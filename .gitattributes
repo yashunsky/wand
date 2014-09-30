@@ -1,0 +1,10 @@
+*                   text=auto
+*.txt               text
+*.md                text
+*.py                text
+*.gitattributes     text
+*.gitignore         text
+*.sh                text
+*.bat               text
+*.log               text
+*.html              text

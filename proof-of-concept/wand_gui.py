@@ -160,6 +160,8 @@ class Listner(QWidget):
             new_line = [time()] + result
             
             self.log.append(new_line)
+            # with open('data.raw', 'a') as f:
+            #    f.write(' '.join([str(d) for d in new_line])+'\n')
             
             
         except KeyboardInterrupt:

@@ -29,7 +29,7 @@ class CheckImu(unittest.TestCase):
         expected_yaw.extend([0.0000313074380366, 0.000218119048053])
         expected_yaw = iter(expected_yaw)
 
-        imu = IMU.IMU()
+        imu = IMU.IMU('stm')
         data_file = os.path.join(DATA_PATH, 'imu_test_data')
         with open(data_file, 'r') as f:
             data = f.readlines()

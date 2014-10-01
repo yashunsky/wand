@@ -36,6 +36,17 @@ def stereographic(x, y, z):
     using stereographic projection'''
     return x/(1+y), -z/(1+y)
 
+def add_circles(plot, radiuses, segmentation = 32):
+    '''Draw concentric circles on given plot'''
+    pen = pg.mkPen(width=1, color=(0,0,0,50))
+    angles = np.linspace(0, 2*np.pi, segmentation)
+    angles = np.hstack((angles, np.zeros(1)))
+    x = np.cos(angles)
+    y = np.sin(angles)
+    for r in radiuses:
+        circle_curve = pg.PlotCurveItem(x=x*r, y=y*r, pen=pen)
+        plot.addItem(circle_curve)
+
 class StrokeList(QAbstractListModel):
     """Model, containing strokes and there curve-representation"""
     def __init__(self, strokes, plot):
@@ -131,6 +142,9 @@ class CoreCreator(QWidget):
         self.grid = QGridLayout(self)
 
         self.display = pg.PlotWidget(name='st', background='w') 
+
+        add_circles(self.display, (1, 2))
+
         self.grid.addWidget(self.display, 0, 0, 2, 2)
 
         self.display.getViewBox().setXRange(-np.pi, np.pi)

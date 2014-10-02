@@ -32,8 +32,7 @@ import numpy as np
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
 GRAVITY = 256
-GYRO_GAIN = 0.07
-
+GYRO_GAIN = 0.0012217304763960308  # np.radians(0.07)
 KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
 KP_YAW = 1.2
@@ -102,13 +101,9 @@ class IMU(object):
         self.update_matrix = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
         self.temporary_matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
-
         self.counter = 0
 
         self.in_calibration = True
-
-    def gyro_scaled(self, x):
-        return x * np.radians(GYRO_GAIN)
 
     def calc(self, data):
         delay, self.data_source = data[0], data[1:]
@@ -262,9 +257,9 @@ class IMU(object):
 
     def matrix_update(self):
 
-        self.gyro_vector[0]=self.gyro_scaled(self.gx) #gyro x roll
-        self.gyro_vector[1]=self.gyro_scaled(self.gy) #gyro y pitch
-        self.gyro_vector[2]=self.gyro_scaled(self.gz) #gyro Z yaw
+        self.gyro_vector[0]=self.gx * GYRO_GAIN #gyro x roll
+        self.gyro_vector[1]=self.gy * GYRO_GAIN #gyro y pitch
+        self.gyro_vector[2]=self.gz * GYRO_GAIN #gyro Z yaw
 
         self.accel_vector[0]=self.ax
         self.accel_vector[1]=self.ay

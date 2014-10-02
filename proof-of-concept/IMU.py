@@ -32,7 +32,11 @@ import numpy as np
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
 GRAVITY = 256
+<<<<<<< HEAD
 GYRO_GAIN = 0.0012217304763960308  # np.radians(0.07)
+=======
+GYRO_GAIN = 0.0012217304763960308
+>>>>>>> Removed strange operations with gyro gain
 KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
 KP_YAW = 1.2

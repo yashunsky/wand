@@ -31,13 +31,8 @@ import numpy as np
 
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
-# Correct directions x,y,z - gyro, accelerometer, magnetometer
-SENSOR_SIGN = (1, 1, 1, -1, -1, -1, 1, 1, 1)
 GRAVITY = 256
 GYRO_GAIN = 0.07
-GYRO_GAIN_X = GYRO_GAIN
-GYRO_GAIN_Y = GYRO_GAIN
-GYRO_GAIN_Z = GYRO_GAIN
 
 KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
@@ -112,14 +107,8 @@ class IMU(object):
 
         self.in_calibration = True
 
-    def gyro_scaled_x(self, x):
-        return x * np.radians(GYRO_GAIN_X)
-
-    def gyro_scaled_y(self, x):
-        return x * np.radians(GYRO_GAIN_Y)
-
-    def gyro_scaled_z(self, x):
-        return x * np.radians(GYRO_GAIN_Z)
+    def gyro_scaled(self, x):
+        return x * np.radians(GYRO_GAIN)
 
     def calc(self, data):
         delay, self.data_source = data[0], data[1:]
@@ -179,9 +168,9 @@ class IMU(object):
         cos_pitch = cos(self.pitch)
         sin_pitch = sin(self.pitch)
 
-        self.cmx = (self.mx - SENSOR_SIGN[6]*self.min_mx) / (self.max_mx - self.min_mx) - SENSOR_SIGN[6]*0.5
-        self.cmy = (self.my - SENSOR_SIGN[7]*self.min_my) / (self.max_my - self.min_my) - SENSOR_SIGN[7]*0.5
-        self.cmz = (self.mz - SENSOR_SIGN[8]*self.min_mz) / (self.max_mz - self.min_mz) - SENSOR_SIGN[8]*0.5
+        self.cmx = (self.mx - self.min_mx) / (self.max_mx - self.min_mx) - 0.5
+        self.cmy = (self.my - self.min_my) / (self.max_my - self.min_my) - 0.5
+        self.cmz = (self.mz - self.min_mz) / (self.max_mz - self.min_mz) - 0.5
 
         mag_x = self.cmx*cos_pitch+self.cmy*sin_roll*sin_pitch+self.cmz*cos_roll*sin_pitch
         mag_y = self.cmy*cos_roll-self.cmz*sin_roll
@@ -193,23 +182,23 @@ class IMU(object):
         self.an[1] = self.data_source[7]
         self.an[2] = self.data_source[8]
 
-        self.gx = SENSOR_SIGN[0] * (self.an[0] - self.an_offset[0])
-        self.gy = SENSOR_SIGN[1] * (self.an[1] - self.an_offset[1])
-        self.gz = SENSOR_SIGN[2] * (self.an[2] - self.an_offset[2])
+        self.gx = (self.an[0] - self.an_offset[0])
+        self.gy = (self.an[1] - self.an_offset[1])
+        self.gz = (self.an[2] - self.an_offset[2])
 
     def read_accel(self):
         self.an[3] = self.data_source[0] / 16
         self.an[4] = self.data_source[1] / 16
         self.an[5] = self.data_source[2] / 16
 
-        self.ax = SENSOR_SIGN[3] * (self.an[3] - self.an_offset[3])
-        self.ay = SENSOR_SIGN[4] * (self.an[4] - self.an_offset[4])
-        self.az = SENSOR_SIGN[5] * (self.an[5] - self.an_offset[5])
+        self.ax = self.an_offset[3] - self.an[3]
+        self.ay = self.an_offset[4] - self.an[4]
+        self.az = self.an_offset[5] - self.an[5]
 
     def read_compass(self):
-        self.mx = SENSOR_SIGN[6] * self.data_source[3]
-        self.my = SENSOR_SIGN[7] * self.data_source[4]
-        self.mz = SENSOR_SIGN[8] * self.data_source[5]
+        self.mx = self.data_source[3]
+        self.my = self.data_source[4]
+        self.mz = self.data_source[5]
 
     def normalize(self):
 
@@ -273,9 +262,9 @@ class IMU(object):
 
     def matrix_update(self):
 
-        self.gyro_vector[0]=self.gyro_scaled_x(self.gx) #gyro x roll
-        self.gyro_vector[1]=self.gyro_scaled_y(self.gy) #gyro y pitch
-        self.gyro_vector[2]=self.gyro_scaled_z(self.gz) #gyro Z yaw
+        self.gyro_vector[0]=self.gyro_scaled(self.gx) #gyro x roll
+        self.gyro_vector[1]=self.gyro_scaled(self.gy) #gyro y pitch
+        self.gyro_vector[2]=self.gyro_scaled(self.gz) #gyro Z yaw
 
         self.accel_vector[0]=self.ax
         self.accel_vector[1]=self.ay

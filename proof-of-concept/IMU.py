@@ -32,19 +32,17 @@ import numpy as np
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
 GRAVITY = 256
-<<<<<<< HEAD
 GYRO_GAIN = 0.0012217304763960308  # np.radians(0.07)
-=======
-GYRO_GAIN = 0.0012217304763960308
->>>>>>> Removed strange operations with gyro gain
 KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
 KP_YAW = 1.2
 KI_YAW = 0.00002
 
-PLATFORM_SPECIFIC_QUOTIENTS = {
-    'stm': (744, -499, -491, 1857, 530, 426),
-    'arduino': (-504, -615, -564, 597, 488, 384)
+# Each value should consist of two numpy arrays: first for the minimum
+# magnetometer values for three axises, second - for the maximum ones.
+PLATFORM_SPECIFIC_PARAMETERS = {
+    'stm': (np.array([744, -499, -491]), np.array([1857, 530, 426])),
+    'arduino': (np.array([-504, -615, -564]), np.array([597, 488, 384]))
 }
 
 CALIBRATION_LENGTH = 32  # In cycles
@@ -70,9 +68,11 @@ class IMU(object):
     def __init__(self, platform):
         self.data_source = []
 
-        (self.min_mx, self.min_my,
-         self.min_mz, self.max_mx,
-         self.max_my, self.max_mz) = PLATFORM_SPECIFIC_QUOTIENTS[platform]
+        (self.min_mx, self.min_my, self.min_mz) = PLATFORM_SPECIFIC_PARAMETERS[
+            platform][0]
+        (self.max_mx, self.max_my, self.max_mz) = PLATFORM_SPECIFIC_PARAMETERS[
+            platform][1]
+        self.magn_min, self.magn_max = PLATFORM_SPECIFIC_PARAMETERS[platform]
 
         self.delay = 0.02
         self.an = [0]*6
@@ -148,7 +148,6 @@ class IMU(object):
             self.delay = delay
 
             #print self.delay
-
             self.read_gyro()
             self.read_accel()
             if self.counter > 5:
@@ -170,6 +169,9 @@ class IMU(object):
         self.cmx = (self.mx - self.min_mx) / (self.max_mx - self.min_mx) - 0.5
         self.cmy = (self.my - self.min_my) / (self.max_my - self.min_my) - 0.5
         self.cmz = (self.mz - self.min_mz) / (self.max_mz - self.min_mz) - 0.5
+
+        self.magn = np.array([self.mx, self.my, self.mz])
+        self.cmagn = (self.magn - self.magn_min) / (self.magn_max - self.magn_min) - 0.5
 
         mag_x = self.cmx*cos_pitch+self.cmy*sin_roll*sin_pitch+self.cmz*cos_roll*sin_pitch
         mag_y = self.cmy*cos_roll-self.cmz*sin_roll

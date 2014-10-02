@@ -47,10 +47,10 @@ class Listner(QWidget):
         self.ser = serial.Serial(port, 115200, timeout=0)
         self.log = []
 
-        self.im = IMU()
+        self.im = IMU('stm')
         self.st = Stroke()
         self.sl = Selector('tetragramma.txt')
-        
+
         self.st.widget = self.display
         self.st.on_done = self.get_stroke
 
@@ -120,26 +120,26 @@ class Listner(QWidget):
                 pitch = self.im.pitch
                 roll = self.im.roll
                 yaw = self.im.yaw
-                
+
                 gyro = np.array([data[7:]])
-                
-                Xr=(cos(pitch)*cos(yaw),-cos(pitch)*sin(yaw),sin(pitch)) 
+
+                Xr=(cos(pitch)*cos(yaw),-cos(pitch)*sin(yaw),sin(pitch))
                 Zr=(sin(roll)*sin(yaw)+cos(roll)*sin(pitch)*cos(yaw),sin(roll)*cos(yaw)-cos(roll)*sin(pitch)*sin(yaw),-cos(roll)*cos(pitch))
 
                 Yr = (-Xr[1]*Zr[2]+Zr[1]*Xr[2],
                       -Zr[0]*Xr[2]+Xr[0]*Zr[2],
                       -Xr[0]*Zr[1]+Xr[1]*Zr[0])
 
-                self.st.set_data(Yr, np.linalg.norm(gyro))  
+                self.st.set_data(Yr, np.linalg.norm(gyro))
 
 
     def get_data(self):
         line = ''
 
-        try:  
+        try:
 
             self.data_buffer += self.ser.read(self.ser.inWaiting())
-            
+
             if self.data_buffer == '':
                 return
 
@@ -158,12 +158,12 @@ class Listner(QWidget):
                 return
 
             new_line = [time()] + result
-            
+
             self.log.append(new_line)
             # with open('data.raw', 'a') as f:
             #    f.write(' '.join([str(d) for d in new_line])+'\n')
-            
-            
+
+
         except KeyboardInterrupt:
             raise
         except Exception as e:

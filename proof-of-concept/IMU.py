@@ -65,17 +65,13 @@ def matrix_multiply(a, b, mat):
 
 class IMU(object):
     def __init__(self, platform):
-        self.data_source = []
-
         (self.min_mx, self.min_my,
          self.min_mz, self.max_mx,
          self.max_my, self.max_mz) = PLATFORM_SPECIFIC_QUOTIENTS[platform]
 
         self.delay = 0.02
 
-        self.gyroscope_readings = np.array([0.0, 0.0, 0.0])
         self.gyroscope_readings_offset = np.array([0.0, 0.0, 0.0])
-        self.accelerometer_readings = np.array([0.0, 0.0, 0.0])
         self.accelerometer_readings_offset = np.array([0.0, 0.0, 0.0])
 
         (self.ax, self.ay, self.az,
@@ -109,19 +105,30 @@ class IMU(object):
 
         self.in_calibration = True
 
-    def calc(self, data):
-        delay, self.data_source = data[0], map(float, data[1:])
-        if self.in_calibration:
-            self.calibration_loop()
-        else:
-            self.main_loop(delay)
+    def parse_data(self, data):
+        delay = data[0]
+        accelerometer_readings = np.array(data[1:4]) / ACCELEROMETER_SCALE
+        magnetometer_readings = np.array(data[4:7])
+        gyroscope_readings = np.array(data[7:10])
+        sensors = {'accelerometer': accelerometer_readings,
+                   'magnetometer': magnetometer_readings,
+                   'gyroscope': gyroscope_readings}
+        return delay, sensors
 
-    def calibration_loop(self):
+    def calc(self, data):
+        delay, sensors = self.parse_data(data)
+
+        if self.in_calibration:
+            self.calibration_loop(sensors)
+        else:
+            self.main_loop(delay, sensors)
+
+    def calibration_loop(self, sensors):
         if self.counter < CALIBRATION_LENGTH:
-            self.read_gyro()
-            self.read_accel()
-            self.gyroscope_readings_offset += self.gyroscope_readings
-            self.accelerometer_readings_offset += self.accelerometer_readings
+            self.read_gyro(sensors['gyroscope'])
+            self.read_accel(sensors['accelerometer'])
+            self.gyroscope_readings_offset += sensors['gyroscope']
+            self.accelerometer_readings_offset += sensors['accelerometer']
             self.counter += 1
         else:
             self.gyroscope_readings_offset /= CALIBRATION_LENGTH
@@ -136,17 +143,17 @@ class IMU(object):
             print 'calibration done'
 
 
-    def main_loop(self, delay):
+    def main_loop(self, delay, sensors):
             self.counter += 1
             self.delay = delay
 
             #print self.delay
 
-            self.read_gyro()
-            self.read_accel()
+            self.read_gyro(sensors['gyroscope'])
+            self.read_accel(sensors['accelerometer'])
             if self.counter > 5:
                 self.counter = 0
-                self.read_compass()
+                self.read_compass(sensors['magnetometer'])
                 self.compass_heading()
 
             self.matrix_update()
@@ -169,30 +176,29 @@ class IMU(object):
 
         self.mag_heading = atan2(-mag_y,mag_x)
 
-    def read_gyro(self):
-        self.gyroscope_readings = np.array(self.data_source[6:])
-        self.angular_velocity = self.gyroscope_readings - self.gyroscope_readings_offset
+    def read_gyro(self, gyroscope_readings):
+        self.angular_velocity = (gyroscope_readings -
+            self.gyroscope_readings_offset)
 
         # # TODO: Get rid of these
         self.gx = self.angular_velocity[0]
         self.gy = self.angular_velocity[1]
         self.gz = self.angular_velocity[2]
 
-    def read_accel(self):
-        self.accelerometer_readings = (np.array(self.data_source[:3]) /
-            ACCELEROMETER_SCALE)
+    def read_accel(self, accelerometer_readings):
         self.acceleration = (self.accelerometer_readings_offset -
-            self.accelerometer_readings)
+            accelerometer_readings)
 
         # TODO: Get rid of these
         self.ax = self.acceleration[0]
         self.ay = self.acceleration[1]
         self.az = self.acceleration[2]
 
-    def read_compass(self):
-        self.mx = self.data_source[3]
-        self.my = self.data_source[4]
-        self.mz = self.data_source[5]
+    # TODO: Destroy this whole func
+    def read_compass(self, magnetometer_readings):
+        self.mx = magnetometer_readings[0]
+        self.my = magnetometer_readings[1]
+        self.mz = magnetometer_readings[2]
 
     def normalize(self):
 

@@ -71,8 +71,11 @@ class IMU(object):
          self.max_my, self.max_mz) = PLATFORM_SPECIFIC_QUOTIENTS[platform]
 
         self.delay = 0.02
-        self.an = [0]*6
-        self.an_offset = [0]*6
+
+        self.gyroscope_readings = np.array([0.0, 0.0, 0.0])
+        self.gyroscope_readings_offset = np.array([0.0, 0.0, 0.0])
+        self.accelerometer_readings = np.array([0.0, 0.0, 0.0])
+        self.accelerometer_readings_offset = np.array([0.0, 0.0, 0.0])
 
         (self.ax, self.ay, self.az,
          self.mx, self.my, self.mz,
@@ -106,7 +109,7 @@ class IMU(object):
         self.in_calibration = True
 
     def calc(self, data):
-        delay, self.data_source = data[0], data[1:]
+        delay, self.data_source = data[0], map(float, data[1:])
         if self.in_calibration:
             self.calibration_loop()
         else:
@@ -116,27 +119,20 @@ class IMU(object):
         if self.counter < CALIBRATION_LENGTH:
             self.read_gyro()
             self.read_accel()
-            for y in xrange(6):
-                self.an_offset[y] += self.an[y]
+            self.gyroscope_readings_offset += self.gyroscope_readings
+            self.accelerometer_readings_offset += self.accelerometer_readings
             self.counter += 1
         else:
-            for y in xrange(6):
-                self.an_offset[y] = self.an_offset[y]/CALIBRATION_LENGTH
+            self.gyroscope_readings_offset /= CALIBRATION_LENGTH
+            self.accelerometer_readings_offset /= CALIBRATION_LENGTH
 
-            g_vector = np.array(self.an_offset[3:6])
-
-            g_axis = g_vector / np.linalg.norm(g_vector)
-
-            g_vector -= GRAVITY * g_axis
-
-            self.an_offset[3] = g_vector[0]
-            self.an_offset[4] = g_vector[1]
-            self.an_offset[5] = g_vector[2]
+            g_axis = (self.accelerometer_readings_offset /
+                np.linalg.norm(self.accelerometer_readings_offset))
+            self.accelerometer_readings_offset -= GRAVITY * g_axis
 
             self.counter = 0
-
             self.in_calibration = False
-            print 'calibratoion done'
+            print 'calibration done'
 
 
     def main_loop(self, delay):
@@ -173,22 +169,26 @@ class IMU(object):
         self.mag_heading = atan2(-mag_y,mag_x)
 
     def read_gyro(self):
-        self.an[0] = self.data_source[6]
-        self.an[1] = self.data_source[7]
-        self.an[2] = self.data_source[8]
+        self.gyroscope_readings = np.array([
+            self.data_source[6], self.data_source[7], self.data_source[8]])
+        self.angular_velocity = self.gyroscope_readings - self.gyroscope_readings_offset
 
-        self.gx = (self.an[0] - self.an_offset[0])
-        self.gy = (self.an[1] - self.an_offset[1])
-        self.gz = (self.an[2] - self.an_offset[2])
+        # # TODO: Get rid of these
+        self.gx = self.angular_velocity[0]
+        self.gy = self.angular_velocity[1]
+        self.gz = self.angular_velocity[2]
 
     def read_accel(self):
-        self.an[3] = self.data_source[0] / 16
-        self.an[4] = self.data_source[1] / 16
-        self.an[5] = self.data_source[2] / 16
+        self.accelerometer_readings = np.array([
+            self.data_source[0] / 16, self.data_source[1] / 16,
+            self.data_source[2] / 16])
+        self.acceleration = (self.accelerometer_readings_offset -
+            self.accelerometer_readings)
 
-        self.ax = self.an_offset[3] - self.an[3]
-        self.ay = self.an_offset[4] - self.an[4]
-        self.az = self.an_offset[5] - self.an[5]
+        # TODO: Get rid of these
+        self.ax = self.acceleration[0]
+        self.ay = self.acceleration[1]
+        self.az = self.acceleration[2]
 
     def read_compass(self):
         self.mx = self.data_source[3]

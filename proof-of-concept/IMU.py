@@ -37,6 +37,7 @@ KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
 KP_YAW = 1.2
 KI_YAW = 0.00002
+ACCELEROMETER_SCALE = 16
 
 PLATFORM_SPECIFIC_QUOTIENTS = {
     'stm': (744, -499, -491, 1857, 530, 426),
@@ -169,8 +170,7 @@ class IMU(object):
         self.mag_heading = atan2(-mag_y,mag_x)
 
     def read_gyro(self):
-        self.gyroscope_readings = np.array([
-            self.data_source[6], self.data_source[7], self.data_source[8]])
+        self.gyroscope_readings = np.array(self.data_source[6:])
         self.angular_velocity = self.gyroscope_readings - self.gyroscope_readings_offset
 
         # # TODO: Get rid of these
@@ -179,9 +179,8 @@ class IMU(object):
         self.gz = self.angular_velocity[2]
 
     def read_accel(self):
-        self.accelerometer_readings = np.array([
-            self.data_source[0] / 16, self.data_source[1] / 16,
-            self.data_source[2] / 16])
+        self.accelerometer_readings = (np.array(self.data_source[:3]) /
+            ACCELEROMETER_SCALE)
         self.acceleration = (self.accelerometer_readings_offset -
             self.accelerometer_readings)
 

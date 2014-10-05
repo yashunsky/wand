@@ -61,7 +61,7 @@ def matrix_multiply(a, b, mat):
         for y in xrange(3):
             for w in xrange(3):
                 op[w]=a[x][w]*b[w][y]
-            mat[x][y]=0;
+            mat[x][y]=0
             mat[x][y]=op[0]+op[1]+op[2]
 
 class IMU(object):
@@ -172,9 +172,9 @@ class IMU(object):
 
     def normalize(self):
 
-        error=0;
+        error=0
         temporary=[[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        renorm=0;
+        renorm=0
 
         error= -np.dot(self.dcm_matrix[0],self.dcm_matrix[1])*.5
 
@@ -193,11 +193,11 @@ class IMU(object):
         self.dcm_matrix[1] = vector_scale(temporary[1], renorm)
 
         renorm= .5 *(3 - np.dot(temporary[2],temporary[2]))
-        self.dcm_matrix[2] = vector_scale(temporary[2], renorm);
+        self.dcm_matrix[2] = vector_scale(temporary[2], renorm)
 
     def drift_correction(self, sensors):
         self.scaled_omega_p = [0]*3
-        self.scaled_omega_i = [0]*3;
+        self.scaled_omega_i = [0]*3
 
         Accel_magnitude = sqrt(sensors['accelerometer'][0]**2 +
                                sensors['accelerometer'][1]**2 +
@@ -213,13 +213,13 @@ class IMU(object):
             Accel_weight = 1
 
         self.error_roll_pitch = np.cross(sensors['accelerometer'],self.dcm_matrix[2])
-        self.omega_p = vector_scale(self.error_roll_pitch,KP_ROLLPITCH*Accel_weight);
+        self.omega_p = vector_scale(self.error_roll_pitch,KP_ROLLPITCH*Accel_weight)
 
-        self.scaled_omega_i = vector_scale(self.error_roll_pitch,KI_ROLLPITCH*Accel_weight);
-        self.omega_i = vector_add(self.omega_i,self.scaled_omega_i);
+        self.scaled_omega_i = vector_scale(self.error_roll_pitch,KI_ROLLPITCH*Accel_weight)
+        self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
-        mag_heading_x = cos(self.mag_heading);
-        mag_heading_y = sin(self.mag_heading);
+        mag_heading_x = cos(self.mag_heading)
+        mag_heading_y = sin(self.mag_heading)
         errorCourse=(self.dcm_matrix[0][0]*mag_heading_y) - (self.dcm_matrix[1][0]*mag_heading_x)
         self.error_yaw = vector_scale(self.dcm_matrix[2],errorCourse)
 
@@ -234,16 +234,16 @@ class IMU(object):
         self.omega_vector = vector_add(self.omega, self.omega_p) # //adding Integrator term
 
         self.update_matrix[0][0]=0
-        self.update_matrix[0][1]=-self.delay*self.omega_vector[2]#;//-z
-        self.update_matrix[0][2]=self.delay*self.omega_vector[1]#;//y
-        self.update_matrix[1][0]=self.delay*self.omega_vector[2]#;//z
+        self.update_matrix[0][1]=-self.delay*self.omega_vector[2]#//-z
+        self.update_matrix[0][2]=self.delay*self.omega_vector[1]#//y
+        self.update_matrix[1][0]=self.delay*self.omega_vector[2]#//z
         self.update_matrix[1][1]=0
-        self.update_matrix[1][2]=-self.delay*self.omega_vector[0]#;//-x
-        self.update_matrix[2][0]=-self.delay*self.omega_vector[1]#;//-y
-        self.update_matrix[2][1]=self.delay*self.omega_vector[0]#;//x
+        self.update_matrix[1][2]=-self.delay*self.omega_vector[0]#//-x
+        self.update_matrix[2][0]=-self.delay*self.omega_vector[1]#//-y
+        self.update_matrix[2][1]=self.delay*self.omega_vector[0]#//x
         self.update_matrix[2][2]=0
 
-        matrix_multiply(self.dcm_matrix,self.update_matrix,self.temporary_matrix)#; //a*b=c
+        matrix_multiply(self.dcm_matrix,self.update_matrix,self.temporary_matrix)# //a*b=c
 
         for x in xrange(3):
             for y in xrange(3):

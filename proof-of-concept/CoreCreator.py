@@ -157,9 +157,13 @@ class CoreCreator(QWidget):
         self.letter_selector = QComboBox(self)
         self.grid.addWidget(self.letter_selector, 1, 2, 1, 2)
 
-        self.relative_chk = QCheckBox(self)
-        self.relative_chk.setText('Relative coords')
-        self.grid.addWidget(self.relative_chk, 2, 0, 1, 1)
+        # self.relative_chk = QCheckBox(self)
+        # self.relative_chk.setText('Relative coords')
+        # self.grid.addWidget(self.relative_chk, 2, 0, 1, 1)
+
+        self.preview_btn = QPushButton(self)
+        self.preview_btn.setText('Preview mean')
+        self.grid.addWidget(self.preview_btn, 2, 0, 1, 1)
 
         self.create_core_btn = QPushButton(self)
         self.create_core_btn.setText('Create core')

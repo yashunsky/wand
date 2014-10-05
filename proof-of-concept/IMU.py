@@ -239,5 +239,4 @@ class IMU(object):
         self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])
 
     def get_direction(self):
-        # TODO remove magic signs adjustment
         return self.dcm_matrix[:, 1]

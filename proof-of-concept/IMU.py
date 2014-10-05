@@ -240,4 +240,4 @@ class IMU(object):
 
     def get_direction(self):
         # TODO remove magic signs adjustment
-        return self.dcm_matrix[:, 1] * np.array([1, -1, -1])
+        return self.dcm_matrix[:, 1]

@@ -44,6 +44,9 @@ class Stroke(object):
         self.on_done = None
 
     def set_data_sphere(self,Yr,g):
+        # sign magic for compatibility with previus data
+        # TO BE REMOVED
+        Yr = np.array(Yr) * np.array([1, -1, -1])
         self.gyro = g
         if self.gyro > self.gyro_min:
 

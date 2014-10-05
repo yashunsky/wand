@@ -238,5 +238,5 @@ class IMU(object):
         self.roll = atan2(self.dcm_matrix[2][1],self.dcm_matrix[2][2])
         self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])
 
-    def get_direction(self):
+    def get_y_direction(self):
         return self.dcm_matrix[:, 1]

@@ -118,7 +118,7 @@ class Listner(QWidget):
 
                 gyro = np.array([data[7:]])
 
-                Yr = self.im.get_direction()
+                Yr = self.im.get_y_direction()
 
                 self.st.set_data(Yr, np.linalg.norm(gyro))
 

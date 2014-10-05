@@ -80,7 +80,7 @@ class CheckImu(unittest.TestCase):
 
             (real_direction_x,
              real_direction_y,
-             real_direction_z) = imu.get_direction()
+             real_direction_z) = imu.get_y_direction()
 
             assertAlmostEqual(real_pitch, next(expected_pitch))
             assertAlmostEqual(real_roll, next(expected_roll))

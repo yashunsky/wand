@@ -74,13 +74,8 @@ class IMU(object):
         self.gyroscope_readings_offset = np.array([0.0, 0.0, 0.0])
         self.accelerometer_readings_offset = np.array([0.0, 0.0, 0.0])
 
-        (self.ax, self.ay, self.az,
-         self.gx, self.gy, self.gz) = [0]*6
-
         self.mag_heading = 0
 
-        self.accel_vector = [0]*3
-        self.gyro_vector = [0]*3
         self.omega_vector = [0]*3
         self.omega_p = [0]*3
         self.omega_i = [0]*3
@@ -123,8 +118,6 @@ class IMU(object):
 
     def calibration_loop(self, sensors):
         if self.counter < CALIBRATION_LENGTH:
-            self.read_gyro(sensors['gyroscope'])
-            self.read_accel(sensors['accelerometer'])
             self.gyroscope_readings_offset += sensors['gyroscope']
             self.accelerometer_readings_offset += sensors['accelerometer']
             self.counter += 1
@@ -145,15 +138,15 @@ class IMU(object):
         self.counter += 1
         self.delay = delay
 
-        self.read_gyro(sensors['gyroscope'])
-        self.read_accel(sensors['accelerometer'])
+        sensors['gyroscope'] = self.offset_gyro(sensors['gyroscope'])
+        sensors['accelerometer'] = self.offset_accel(sensors['accelerometer'])
         if self.counter > 5:
             self.counter = 0
             self.compass_heading(sensors['magnetometer'])
 
-        self.matrix_update()
+        self.matrix_update(sensors)
         self.normalize()
-        self.drift_correction()
+        self.drift_correction(sensors)
         self.Euler_angles()
 
     def compass_heading(self, magnets):
@@ -171,23 +164,11 @@ class IMU(object):
 
         self.mag_heading = atan2(-mag_y, mag_x)
 
-    def read_gyro(self, gyroscope_readings):
-        self.angular_velocity = (gyroscope_readings -
-            self.gyroscope_readings_offset)
+    def offset_gyro(self, gyro_readings):
+        return (gyro_readings - self.gyroscope_readings_offset) * GYRO_GAIN
 
-        # # TODO: Get rid of these
-        self.gx = self.angular_velocity[0]
-        self.gy = self.angular_velocity[1]
-        self.gz = self.angular_velocity[2]
-
-    def read_accel(self, accelerometer_readings):
-        self.acceleration = (self.accelerometer_readings_offset -
-            accelerometer_readings)
-
-        # TODO: Get rid of these
-        self.ax = self.acceleration[0]
-        self.ay = self.acceleration[1]
-        self.az = self.acceleration[2]
+    def offset_accel(self, accelerometer_readings):
+        return self.accelerometer_readings_offset - accelerometer_readings
 
     def normalize(self):
 
@@ -214,14 +195,13 @@ class IMU(object):
         renorm= .5 *(3 - np.dot(temporary[2],temporary[2]))
         self.dcm_matrix[2] = vector_scale(temporary[2], renorm);
 
-    def drift_correction(self):
-
+    def drift_correction(self, sensors):
         self.scaled_omega_p = [0]*3
         self.scaled_omega_i = [0]*3;
 
-        Accel_magnitude = sqrt(self.accel_vector[0]*self.accel_vector[0] +
-                               self.accel_vector[1]*self.accel_vector[1] +
-                               self.accel_vector[2]*self.accel_vector[2])
+        Accel_magnitude = sqrt(sensors['accelerometer'][0]**2 +
+                               sensors['accelerometer'][1]**2 +
+                               sensors['accelerometer'][2]**2)
 
         Accel_magnitude = Accel_magnitude / GRAVITY
 
@@ -232,7 +212,7 @@ class IMU(object):
         if Accel_weight > 1:
             Accel_weight = 1
 
-        self.error_roll_pitch = np.cross(self.accel_vector,self.dcm_matrix[2])
+        self.error_roll_pitch = np.cross(sensors['accelerometer'],self.dcm_matrix[2])
         self.omega_p = vector_scale(self.error_roll_pitch,KP_ROLLPITCH*Accel_weight);
 
         self.scaled_omega_i = vector_scale(self.error_roll_pitch,KI_ROLLPITCH*Accel_weight);
@@ -249,17 +229,8 @@ class IMU(object):
         self.scaled_omega_i = vector_scale(self.error_yaw,KI_YAW)
         self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
-    def matrix_update(self):
-
-        self.gyro_vector[0]=self.gx * GYRO_GAIN #gyro x roll
-        self.gyro_vector[1]=self.gy * GYRO_GAIN #gyro y pitch
-        self.gyro_vector[2]=self.gz * GYRO_GAIN #gyro Z yaw
-
-        self.accel_vector[0]=self.ax
-        self.accel_vector[1]=self.ay
-        self.accel_vector[2]=self.az
-
-        self.omega = vector_add(self.gyro_vector, self.omega_i) #adding proportional term
+    def matrix_update(self, sensors):
+        self.omega = vector_add(sensors['gyroscope'], self.omega_i) #adding proportional term
         self.omega_vector = vector_add(self.omega, self.omega_p) # //adding Integrator term
 
         self.update_matrix[0][0]=0

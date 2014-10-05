@@ -90,8 +90,6 @@ class IMU(object):
         self.gyro_sat = 0
 
         self.dcm_matrix = np.eye(3)
-        self.update_matrix = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-        self.temporary_matrix = np.zeros((3, 3))
 
         self.counter = 0
 
@@ -232,24 +230,23 @@ class IMU(object):
         # adding integrator and proportional term
         self.omega = sensors['gyroscope'] + self.omega_i + self.omega_p
 
-        self.update_matrix[0][0] = 0
-        self.update_matrix[0][1] = -self.delay * self.omega[2] # -z
-        self.update_matrix[0][2] =  self.delay * self.omega[1] # y
-        self.update_matrix[1][0] =  self.delay * self.omega[2] # z
-        self.update_matrix[1][1] = 0
-        self.update_matrix[1][2] = -self.delay * self.omega[0] # -x
-        self.update_matrix[2][0] = -self.delay * self.omega[1] # -y
-        self.update_matrix[2][1] =  self.delay * self.omega[0] # x
-        self.update_matrix[2][2] = 0
+        update_matrix = np.matrix(np.zeros((3, 3)))
+        update_matrix[0, 0] = 1
+        update_matrix[0, 1] = -self.delay * self.omega[2] # -z
+        update_matrix[0, 2] =  self.delay * self.omega[1] # y
+        update_matrix[1, 0] =  self.delay * self.omega[2] # z
+        update_matrix[1, 1] = 1
+        update_matrix[1, 2] = -self.delay * self.omega[0] # -x
+        update_matrix[2, 0] = -self.delay * self.omega[1] # -y
+        update_matrix[2, 1] =  self.delay * self.omega[0] # x
+        update_matrix[2, 2] = 1
 
-        matrix_multiply(self.dcm_matrix,self.update_matrix,self.temporary_matrix)# //a*b=c
-
-        for x in xrange(3):
-            for y in xrange(3):
-                self.dcm_matrix[x][y]+=self.temporary_matrix[x][y]
+        # TODO: Fixup this shit
+        self.dcm_matrix = np.matrix(self.dcm_matrix)
+        self.dcm_matrix *= update_matrix
+        self.dcm_matrix = np.array(self.dcm_matrix)
 
     def Euler_angles(self):
-
         self.pitch = -asin(self.dcm_matrix[2][0])
         self.roll = atan2(self.dcm_matrix[2][1],self.dcm_matrix[2][2])
         self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])

@@ -1,3 +1,5 @@
 *.pyc
 *.log
-proof-of-concept/learned/*
+
+/proof-of-concept/learned
+

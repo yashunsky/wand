@@ -41,6 +41,31 @@ class CheckImu(unittest.TestCase):
             0.0168467064479, 0.0257698163393, 0.0381516397484])
         expected_yaw = iter(expected_yaw)
 
+        expected_direction_x = [0 for i in xrange(33)]
+        expected_direction_x.extend([
+            -3.13062487218e-05, 9.15243571452e-05, 0.000590973471087,
+            0.00160034092449, 0.0032484879694, 0.0057111739703,
+            0.0118808623309, 0.0190804606707, 0.0275439107177,
+            0.0374278460195, 0.0491031738241, 0.0625297208588])
+        expected_direction_x = iter(expected_direction_x)
+
+        expected_direction_y = [-1 for i in xrange(33)]
+        expected_direction_y.extend([
+            -0.999999995312, -0.999945835736, -0.999752094697,
+            -0.999354101851, -0.998763807167, -0.997947234577,
+            -0.996765596444, -0.995206707163, -0.993047877427,
+            -0.990301181542, -0.986637672924, -0.982269190242])
+        expected_direction_y = iter(expected_direction_y)
+
+        expected_direction_z = [0 for i in xrange(33)]
+        expected_direction_z.extend([
+            9.16301916381e-05, -0.010407555782, -0.0222575807344,
+            -0.0359001117326, -0.0496014598484, -0.0637863581998,
+            -0.0794807577672, -0.0959142639964, -0.114443200409,
+            -0.133801069421, -0.15535437132, -0.176740691155])
+        expected_direction_z = iter(expected_direction_z)
+
+
         imu = IMU.IMU('stm')
         data_file = os.path.join(DATA_PATH, 'imu_test_data')
         with open(data_file, 'r') as f:
@@ -53,9 +78,17 @@ class CheckImu(unittest.TestCase):
             real_roll = imu.roll
             real_yaw = imu.yaw
 
+            (real_direction_x,
+             real_direction_y,
+             real_direction_z) = imu.get_direction()
+
             assertAlmostEqual(real_pitch, next(expected_pitch))
             assertAlmostEqual(real_roll, next(expected_roll))
             assertAlmostEqual(real_yaw, next(expected_yaw))
+
+            assertAlmostEqual(real_direction_x, next(expected_direction_x))
+            assertAlmostEqual(real_direction_y, next(expected_direction_y))
+            assertAlmostEqual(real_direction_z, next(expected_direction_z))
 
 
 if __name__ == '__main__':

@@ -239,6 +239,7 @@ class IMU(object):
         self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])
 
     def get_direction(self):
+        # TODO: ruturn a result, based on dcm_matrix, not Euler angles
         pitch = self.pitch
         roll = self.roll
         yaw = self.yaw

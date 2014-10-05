@@ -142,19 +142,19 @@ class IMU(object):
 
 
     def main_loop(self, delay, sensors):
-            self.counter += 1
-            self.delay = delay
+        self.counter += 1
+        self.delay = delay
 
-            self.read_gyro(sensors['gyroscope'])
-            self.read_accel(sensors['accelerometer'])
-            if self.counter > 5:
-                self.counter = 0
-                self.compass_heading(sensors['magnetometer'])
+        self.read_gyro(sensors['gyroscope'])
+        self.read_accel(sensors['accelerometer'])
+        if self.counter > 5:
+            self.counter = 0
+            self.compass_heading(sensors['magnetometer'])
 
-            self.matrix_update()
-            self.normalize()
-            self.drift_correction()
-            self.Euler_angles()
+        self.matrix_update()
+        self.normalize()
+        self.drift_correction()
+        self.Euler_angles()
 
     def compass_heading(self, magnets):
         cos_roll = cos(self.roll)

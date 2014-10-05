@@ -69,14 +69,11 @@ class IMU(object):
         self.magnets_min = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][:3])
         self.magnets_max = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][3:6])
 
-        self.delay = 0.02
-
         self.gyroscope_readings_offset = np.zeros(3)
         self.accelerometer_readings_offset = np.zeros(3)
 
         self.mag_heading = 0
 
-        self.omega = np.zeros(3)
         self.omega_p = np.zeros(3)
         self.omega_i = np.zeros(3)
 
@@ -133,7 +130,6 @@ class IMU(object):
 
     def main_loop(self, delay, sensors):
         self.counter += 1
-        self.delay = delay
 
         sensors['gyroscope'] = self.offset_gyro(sensors['gyroscope'])
         sensors['accelerometer'] = self.offset_accel(sensors['accelerometer'])
@@ -141,7 +137,7 @@ class IMU(object):
             self.counter = 0
             self.compass_heading(sensors['magnetometer'])
 
-        self.matrix_update(sensors)
+        self.matrix_update(sensors, delay)
         self.normalize()
         self.drift_correction(sensors)
         self.Euler_angles()
@@ -222,11 +218,11 @@ class IMU(object):
         self.scaled_omega_i = vector_scale(self.error_yaw,KI_YAW)
         self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
-    def matrix_update(self, sensors):
+    def matrix_update(self, sensors, delay):
         # adding integrator and proportional term
-        self.omega = sensors['gyroscope'] + self.omega_i + self.omega_p
+        omega = sensors['gyroscope'] + self.omega_i + self.omega_p
 
-        (x, y, z) = self.omega * self.delay
+        (x, y, z) = omega * delay
 
         update_matrix = np.matrix([[ 1, -z,  y],
                                    [ z,  1, -x],

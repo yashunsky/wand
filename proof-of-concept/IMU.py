@@ -148,6 +148,9 @@ class IMU(object):
         cos_pitch = cos(self.pitch)
         sin_pitch = sin(self.pitch)
 
+        print cos_roll
+        print self.dcm_matrix
+
         magnets_norm = ((magnets - self.magnets_min) /
             (self.magnets_max - self.magnets_min) - MAGNETS_OFFSET)
 

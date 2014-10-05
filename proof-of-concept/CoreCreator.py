@@ -16,6 +16,31 @@ import pyqtgraph as pg
 from os.path import join, isfile, basename
 from os import listdir
 
+import json
+
+from unify_definition import unify_stroke
+
+SEGMENTATION = 32
+
+def make_core(letters, points):
+    core = {}
+    for key, letters_group in letters.items():
+        unified = np.array([unify_stroke(letter, points) for letter in letters_group])
+
+        centers = np.mean(unified, axis=0)
+
+        R = []
+
+        for u in unified:
+            dists = u - centers
+            radius = np.linalg.norm(dists, axis=1)
+            R.append(radius)
+
+        R = np.max(np.array(R), axis=0)
+
+        core[key] = np.hstack((centers, np.array([R]).T))
+    return core
+
 
 def get_letters(path):
     '''Read stroke files from given folder
@@ -68,6 +93,36 @@ class StrokeList(QAbstractListModel):
         self.stroke_group = []
         self.key_letter = ''
 
+        self.preview_stroke = pg.PlotCurveItem()
+        self.plot.addItem(self.preview_stroke)
+
+        self.set_preview(reset=True)
+
+    def set_preview(self, reset=False):
+
+        pen = pg.mkPen(width=5, color=(255,0,0,255))
+        pen.setCapStyle(Qt.RoundCap)
+
+        if reset:
+            x = y = np.array([0])
+        else:
+            letters = self.make_dict(all_letters=False)
+
+            preview_set = make_core(letters, SEGMENTATION)
+            if self.key_letter in preview_set:
+                preview = preview_set[self.key_letter]
+            else:
+                return
+            x, y = stereographic(preview[:, 0],
+                                 preview[:, 1],
+                                 preview[:, 2])
+        self.preview_stroke.setData(x=x, y=y, pen=pen)
+
+    def make_dict(self, all_letters=True):
+        return {key: [element['data'] for element in elements_list
+                      if element['checked'] == Qt.Checked] 
+                for key, elements_list in self.strokes.items()
+                if all_letters or key == self.key_letter}
 
     def set_key_letter(self, letter):
         '''Select one list by key-letter'''
@@ -88,6 +143,7 @@ class StrokeList(QAbstractListModel):
         
         # reset model so changes become visivle
         self.modelReset.emit()
+        self.set_preview(reset=False)
 
     def rowCount(self, *args):
         return len(self.stroke_group)
@@ -112,6 +168,7 @@ class StrokeList(QAbstractListModel):
         row = index.row()
         if role == Qt.CheckStateRole:
              self.stroke_group[row]['checked'] = value
+             self.set_preview()
         return True
 
     def flags(self, index):
@@ -124,12 +181,23 @@ class CoreCreator(QWidget):
         self.setup_ui()
         self.stroke_list = StrokeList(get_letters(path), self.display)
 
-
-
         self.letter_selector.addItems(['_'] + self.stroke_list.strokes.keys())
         self.list_view.setModel(self.stroke_list)
 
         self.letter_selector.currentIndexChanged.connect(self.select_letter)
+
+        self.preview_btn.clicked.connect(self.stroke_list.set_preview)
+
+        self.create_core_btn.clicked.connect(self.create_core)
+
+    def create_core(self):
+        segmentation = SEGMENTATION
+        letters = self.stroke_list.make_dict(all_letters=True)
+        core = make_core(letters, segmentation)
+        dump_data = {'segmentation': segmentation}
+        dump_data['letters'] = {key: data.tolist() for key, data in core.items()}
+        with open('tetra_v2.txt', 'w') as f:
+            json.dump(dump_data, f, indent=1)
 
     def select_letter(self):
         # set stroke_list key_letter to the one

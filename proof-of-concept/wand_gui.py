@@ -73,7 +73,7 @@ class Listner(QWidget):
 
     def set_background(self):
         letter = self.selector.currentText()
-        self.display.set_background('tetragramma.txt', letter)
+        self.display.set_background('tetra_v2.txt', letter)
 
     def get_stroke(self, stroke):
         #np.savetxt('new_basis/%.0f.txt' % time(), stroke)
@@ -93,7 +93,7 @@ class Listner(QWidget):
             key = letters[0]
 
         if key is not None:
-            self.display.set_background('tetragramma.txt', key, color='g')
+            self.display.set_background('tetra_v2.txt', key, color='g')
             np.savetxt('learned/%s%.0f.txt' % (key, time()), stroke)
             self.timer.start(1000)
 

@@ -7,7 +7,7 @@ import IMU
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          'test_data')
-EPSILON = 0.000000000001
+EPSILON = 0.00001
 
 
 def assertAlmostEqual(real, expected):

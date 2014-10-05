@@ -237,3 +237,17 @@ class IMU(object):
         self.pitch = -asin(self.dcm_matrix[2][0])
         self.roll = atan2(self.dcm_matrix[2][1],self.dcm_matrix[2][2])
         self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])
+
+    def get_direction(self):
+        pitch = self.pitch
+        roll = self.roll
+        yaw = self.yaw
+
+        Xr=(cos(pitch)*cos(yaw),-cos(pitch)*sin(yaw),sin(pitch))
+        Zr=(sin(roll)*sin(yaw)+cos(roll)*sin(pitch)*cos(yaw),sin(roll)*cos(yaw)-cos(roll)*sin(pitch)*sin(yaw),-cos(roll)*cos(pitch))
+
+        Yr = (-Xr[1]*Zr[2]+Zr[1]*Xr[2],
+              -Zr[0]*Xr[2]+Xr[0]*Zr[2],
+              -Xr[0]*Zr[1]+Xr[1]*Zr[0])
+
+        return Yr

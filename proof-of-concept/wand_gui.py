@@ -116,19 +116,9 @@ class Listner(QWidget):
             if data[0] < 0.05:
                 self.im.calc(data)
 
-
-                pitch = self.im.pitch
-                roll = self.im.roll
-                yaw = self.im.yaw
-
                 gyro = np.array([data[7:]])
 
-                Xr=(cos(pitch)*cos(yaw),-cos(pitch)*sin(yaw),sin(pitch))
-                Zr=(sin(roll)*sin(yaw)+cos(roll)*sin(pitch)*cos(yaw),sin(roll)*cos(yaw)-cos(roll)*sin(pitch)*sin(yaw),-cos(roll)*cos(pitch))
-
-                Yr = (-Xr[1]*Zr[2]+Zr[1]*Xr[2],
-                      -Zr[0]*Xr[2]+Xr[0]*Zr[2],
-                      -Xr[0]*Zr[1]+Xr[1]*Zr[0])
+                Yr = self.im.get_direction()
 
                 self.st.set_data(Yr, np.linalg.norm(gyro))
 

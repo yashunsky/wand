@@ -230,16 +230,11 @@ class IMU(object):
         # adding integrator and proportional term
         self.omega = sensors['gyroscope'] + self.omega_i + self.omega_p
 
-        update_matrix = np.matrix(np.zeros((3, 3)))
-        update_matrix[0, 0] = 1
-        update_matrix[0, 1] = -self.delay * self.omega[2] # -z
-        update_matrix[0, 2] =  self.delay * self.omega[1] # y
-        update_matrix[1, 0] =  self.delay * self.omega[2] # z
-        update_matrix[1, 1] = 1
-        update_matrix[1, 2] = -self.delay * self.omega[0] # -x
-        update_matrix[2, 0] = -self.delay * self.omega[1] # -y
-        update_matrix[2, 1] =  self.delay * self.omega[0] # x
-        update_matrix[2, 2] = 1
+        (x, y, z) = self.omega * self.delay
+
+        update_matrix = np.matrix([[ 1, -z,  y],
+                                   [ z,  1, -x],
+                                   [-y,  x,  1]])
 
         # TODO: Fixup this shit
         self.dcm_matrix = np.matrix(self.dcm_matrix)

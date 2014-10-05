@@ -76,10 +76,9 @@ class IMU(object):
 
         self.mag_heading = 0
 
-        self.omega_vector = np.zeros(3)
+        self.omega = np.zeros(3)
         self.omega_p = np.zeros(3)
         self.omega_i = np.zeros(3)
-        self.omega = np.zeros(3)
 
         self.roll = 0
         self.pitch = 0
@@ -230,18 +229,18 @@ class IMU(object):
         self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
     def matrix_update(self, sensors):
-        self.omega = vector_add(sensors['gyroscope'], self.omega_i) #adding proportional term
-        self.omega_vector = vector_add(self.omega, self.omega_p) # //adding Integrator term
+        # adding integrator and proportional term
+        self.omega = sensors['gyroscope'] + self.omega_i + self.omega_p
 
-        self.update_matrix[0][0]=0
-        self.update_matrix[0][1]=-self.delay*self.omega_vector[2]#//-z
-        self.update_matrix[0][2]=self.delay*self.omega_vector[1]#//y
-        self.update_matrix[1][0]=self.delay*self.omega_vector[2]#//z
-        self.update_matrix[1][1]=0
-        self.update_matrix[1][2]=-self.delay*self.omega_vector[0]#//-x
-        self.update_matrix[2][0]=-self.delay*self.omega_vector[1]#//-y
-        self.update_matrix[2][1]=self.delay*self.omega_vector[0]#//x
-        self.update_matrix[2][2]=0
+        self.update_matrix[0][0] = 0
+        self.update_matrix[0][1] = -self.delay * self.omega[2] # -z
+        self.update_matrix[0][2] =  self.delay * self.omega[1] # y
+        self.update_matrix[1][0] =  self.delay * self.omega[2] # z
+        self.update_matrix[1][1] = 0
+        self.update_matrix[1][2] = -self.delay * self.omega[0] # -x
+        self.update_matrix[2][0] = -self.delay * self.omega[1] # -y
+        self.update_matrix[2][1] =  self.delay * self.omega[0] # x
+        self.update_matrix[2][2] = 0
 
         matrix_multiply(self.dcm_matrix,self.update_matrix,self.temporary_matrix)# //a*b=c
 

@@ -32,7 +32,7 @@ import numpy as np
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
 GRAVITY = 256
-GYRO_GAIN = 0.0012217304763960308  # np.radians(0.07)
+GYRO_GAIN = 0.0012217304763960308  # np.radians(0.07) TODO: Check 0.064
 KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
 KP_YAW = 1.2
@@ -61,7 +61,7 @@ def matrix_multiply(a, b, mat):
         for y in xrange(3):
             for w in xrange(3):
                 op[w]=a[x][w]*b[w][y]
-            mat[x][y]=0;
+            mat[x][y]=0
             mat[x][y]=op[0]+op[1]+op[2]
 
 class IMU(object):
@@ -71,28 +71,25 @@ class IMU(object):
 
         self.delay = 0.02
 
-        self.gyroscope_readings_offset = np.array([0.0, 0.0, 0.0])
-        self.accelerometer_readings_offset = np.array([0.0, 0.0, 0.0])
+        self.gyroscope_readings_offset = np.zeros(3)
+        self.accelerometer_readings_offset = np.zeros(3)
 
         self.mag_heading = 0
 
-        self.omega_vector = [0]*3
-        self.omega_p = [0]*3
-        self.omega_i = [0]*3
-        self.omega = [0]*3
+        self.omega = np.zeros(3)
+        self.omega_p = np.zeros(3)
+        self.omega_i = np.zeros(3)
 
         self.roll = 0
         self.pitch = 0
         self.yaw = 0
 
-        self.error_roll_pitch = [0]*3
-        self.error_yaw = [0]*3
+        self.error_roll_pitch = np.zeros(3)
+        self.error_yaw = np.zeros(3)
 
         self.gyro_sat = 0
 
-        self.dcm_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        self.update_matrix = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-        self.temporary_matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        self.dcm_matrix = np.eye(3)
 
         self.counter = 0
 
@@ -172,9 +169,9 @@ class IMU(object):
 
     def normalize(self):
 
-        error=0;
+        error=0
         temporary=[[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        renorm=0;
+        renorm=0
 
         error= -np.dot(self.dcm_matrix[0],self.dcm_matrix[1])*.5
 
@@ -193,11 +190,11 @@ class IMU(object):
         self.dcm_matrix[1] = vector_scale(temporary[1], renorm)
 
         renorm= .5 *(3 - np.dot(temporary[2],temporary[2]))
-        self.dcm_matrix[2] = vector_scale(temporary[2], renorm);
+        self.dcm_matrix[2] = vector_scale(temporary[2], renorm)
 
     def drift_correction(self, sensors):
         self.scaled_omega_p = [0]*3
-        self.scaled_omega_i = [0]*3;
+        self.scaled_omega_i = [0]*3
 
         Accel_magnitude = sqrt(sensors['accelerometer'][0]**2 +
                                sensors['accelerometer'][1]**2 +
@@ -213,13 +210,13 @@ class IMU(object):
             Accel_weight = 1
 
         self.error_roll_pitch = np.cross(sensors['accelerometer'],self.dcm_matrix[2])
-        self.omega_p = vector_scale(self.error_roll_pitch,KP_ROLLPITCH*Accel_weight);
+        self.omega_p = vector_scale(self.error_roll_pitch,KP_ROLLPITCH*Accel_weight)
 
-        self.scaled_omega_i = vector_scale(self.error_roll_pitch,KI_ROLLPITCH*Accel_weight);
-        self.omega_i = vector_add(self.omega_i,self.scaled_omega_i);
+        self.scaled_omega_i = vector_scale(self.error_roll_pitch,KI_ROLLPITCH*Accel_weight)
+        self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
-        mag_heading_x = cos(self.mag_heading);
-        mag_heading_y = sin(self.mag_heading);
+        mag_heading_x = cos(self.mag_heading)
+        mag_heading_y = sin(self.mag_heading)
         errorCourse=(self.dcm_matrix[0][0]*mag_heading_y) - (self.dcm_matrix[1][0]*mag_heading_x)
         self.error_yaw = vector_scale(self.dcm_matrix[2],errorCourse)
 
@@ -230,27 +227,26 @@ class IMU(object):
         self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
     def matrix_update(self, sensors):
-        self.omega = vector_add(sensors['gyroscope'], self.omega_i) #adding proportional term
-        self.omega_vector = vector_add(self.omega, self.omega_p) # //adding Integrator term
+        # adding integrator and proportional term
+        self.omega = sensors['gyroscope'] + self.omega_i + self.omega_p
 
-        self.update_matrix[0][0]=0
-        self.update_matrix[0][1]=-self.delay*self.omega_vector[2]#;//-z
-        self.update_matrix[0][2]=self.delay*self.omega_vector[1]#;//y
-        self.update_matrix[1][0]=self.delay*self.omega_vector[2]#;//z
-        self.update_matrix[1][1]=0
-        self.update_matrix[1][2]=-self.delay*self.omega_vector[0]#;//-x
-        self.update_matrix[2][0]=-self.delay*self.omega_vector[1]#;//-y
-        self.update_matrix[2][1]=self.delay*self.omega_vector[0]#;//x
-        self.update_matrix[2][2]=0
+        update_matrix = np.matrix(np.zeros((3, 3)))
+        update_matrix[0, 0] = 1
+        update_matrix[0, 1] = -self.delay * self.omega[2] # -z
+        update_matrix[0, 2] =  self.delay * self.omega[1] # y
+        update_matrix[1, 0] =  self.delay * self.omega[2] # z
+        update_matrix[1, 1] = 1
+        update_matrix[1, 2] = -self.delay * self.omega[0] # -x
+        update_matrix[2, 0] = -self.delay * self.omega[1] # -y
+        update_matrix[2, 1] =  self.delay * self.omega[0] # x
+        update_matrix[2, 2] = 1
 
-        matrix_multiply(self.dcm_matrix,self.update_matrix,self.temporary_matrix)#; //a*b=c
-
-        for x in xrange(3):
-            for y in xrange(3):
-                self.dcm_matrix[x][y]+=self.temporary_matrix[x][y]
+        # TODO: Fixup this shit
+        self.dcm_matrix = np.matrix(self.dcm_matrix)
+        self.dcm_matrix *= update_matrix
+        self.dcm_matrix = np.array(self.dcm_matrix)
 
     def Euler_angles(self):
-
         self.pitch = -asin(self.dcm_matrix[2][0])
         self.roll = atan2(self.dcm_matrix[2][1],self.dcm_matrix[2][2])
         self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])

@@ -38,6 +38,7 @@ KI_ROLLPITCH = 0.00002
 KP_YAW = 1.2
 KI_YAW = 0.00002
 ACCELEROMETER_SCALE = 16
+MAGNETS_OFFSET = 0.5
 
 PLATFORM_SPECIFIC_QUOTIENTS = {
     'stm': (744, -499, -491, 1857, 530, 426),
@@ -65,9 +66,8 @@ def matrix_multiply(a, b, mat):
 
 class IMU(object):
     def __init__(self, platform):
-        (self.min_mx, self.min_my,
-         self.min_mz, self.max_mx,
-         self.max_my, self.max_mz) = PLATFORM_SPECIFIC_QUOTIENTS[platform]
+        self.magnets_min = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][:3])
+        self.magnets_max = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][3:6])
 
         self.delay = 0.02
 
@@ -75,9 +75,7 @@ class IMU(object):
         self.accelerometer_readings_offset = np.array([0.0, 0.0, 0.0])
 
         (self.ax, self.ay, self.az,
-         self.mx, self.my, self.mz,
-         self.gx, self.gy, self.gz,
-         self.cmx, self.cmy, self.cmz,) = [0]*12
+         self.gx, self.gy, self.gz) = [0]*6
 
         self.mag_heading = 0
 
@@ -147,34 +145,31 @@ class IMU(object):
             self.counter += 1
             self.delay = delay
 
-            #print self.delay
-
             self.read_gyro(sensors['gyroscope'])
             self.read_accel(sensors['accelerometer'])
             if self.counter > 5:
                 self.counter = 0
-                self.read_compass(sensors['magnetometer'])
-                self.compass_heading()
+                self.compass_heading(sensors['magnetometer'])
 
             self.matrix_update()
             self.normalize()
             self.drift_correction()
             self.Euler_angles()
 
-    def compass_heading(self):
+    def compass_heading(self, magnets):
         cos_roll = cos(self.roll)
         sin_roll = sin(self.roll)
         cos_pitch = cos(self.pitch)
         sin_pitch = sin(self.pitch)
 
-        self.cmx = (self.mx - self.min_mx) / (self.max_mx - self.min_mx) - 0.5
-        self.cmy = (self.my - self.min_my) / (self.max_my - self.min_my) - 0.5
-        self.cmz = (self.mz - self.min_mz) / (self.max_mz - self.min_mz) - 0.5
+        magnets_norm = ((magnets - self.magnets_min) /
+            (self.magnets_max - self.magnets_min) - MAGNETS_OFFSET)
 
-        mag_x = self.cmx*cos_pitch+self.cmy*sin_roll*sin_pitch+self.cmz*cos_roll*sin_pitch
-        mag_y = self.cmy*cos_roll-self.cmz*sin_roll
+        mag_x = (magnets_norm[0] * cos_pitch + magnets_norm[1] * sin_roll *
+                 sin_pitch + magnets_norm[2] * cos_roll * sin_pitch)
+        mag_y = (magnets_norm[1] * cos_roll - magnets_norm[2] * sin_roll)
 
-        self.mag_heading = atan2(-mag_y,mag_x)
+        self.mag_heading = atan2(-mag_y, mag_x)
 
     def read_gyro(self, gyroscope_readings):
         self.angular_velocity = (gyroscope_readings -
@@ -193,12 +188,6 @@ class IMU(object):
         self.ax = self.acceleration[0]
         self.ay = self.acceleration[1]
         self.az = self.acceleration[2]
-
-    # TODO: Destroy this whole func
-    def read_compass(self, magnetometer_readings):
-        self.mx = magnetometer_readings[0]
-        self.my = magnetometer_readings[1]
-        self.mz = magnetometer_readings[2]
 
     def normalize(self):
 

@@ -71,28 +71,28 @@ class IMU(object):
 
         self.delay = 0.02
 
-        self.gyroscope_readings_offset = np.array([0.0, 0.0, 0.0])
-        self.accelerometer_readings_offset = np.array([0.0, 0.0, 0.0])
+        self.gyroscope_readings_offset = np.zeros(3)
+        self.accelerometer_readings_offset = np.zeros(3)
 
         self.mag_heading = 0
 
-        self.omega_vector = [0]*3
-        self.omega_p = [0]*3
-        self.omega_i = [0]*3
-        self.omega = [0]*3
+        self.omega_vector = np.zeros(3)
+        self.omega_p = np.zeros(3)
+        self.omega_i = np.zeros(3)
+        self.omega = np.zeros(3)
 
         self.roll = 0
         self.pitch = 0
         self.yaw = 0
 
-        self.error_roll_pitch = [0]*3
-        self.error_yaw = [0]*3
+        self.error_roll_pitch = np.zeros(3)
+        self.error_yaw = np.zeros(3)
 
         self.gyro_sat = 0
 
-        self.dcm_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        self.dcm_matrix = np.eye(3)
         self.update_matrix = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-        self.temporary_matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        self.temporary_matrix = np.zeros((3, 3))
 
         self.counter = 0
 

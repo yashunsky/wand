@@ -123,8 +123,6 @@ class IMU(object):
 
     def calibration_loop(self, sensors):
         if self.counter < CALIBRATION_LENGTH:
-            self.read_gyro(sensors['gyroscope'])
-            self.read_accel(sensors['accelerometer'])
             self.gyroscope_readings_offset += sensors['gyroscope']
             self.accelerometer_readings_offset += sensors['accelerometer']
             self.counter += 1

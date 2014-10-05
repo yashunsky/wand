@@ -196,11 +196,7 @@ class IMU(object):
         self.scaled_omega_p = [0]*3
         self.scaled_omega_i = [0]*3
 
-        Accel_magnitude = sqrt(sensors['accelerometer'][0]**2 +
-                               sensors['accelerometer'][1]**2 +
-                               sensors['accelerometer'][2]**2)
-
-        Accel_magnitude = Accel_magnitude / GRAVITY
+        Accel_magnitude = np.linalg.norm(sensors['accelerometer']) / GRAVITY
 
         Accel_weight = 1 - 2*abs(1 - Accel_magnitude)
 

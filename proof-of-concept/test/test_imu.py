@@ -65,8 +65,7 @@ class CheckImu(unittest.TestCase):
             0.133800203706, 0.155352824552, 0.176738203998])
         expected_direction_z = iter(expected_direction_z)
 
-
-        imu = IMU.IMU('stm')
+        imu = IMU.IMU(((744, -499, -491), (1857, 530, 426)))
         data_file = os.path.join(DATA_PATH, 'imu_test_data')
         with open(data_file, 'r') as f:
             data = f.readlines()

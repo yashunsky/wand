@@ -21,6 +21,11 @@ from copy import deepcopy
 from time import time
 
 
+PLATFORM_SPECIFIC_QUOTIENTS = {
+    'stm': ((744, -499, -491), (1857, 530, 426)),
+    'arduino': ((-504, -615, -564), (597, 488, 384))
+}
+
 class Listner(QWidget):
     """docstring for Listner"""
     def __init__(self):
@@ -47,7 +52,7 @@ class Listner(QWidget):
         self.ser = serial.Serial(port, 115200, timeout=0)
         self.log = []
 
-        self.im = IMU('stm')
+        self.im = IMU(PLATFORM_SPECIFIC_QUOTIENTS['stm'])
         self.st = Stroke()
         self.sl = Selector('tetragramma.txt')
 

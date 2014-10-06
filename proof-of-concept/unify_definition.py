@@ -48,7 +48,7 @@ def check_stroke(stroke, description_, offset):
 
     #print np.max(radius), np.min(radius)
 
-    return np.all(radius <= 1)#description[:, -1]*(1.+offset))
+    return np.all(radius <= description[:, -1]*(1.+offset))
 
 def get_letter(stroke, segmentation, letters, offset):
     u_st = unify_stroke(stroke, segmentation)
@@ -60,3 +60,13 @@ def get_letter(stroke, segmentation, letters, offset):
             result.append(key)
     return result
 
+if __name__ == '__main__':
+    stroke = np.loadtxt('learned/a1411911395.txt')
+    import json
+    with open('tetra_v2.txt', 'r') as f:
+        core = json.load(f)
+
+    u_st = unify_stroke(stroke, core['segmentation'])
+    letter = core['letters']['a']
+    offset = 0
+    print check_stroke(u_st, letter, offset)

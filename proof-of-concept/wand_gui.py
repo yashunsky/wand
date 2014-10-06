@@ -23,7 +23,7 @@ from time import time
 
 class Listner(QWidget):
     """docstring for Listner"""
-    def __init__(self):
+    def __init__(self, core_file_name):
         super(Listner, self).__init__()
         self.resize(500, 500)
         self.out = QTextEdit(self)
@@ -49,12 +49,10 @@ class Listner(QWidget):
 
         self.im = IMU('stm')
         self.st = Stroke()
-        self.sl = Selector('tetragramma.txt')
+        self.sl = Selector(core_file_name)
 
         self.st.widget = self.display
         self.st.on_done = self.get_stroke
-
-        #self.display.set_background('tetragramma.txt', 'x')
 
         self.prev = None
 
@@ -73,7 +71,7 @@ class Listner(QWidget):
 
     def set_background(self):
         letter = self.selector.currentText()
-        self.display.set_background('tetra_v2.txt', letter)
+        self.display.set_background('core_file_name', letter)
 
     def get_stroke(self, stroke):
         #np.savetxt('new_basis/%.0f.txt' % time(), stroke)
@@ -93,12 +91,9 @@ class Listner(QWidget):
             key = letters[0]
 
         if key is not None:
-            self.display.set_background('tetra_v2.txt', key, color='g')
+            self.display.set_background('core_file_name', key, color='g')
             np.savetxt('learned/%s%.0f.txt' % (key, time()), stroke)
             self.timer.start(1000)
-
-#        to_print = '%s' % letters
-#        self.out.setText(to_print)
 
     def process(self):
         local_log = deepcopy(self.log)
@@ -166,7 +161,7 @@ class Listner(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    ls = Listner()
+    ls = Listner('tetra_v2.txt')
 
     ls.show()
 

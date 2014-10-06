@@ -137,8 +137,8 @@ class IMU(object):
             self.counter = 0
             self.compass_heading(sensors['magnetometer'])
 
-        self.matrix_update(sensors, delay)
-        self.normalize()
+        dcm_matrix = self.matrix_update(self.dcm_matrix, sensors, delay)
+        self.dcm_matrix = self.normalize(dcm_matrix)
         self.drift_correction(sensors)
         self.Euler_angles()
 
@@ -163,30 +163,19 @@ class IMU(object):
     def offset_accel(self, accelerometer_readings):
         return self.accelerometer_readings_offset - accelerometer_readings
 
-    def normalize(self):
+    def renorm(self, array):
+        renorm = 0.5 * (3 - np.dot(array, array))
+        return array * renorm
 
-        error=0
-        temporary=[[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        renorm=0
+    def normalize(self, dcm_matrix):
+        temporary = [np.matrix(0)] * 3
+        error = -np.dot(dcm_matrix[0], dcm_matrix[1]) * 0.5
 
-        error= -np.dot(self.dcm_matrix[0],self.dcm_matrix[1])*.5
+        temporary[0] = dcm_matrix[1] * error + dcm_matrix[0]
+        temporary[1] = dcm_matrix[0] * error + dcm_matrix[1]
+        temporary[2] = np.cross(temporary[0], temporary[1])
 
-        temporary[0] = vector_scale(self.dcm_matrix[1], error)
-        temporary[1] = vector_scale(self.dcm_matrix[0], error)
-
-        temporary[0] = vector_add(temporary[0], self.dcm_matrix[0])
-        temporary[1] = vector_add(temporary[1], self.dcm_matrix[1])
-
-        temporary[2] = np.cross(temporary[0],temporary[1])
-
-        renorm= .5 *(3 - np.dot(temporary[0],temporary[0]))
-        self.dcm_matrix[0] = vector_scale(temporary[0], renorm)
-
-        renorm= .5 *(3 - np.dot(temporary[1],temporary[1]))
-        self.dcm_matrix[1] = vector_scale(temporary[1], renorm)
-
-        renorm= .5 *(3 - np.dot(temporary[2],temporary[2]))
-        self.dcm_matrix[2] = vector_scale(temporary[2], renorm)
+        return np.array([self.renorm(temp) for temp in temporary])
 
     def drift_correction(self, sensors):
         self.scaled_omega_p = [0]*3
@@ -218,7 +207,7 @@ class IMU(object):
         self.scaled_omega_i = vector_scale(self.error_yaw,KI_YAW)
         self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
 
-    def matrix_update(self, sensors, delay):
+    def matrix_update(self, dcm_matrix, sensors, delay):
         # adding integrator and proportional term
         omega = sensors['gyroscope'] + self.omega_i + self.omega_p
 
@@ -228,10 +217,7 @@ class IMU(object):
                                    [ z,  1, -x],
                                    [-y,  x,  1]])
 
-        # TODO: Fixup this shit
-        self.dcm_matrix = np.matrix(self.dcm_matrix)
-        self.dcm_matrix *= update_matrix
-        self.dcm_matrix = np.array(self.dcm_matrix)
+        return np.array(np.dot(dcm_matrix, update_matrix))
 
     def Euler_angles(self):
         self.pitch = -asin(self.dcm_matrix[2][0])

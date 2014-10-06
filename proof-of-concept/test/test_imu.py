@@ -65,8 +65,7 @@ class CheckImu(unittest.TestCase):
             0.133800203706, 0.155352824552, 0.176738203998])
         expected_direction_z = iter(expected_direction_z)
 
-
-        imu = IMU.IMU('stm')
+        imu = IMU.IMU(((744, -499, -491), (1857, 530, 426)))
         data_file = os.path.join(DATA_PATH, 'imu_test_data')
         with open(data_file, 'r') as f:
             data = f.readlines()
@@ -74,9 +73,9 @@ class CheckImu(unittest.TestCase):
         for data_point in data:
             imu.calc(data_point)
 
-            real_pitch = imu.pitch
-            real_roll = imu.roll
-            real_yaw = imu.yaw
+            real_pitch = imu.angles['pitch']
+            real_roll = imu.angles['roll']
+            real_yaw = imu.angles['yaw']
 
             (real_direction_x,
              real_direction_y,

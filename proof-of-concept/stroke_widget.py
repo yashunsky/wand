@@ -16,7 +16,7 @@ from time import time
 
 from unify_definition import unify_stroke
 
-def tangent_circle(center, radius, segmentation=32):
+def tangent_circle(center, radius, segmentation=128):
     y = center #np.array([center]).T
     x = np.array([y[1], -y[0], 0])
     x = x/np.linalg.norm(x)
@@ -103,7 +103,7 @@ class StrokeWidget(QWidget):
             y = circles[:, 1]
             z = circles[:, 2]
             x, y = stereographic(x, y, z)
-            self.circle.setData(x=x, y=y, pen=pg.mkPen(width=1, color='m'))            
+            self.circle.setData(x=x, y=y, pen=pg.mkPen(width=0.5, color='b'))            
 
     def set_coords_3D(self, d):
         self.set_coords(d[0, 0], d[0, 2])
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     sw = StrokeWidget()
 
-    sw.set_background('tetra_v2.txt', 'x')
+    sw.set_background('tetra_v2.txt', 'x', add_circles=False)
 
     sw.show()
 

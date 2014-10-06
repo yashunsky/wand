@@ -66,8 +66,9 @@ def matrix_multiply(a, b, mat):
 
 class IMU(object):
     def __init__(self, platform):
-        self.magnets_min = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][:3])
-        self.magnets_max = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][3:6])
+        magnets_min = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][:3])
+        magnets_max = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][3:6])
+        self.magnet_boundaries = [magnets_min, magnets_max]
 
         self.gyroscope_readings_offset = np.zeros(3)
         self.accelerometer_readings_offset = np.zeros(3)
@@ -77,14 +78,7 @@ class IMU(object):
         self.omega_p = np.zeros(3)
         self.omega_i = np.zeros(3)
 
-        self.roll = 0
-        self.pitch = 0
-        self.yaw = 0
-
-        self.error_roll_pitch = np.zeros(3)
-        self.error_yaw = np.zeros(3)
-
-        self.gyro_sat = 0
+        self.angles = {'roll': 0, 'pitch': 0, 'yaw': 0}
 
         self.dcm_matrix = np.eye(3)
 
@@ -130,45 +124,61 @@ class IMU(object):
 
     def main_loop(self, delay, sensors):
         self.counter += 1
-
-        sensors['gyroscope'] = self.offset_gyro(sensors['gyroscope'])
-        sensors['accelerometer'] = self.offset_accel(sensors['accelerometer'])
+        sensors = self.offset_sensors(sensors)
         if self.counter > 5:
             self.counter = 0
-            self.compass_heading(sensors['magnetometer'])
+            self.mag_heading = self.compass_heading(
+                sensors['magnetometer'], self.angles, self.magnet_boundaries)
 
-        dcm_matrix = self.matrix_update(self.dcm_matrix, sensors, delay)
-        self.dcm_matrix = self.normalize(dcm_matrix)
-        self.drift_correction(sensors)
-        self.Euler_angles()
+        self.dcm_matrix = self.matrix_update(
+            self.dcm_matrix, sensors['gyroscope'], delay,
+            self.omega_p, self.omega_i)
+        self.dcm_matrix = self.normalize(self.dcm_matrix)
+        accel_weight = self.calculate_accel_weight(sensors['accelerometer'])
+        error_yaw, error_roll_pitch = self.calculate_error(
+            sensors['accelerometer'], self.dcm_matrix, self.mag_heading)
+        self.omega_p, self.omega_i = self.drift_correction(
+            accel_weight, error_yaw, error_roll_pitch, self.omega_i)
+        self.angles = self.euler_angles(self.dcm_matrix)
 
-    def compass_heading(self, magnets):
-        cos_roll = cos(self.roll)
-        sin_roll = sin(self.roll)
-        cos_pitch = cos(self.pitch)
-        sin_pitch = sin(self.pitch)
+    def offset_sensors(self, sensors):
+        sensors['gyroscope'] = self.offset_gyro(
+            sensors['gyroscope'], self.gyroscope_readings_offset)
 
-        magnets_norm = ((magnets - self.magnets_min) /
-            (self.magnets_max - self.magnets_min) - MAGNETS_OFFSET)
+        sensors['accelerometer'] = self.offset_accel(
+            sensors['accelerometer'], self.accelerometer_readings_offset)
+
+        return sensors
+
+    def compass_heading(self, magnets, angles, magnets_boundaries):
+        cos_roll = cos(angles['roll'])
+        sin_roll = sin(angles['roll'])
+        cos_pitch = cos(angles['pitch'])
+        sin_pitch = sin(angles['pitch'])
+        magnets_min = magnets_boundaries[0]
+        magnets_max = magnets_boundaries[1]
+
+        magnets_norm = ((magnets - magnets_min) /
+            (magnets_max - magnets_min) - MAGNETS_OFFSET)
 
         mag_x = (magnets_norm[0] * cos_pitch + magnets_norm[1] * sin_roll *
                  sin_pitch + magnets_norm[2] * cos_roll * sin_pitch)
         mag_y = (magnets_norm[1] * cos_roll - magnets_norm[2] * sin_roll)
 
-        self.mag_heading = atan2(-mag_y, mag_x)
+        return atan2(-mag_y, mag_x)
 
-    def offset_gyro(self, gyro_readings):
-        return (gyro_readings - self.gyroscope_readings_offset) * GYRO_GAIN
+    def offset_gyro(self, gyro_readings, gyro_readings_offset):
+        return (gyro_readings - gyro_readings_offset) * GYRO_GAIN
 
-    def offset_accel(self, accelerometer_readings):
-        return self.accelerometer_readings_offset - accelerometer_readings
+    def offset_accel(self, accel_readings, accel_readings_offset):
+        return accel_readings_offset - accel_readings
 
     def renorm(self, array):
         renorm = 0.5 * (3 - np.dot(array, array))
         return array * renorm
 
     def normalize(self, dcm_matrix):
-        temporary = [np.matrix(0)] * 3
+        temporary = [0] * 3
         error = -np.dot(dcm_matrix[0], dcm_matrix[1]) * 0.5
 
         temporary[0] = dcm_matrix[1] * error + dcm_matrix[0]
@@ -177,39 +187,44 @@ class IMU(object):
 
         return np.array([self.renorm(temp) for temp in temporary])
 
-    def drift_correction(self, sensors):
-        self.scaled_omega_p = [0]*3
-        self.scaled_omega_i = [0]*3
+    def calculate_accel_weight(self, acceleration):
+        accel_magnitude = np.linalg.norm(acceleration) / GRAVITY
 
-        Accel_magnitude = np.linalg.norm(sensors['accelerometer']) / GRAVITY
+        accel_weight = 1 - 2*abs(1 - accel_magnitude)
 
-        Accel_weight = 1 - 2*abs(1 - Accel_magnitude)
+        if accel_weight < 0:
+            accel_weight = 0
+        if accel_weight > 1:
+            accel_weight = 1
 
-        if Accel_weight < 0:
-            Accel_weight = 0
-        if Accel_weight > 1:
-            Accel_weight = 1
+        return accel_weight
 
-        self.error_roll_pitch = np.cross(sensors['accelerometer'],self.dcm_matrix[2])
-        self.omega_p = vector_scale(self.error_roll_pitch,KP_ROLLPITCH*Accel_weight)
+    def calculate_error(self, acceleration, dcm_matrix, mag_heading):
+        mag_heading_x = cos(mag_heading)
+        mag_heading_y = sin(mag_heading)
+        error_course = ((dcm_matrix[0][0] * mag_heading_y) -
+                       (dcm_matrix[1][0] * mag_heading_x))
+        error_yaw = dcm_matrix[2] * error_course
+        error_roll_pitch = np.cross(acceleration, dcm_matrix[2])
 
-        self.scaled_omega_i = vector_scale(self.error_roll_pitch,KI_ROLLPITCH*Accel_weight)
-        self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
+        return error_yaw, error_roll_pitch
 
-        mag_heading_x = cos(self.mag_heading)
-        mag_heading_y = sin(self.mag_heading)
-        errorCourse=(self.dcm_matrix[0][0]*mag_heading_y) - (self.dcm_matrix[1][0]*mag_heading_x)
-        self.error_yaw = vector_scale(self.dcm_matrix[2],errorCourse)
+    def drift_correction(self, accel_weight, error_yaw, error_roll_pitch,
+                         original_omega_i):
+        scaled_omega_p = error_yaw * KP_YAW
+        omega_p = (error_roll_pitch * KP_ROLLPITCH * accel_weight +
+                   scaled_omega_p)
 
-        self.scaled_omega_p = vector_scale(self.error_yaw,KP_YAW)
-        self.omega_p = vector_add(self.omega_p,self.scaled_omega_p)
+        scaled_omega_i = error_yaw * KI_YAW
+        omega_i = (original_omega_i +
+                   error_roll_pitch * KI_ROLLPITCH * accel_weight +
+                   scaled_omega_i)
 
-        self.scaled_omega_i = vector_scale(self.error_yaw,KI_YAW)
-        self.omega_i = vector_add(self.omega_i,self.scaled_omega_i)
+        return omega_p, omega_i
 
-    def matrix_update(self, dcm_matrix, sensors, delay):
+    def matrix_update(self, dcm_matrix, angular_vel, delay, omega_p, omega_i):
         # adding integrator and proportional term
-        omega = sensors['gyroscope'] + self.omega_i + self.omega_p
+        omega = angular_vel + omega_i + omega_p
 
         (x, y, z) = omega * delay
 
@@ -217,12 +232,13 @@ class IMU(object):
                                    [ z,  1, -x],
                                    [-y,  x,  1]])
 
-        return np.array(np.dot(dcm_matrix, update_matrix))
+        return np.array(np.matrix(dcm_matrix) * update_matrix)
 
-    def Euler_angles(self):
-        self.pitch = -asin(self.dcm_matrix[2][0])
-        self.roll = atan2(self.dcm_matrix[2][1],self.dcm_matrix[2][2])
-        self.yaw = atan2(self.dcm_matrix[1][0],self.dcm_matrix[0][0])
+    def euler_angles(self, dcm_matrix):
+        pitch = -asin(dcm_matrix[2][0])
+        roll = atan2(dcm_matrix[2][1], dcm_matrix[2][2])
+        yaw = atan2(dcm_matrix[1][0], dcm_matrix[0][0])
+        return {'pitch': pitch, 'roll': roll, 'yaw': yaw}
 
     def get_y_direction(self):
         return self.dcm_matrix[:, 1]

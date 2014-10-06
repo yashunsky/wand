@@ -74,9 +74,9 @@ class CheckImu(unittest.TestCase):
         for data_point in data:
             imu.calc(data_point)
 
-            real_pitch = imu.pitch
-            real_roll = imu.roll
-            real_yaw = imu.yaw
+            real_pitch = imu.angles['pitch']
+            real_roll = imu.angles['roll']
+            real_yaw = imu.angles['yaw']
 
             (real_direction_x,
              real_direction_y,

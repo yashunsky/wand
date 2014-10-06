@@ -155,12 +155,12 @@ class IMU(object):
         return array * renorm
 
     def normalize(self, dcm_matrix):
-        temporary = [0] * 3
-        error = -np.dot(dcm_matrix[0], dcm_matrix[1]) * 0.5
+        temporary = np.zeros((3, 3))
+        error = -np.dot(dcm_matrix[0, :], dcm_matrix[1, :]) * 0.5
 
-        temporary[0] = dcm_matrix[1] * error + dcm_matrix[0]
-        temporary[1] = dcm_matrix[0] * error + dcm_matrix[1]
-        temporary[2] = np.cross(temporary[0], temporary[1])
+        temporary[0, :] = dcm_matrix[1, :] * error + dcm_matrix[0, :]
+        temporary[1, :] = dcm_matrix[0, :] * error + dcm_matrix[1, :]
+        temporary[2, :] = np.cross(temporary[0, :], temporary[1, :])
 
         return np.array([self.renorm(temp) for temp in temporary])
 
@@ -179,10 +179,10 @@ class IMU(object):
     def calculate_error(self, acceleration, dcm_matrix, mag_heading):
         mag_heading_x = np.cos(mag_heading)
         mag_heading_y = np.sin(mag_heading)
-        error_course = ((dcm_matrix[0][0] * mag_heading_y) -
-                       (dcm_matrix[1][0] * mag_heading_x))
-        error_yaw = dcm_matrix[2] * error_course
-        error_roll_pitch = np.cross(acceleration, dcm_matrix[2])
+        error_course = ((dcm_matrix[0, 0] * mag_heading_y) -
+                       (dcm_matrix[1, 0] * mag_heading_x))
+        error_yaw = dcm_matrix[2, :] * error_course
+        error_roll_pitch = np.cross(acceleration, dcm_matrix[2, :])
 
         return error_yaw, error_roll_pitch
 
@@ -212,9 +212,9 @@ class IMU(object):
         return np.array(np.matrix(dcm_matrix) * update_matrix)
 
     def euler_angles(self, dcm_matrix):
-        pitch = -np.arcsin(dcm_matrix[2][0])
-        roll = np.arctan2(dcm_matrix[2][1], dcm_matrix[2][2])
-        yaw = np.arctan2(dcm_matrix[1][0], dcm_matrix[0][0])
+        pitch = -np.arcsin(dcm_matrix[2, 0])
+        roll = np.arctan2(dcm_matrix[2, 1], dcm_matrix[2, 2])
+        yaw = np.arctan2(dcm_matrix[1, 0], dcm_matrix[0, 0])
         return {'pitch': pitch, 'roll': roll, 'yaw': yaw}
 
     def get_y_direction(self):

@@ -10,19 +10,20 @@
 # http://www.pololu.com/
 # MinIMU-9-Arduino-AHRS is based on sf9domahrs by Doug Weibel and Jose Julio:
 # http://code.google.com/p/sf9domahrs/
-# sf9domahrs is based on ArduIMU v1.5 by Jordi Munoz and William Premerlani, Jose
+# sf9domahrs is based on ArduIMU v1.5 by Jordi Munoz and
+# William Premerlani, Jose
 # Julio and Doug Weibel:
 # http://code.google.com/p/ardu-imu/
-# MinIMU-9-Arduino-AHRS is free software: you can redistribute it and/or modify it
-# under the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your option)
-# any later version.
+# MinIMU-9-Arduino-AHRS is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation, either version 3 of the License,
+# or (at your option) any later version.
 # MinIMU-9-Arduino-AHRS is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-# more details.
-# You should have received a copy of the GNU Lesser General Public License along
-# with MinIMU-9-Arduino-AHRS. If not, see <http://www.gnu.org/licenses/>.
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+# for more details.
+# You should have received a copy of the GNU Lesser General Public License
+# along with MinIMU-9-Arduino-AHRS. If not, see <http://www.gnu.org/licenses/>.
 
 from math import sin, cos, atan2, sqrt, asin, pi
 
@@ -40,34 +41,13 @@ KI_YAW = 0.00002
 ACCELEROMETER_SCALE = 16
 MAGNETS_OFFSET = 0.5
 
-PLATFORM_SPECIFIC_QUOTIENTS = {
-    'stm': (744, -499, -491, 1857, 530, 426),
-    'arduino': (-504, -615, -564, 597, 488, 384)
-}
-
 CALIBRATION_LENGTH = 32  # In cycles
 
 
-# TODO: Later should be replaced with numpy.array *
-def vector_scale(vector, scale):
-    return map(lambda a: a * scale, vector)
-
-def vector_add(vector1, vector2):
-    return map(sum, zip(vector1, vector2))
-
-def matrix_multiply(a, b, mat):
-    op=[0]*3
-    for x in xrange(3):
-        for y in xrange(3):
-            for w in xrange(3):
-                op[w]=a[x][w]*b[w][y]
-            mat[x][y]=0
-            mat[x][y]=op[0]+op[1]+op[2]
-
 class IMU(object):
-    def __init__(self, platform):
-        magnets_min = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][:3])
-        magnets_max = np.array(PLATFORM_SPECIFIC_QUOTIENTS[platform][3:6])
+    def __init__(self, magnet_boundaries):
+        magnets_min = np.array(magnet_boundaries[0])
+        magnets_max = np.array(magnet_boundaries[1])
         self.magnet_boundaries = [magnets_min, magnets_max]
 
         self.gyroscope_readings_offset = np.zeros(3)
@@ -114,13 +94,12 @@ class IMU(object):
             self.accelerometer_readings_offset /= CALIBRATION_LENGTH
 
             g_axis = (self.accelerometer_readings_offset /
-                np.linalg.norm(self.accelerometer_readings_offset))
+                      np.linalg.norm(self.accelerometer_readings_offset))
             self.accelerometer_readings_offset -= GRAVITY * g_axis
 
             self.counter = 0
             self.in_calibration = False
             print 'calibration done'
-
 
     def main_loop(self, delay, sensors):
         self.counter += 1
@@ -159,7 +138,7 @@ class IMU(object):
         magnets_max = magnets_boundaries[1]
 
         magnets_norm = ((magnets - magnets_min) /
-            (magnets_max - magnets_min) - MAGNETS_OFFSET)
+                        (magnets_max - magnets_min) - MAGNETS_OFFSET)
 
         mag_x = (magnets_norm[0] * cos_pitch + magnets_norm[1] * sin_roll *
                  sin_pitch + magnets_norm[2] * cos_roll * sin_pitch)

@@ -25,8 +25,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with MinIMU-9-Arduino-AHRS. If not, see <http://www.gnu.org/licenses/>.
 
-from math import sin, cos, atan2, sqrt, asin, pi
-
 import numpy as np
 
 
@@ -130,10 +128,10 @@ class IMU(object):
         return sensors
 
     def compass_heading(self, magnets, angles, magnets_boundaries):
-        cos_roll = cos(angles['roll'])
-        sin_roll = sin(angles['roll'])
-        cos_pitch = cos(angles['pitch'])
-        sin_pitch = sin(angles['pitch'])
+        cos_roll = np.cos(angles['roll'])
+        sin_roll = np.sin(angles['roll'])
+        cos_pitch = np.cos(angles['pitch'])
+        sin_pitch = np.sin(angles['pitch'])
         magnets_min = magnets_boundaries[0]
         magnets_max = magnets_boundaries[1]
 
@@ -144,7 +142,7 @@ class IMU(object):
                  sin_pitch + magnets_norm[2] * cos_roll * sin_pitch)
         mag_y = (magnets_norm[1] * cos_roll - magnets_norm[2] * sin_roll)
 
-        return atan2(-mag_y, mag_x)
+        return np.arctan2(-mag_y, mag_x)
 
     def offset_gyro(self, gyro_readings, gyro_readings_offset):
         return (gyro_readings - gyro_readings_offset) * GYRO_GAIN
@@ -179,8 +177,8 @@ class IMU(object):
         return accel_weight
 
     def calculate_error(self, acceleration, dcm_matrix, mag_heading):
-        mag_heading_x = cos(mag_heading)
-        mag_heading_y = sin(mag_heading)
+        mag_heading_x = np.cos(mag_heading)
+        mag_heading_y = np.sin(mag_heading)
         error_course = ((dcm_matrix[0][0] * mag_heading_y) -
                        (dcm_matrix[1][0] * mag_heading_x))
         error_yaw = dcm_matrix[2] * error_course
@@ -214,9 +212,9 @@ class IMU(object):
         return np.array(np.matrix(dcm_matrix) * update_matrix)
 
     def euler_angles(self, dcm_matrix):
-        pitch = -asin(dcm_matrix[2][0])
-        roll = atan2(dcm_matrix[2][1], dcm_matrix[2][2])
-        yaw = atan2(dcm_matrix[1][0], dcm_matrix[0][0])
+        pitch = -np.arcsin(dcm_matrix[2][0])
+        roll = np.arctan2(dcm_matrix[2][1], dcm_matrix[2][2])
+        yaw = np.arctan2(dcm_matrix[1][0], dcm_matrix[0][0])
         return {'pitch': pitch, 'roll': roll, 'yaw': yaw}
 
     def get_y_direction(self):

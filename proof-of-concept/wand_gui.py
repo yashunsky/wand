@@ -25,6 +25,7 @@ class Listner(QWidget):
     """docstring for Listner"""
     def __init__(self, core_file_name):
         super(Listner, self).__init__()
+        self.core_file_name = core_file_name
         self.resize(500, 500)
         self.out = QTextEdit(self)
         self.grid = QGridLayout(self)
@@ -49,7 +50,7 @@ class Listner(QWidget):
 
         self.im = IMU('stm')
         self.st = Stroke()
-        self.sl = Selector(core_file_name)
+        self.sl = Selector(self.core_file_name)
 
         self.st.widget = self.display
         self.st.on_done = self.get_stroke
@@ -71,7 +72,7 @@ class Listner(QWidget):
 
     def set_background(self):
         letter = self.selector.currentText()
-        self.display.set_background('core_file_name', letter)
+        self.display.set_background(self.core_file_name, letter)
 
     def get_stroke(self, stroke):
         #np.savetxt('new_basis/%.0f.txt' % time(), stroke)
@@ -91,7 +92,7 @@ class Listner(QWidget):
             key = letters[0]
 
         if key is not None:
-            self.display.set_background('core_file_name', key, color='g')
+            self.display.set_background(self.core_file_name, key, color='g')
             np.savetxt('learned/%s%.0f.txt' % (key, time()), stroke)
             self.timer.start(1000)
 

@@ -16,29 +16,31 @@ from time import time
 
 from unify_definition import unify_stroke
 
-class TouchSensor(QWidget):
-    """docstring for TouchSensor"""
-    def __init__(self, event_reciever):
-        super(TouchSensor, self).__init__()
-        self.set_coords = event_reciever.set_coords
-        self.reset_stroke = event_reciever.reset_stroke
-        self.analize_stroke = event_reciever.analize_stroke
-        
-    def mouseMoveEvent(self, event):
-        super(TouchSensor, self).mouseMoveEvent(event)
-        x = (float(event.x())/self.width()-0.5)*np.pi*2
-        y = -(float(event.y())/self.height()-0.5)*np.pi
-        self.set_coords(x, y)
+def tangent_circle(center, radius, segmentation=32):
+    y = center #np.array([center]).T
+    x = np.array([y[1], -y[0], 0])
+    x = x/np.linalg.norm(x)
+    z = np.cross(x, y)
+    m = np.matrix(np.vstack((x, y, z)))
 
-    def mousePressEvent(self, event):
-        super(TouchSensor, self).mousePressEvent(event)
-        self.reset_stroke()
+    circle = []
+    for i in xrange(segmentation+1):
+        a = i*2*np.pi/segmentation
+        x = radius*np.cos(a)
+        z = radius*np.sin(a)
+        point = np.matrix([[x, 0, z]]).T
+        point = m*point + np.matrix(center).T
+        circle.append(np.array(point.T)[0])
+    
+    circle = np.array(circle)
+    return circle
 
-    def mouseReleaseEvent(self, event):
-        super(TouchSensor, self).mouseReleaseEvent(event)
-        self.analize_stroke()
+    return None
 
-
+def stereographic(x, y, z):
+    '''Transform 3D coords into 2D
+    using stereographic projection'''
+    return x/(1+y), -z/(1+y)
 
 class StrokeWidget(QWidget):
     """docstring for StrokeWidget"""
@@ -51,11 +53,16 @@ class StrokeWidget(QWidget):
         self.gridLayout = QGridLayout(self)
         self.pw = pg.PlotWidget(name='st', background='w') 
 
+        self.circle = pg.PlotCurveItem(np.array([0]), np.array([0]), pen=pg.mkPen(width=2, color='m'))
+        self.pw.addItem(self.circle)
+
         self.bg_stroke = pg.PlotCurveItem(np.array([0]), np.array([0]), pen=pg.mkPen(width=5, color='k'))
         self.pw.addItem(self.bg_stroke)
 
         self.stroke = pg.PlotCurveItem(np.array([0]), np.array([0]), pen=pg.mkPen(width=5, color='k'))
         self.pw.addItem(self.stroke)
+
+
 
         self.gridLayout.addWidget(self.pw, 0, 0, 1, 1)
 
@@ -63,30 +70,40 @@ class StrokeWidget(QWidget):
         self.pw.getViewBox().setYRange(-np.pi/2, np.pi/2)
         self.pw.getViewBox().setAspectLocked()
 
-
-        #self.pw.hideAxis('left')
-        #self.pw.hideAxis('bottom')
-        
-        #self.touch = TouchSensor(self)
-
-        #self.gridLayout.addWidget(self.touch, 0, 0, 1, 1)
-
         self.stroke_data = np.array(())
 
-    def set_background(self, path, letter, color='r'):
+    def set_background(self, path, letter, color='r', add_circles=False):
         with open(path, 'r') as f:
             data = json.load(f)
         letters_list = data['letters']
+        circles = np.array([])
         if letter in letters_list:
             st = np.array(letters_list[letter])
 
             x = st[:, 0]
             y = st[:, 1]
             z = st[:, 2]
+
+            if add_circles:
+                for row in st:
+                    circle = tangent_circle(row[:3], row[3])
+                    if circles.size==0:
+                        circles = circle
+                    else:
+                        circles = np.vstack((circles, circle))
         else:
             x = y = z = np.array([0])
 
-        self.bg_stroke.setData(x=x/(1+y), y=-z/(1+y), pen=pg.mkPen(width=5, color=color))
+        x, y = stereographic(x, y, z)
+
+        self.bg_stroke.setData(x=x, y=y, pen=pg.mkPen(width=5, color=color))
+
+        if not circles.size==0:
+            x = circles[:, 0]
+            y = circles[:, 1]
+            z = circles[:, 2]
+            x, y = stereographic(x, y, z)
+            self.circle.setData(x=x, y=y, pen=pg.mkPen(width=1, color='m'))            
 
     def set_coords_3D(self, d):
         self.set_coords(d[0, 0], d[0, 2])
@@ -130,6 +147,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     sw = StrokeWidget()
+
+    sw.set_background('tetra_v2.txt', 'x')
 
     sw.show()
 

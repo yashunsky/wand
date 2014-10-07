@@ -44,9 +44,7 @@ CALIBRATION_LENGTH = 32  # In cycles
 
 class IMU(object):
     def __init__(self, magnet_boundaries):
-        magnets_min = np.array(magnet_boundaries[0])
-        magnets_max = np.array(magnet_boundaries[1])
-        self.magnet_boundaries = [magnets_min, magnets_max]
+        self.magnet_boundaries = map(np.array, magnet_boundaries)
 
         self.gyroscope_readings_offset = np.zeros(3)
         self.accelerometer_readings_offset = np.zeros(3)

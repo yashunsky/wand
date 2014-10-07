@@ -163,6 +163,20 @@ class IMU(object):
         temporary[1, :] = dcm_matrix[0, :] * error + dcm_matrix[1, :]
         temporary[2, :] = np.cross(temporary[0, :], temporary[1, :])
 
+        # It's quite strange: the commented code should do exactly
+        # the same thing, as the uncommented, and it does pass the tests,
+        # but only with a much bigger EPSILON.
+        # I don't understand, how in could be so:)
+
+        # renorm_coeff = (np.array([3, 3, 3]) - 
+        #                 np.power(np.linalg.norm(temporary, axis=1),2)) * 0.5
+
+        # renorm_matrix = np.vstack((renorm_coeff,
+        #                            renorm_coeff,
+        #                            renorm_coeff))
+
+        # return np.matrix(np.multiply(renorm_matrix, temporary))
+
         return np.matrix([self.renorm(temp) for temp in temporary])
 
 

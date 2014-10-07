@@ -154,15 +154,18 @@ class IMU(object):
         renorm = 0.5 * (3 - np.power(np.linalg.norm(array),2))
         return array * renorm
 
-    def normalize(self, dcm_matrix):
+    def normalize(self, dcm_matrix_):
+        dcm_matrix = np.matrix(dcm_matrix_)
         temporary = np.zeros((3, 3))
-        error = -np.dot(dcm_matrix[0, :], dcm_matrix[1, :]) * 0.5
-
+        error = -np.dot(dcm_matrix[0, :], dcm_matrix[1, :].T) * 0.5
+        error = error[0, 0]
+        
         temporary[0, :] = dcm_matrix[1, :] * error + dcm_matrix[0, :]
         temporary[1, :] = dcm_matrix[0, :] * error + dcm_matrix[1, :]
         temporary[2, :] = np.cross(temporary[0, :], temporary[1, :])
 
         return np.array([self.renorm(temp) for temp in temporary])
+
 
     def calculate_accel_weight(self, acceleration):
         accel_magnitude = np.linalg.norm(acceleration) / GRAVITY

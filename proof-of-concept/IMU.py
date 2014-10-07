@@ -204,7 +204,8 @@ class IMU(object):
 
         return omega_p, omega_i
 
-    def matrix_update(self, dcm_matrix, angular_vel, delay, omega_p, omega_i):
+    def matrix_update(self, dcm_matrix_, angular_vel, delay, omega_p, omega_i):
+        dcm_matrix = np.matrix(dcm_matrix_)
         # adding integrator and proportional term
         omega = angular_vel + omega_i + omega_p
 
@@ -216,7 +217,8 @@ class IMU(object):
 
         return np.array(np.matrix(dcm_matrix) * update_matrix)
 
-    def euler_angles(self, dcm_matrix):
+    def euler_angles(self, dcm_matrix_):
+        dcm_matrix = np.matrix(dcm_matrix_)
         pitch = -np.arcsin(dcm_matrix[2, 0])
         roll = np.arctan2(dcm_matrix[2, 1], dcm_matrix[2, 2])
         yaw = np.arctan2(dcm_matrix[1, 0], dcm_matrix[0, 0])

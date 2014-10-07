@@ -151,7 +151,7 @@ class IMU(object):
         return accel_readings_offset - accel_readings
 
     def renorm(self, array):
-        renorm = 0.5 * (3 - np.dot(array, array))
+        renorm = 0.5 * (3 - np.power(np.linalg.norm(array),2))
         return array * renorm
 
     def normalize(self, dcm_matrix):

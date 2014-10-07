@@ -58,7 +58,7 @@ class IMU(object):
 
         self.angles = {'roll': 0, 'pitch': 0, 'yaw': 0}
 
-        self.dcm_matrix = np.eye(3)
+        self.dcm_matrix = np.matrix(np.eye(3))
 
         self.counter = 0
 
@@ -154,8 +154,7 @@ class IMU(object):
         renorm = 0.5 * (3 - np.power(np.linalg.norm(array),2))
         return array * renorm
 
-    def normalize(self, dcm_matrix_):
-        dcm_matrix = np.matrix(dcm_matrix_)
+    def normalize(self, dcm_matrix):
         temporary = np.zeros((3, 3))
         error = -np.dot(dcm_matrix[0, :], dcm_matrix[1, :].T) * 0.5
         error = error[0, 0]
@@ -164,7 +163,7 @@ class IMU(object):
         temporary[1, :] = dcm_matrix[0, :] * error + dcm_matrix[1, :]
         temporary[2, :] = np.cross(temporary[0, :], temporary[1, :])
 
-        return np.array([self.renorm(temp) for temp in temporary])
+        return np.matrix([self.renorm(temp) for temp in temporary])
 
 
     def calculate_accel_weight(self, acceleration):
@@ -179,9 +178,7 @@ class IMU(object):
 
         return accel_weight
 
-    def calculate_error(self, acceleration, dcm_matrix_, mag_heading):
-        dcm_matrix = np.matrix(dcm_matrix_)
-
+    def calculate_error(self, acceleration, dcm_matrix, mag_heading):
         mag_heading_x = np.cos(mag_heading)
         mag_heading_y = np.sin(mag_heading)
         error_course = ((dcm_matrix[0, 0] * mag_heading_y) -
@@ -204,8 +201,7 @@ class IMU(object):
 
         return omega_p, omega_i
 
-    def matrix_update(self, dcm_matrix_, angular_vel, delay, omega_p, omega_i):
-        dcm_matrix = np.matrix(dcm_matrix_)
+    def matrix_update(self, dcm_matrix, angular_vel, delay, omega_p, omega_i):
         # adding integrator and proportional term
         omega = angular_vel + omega_i + omega_p
 
@@ -215,14 +211,13 @@ class IMU(object):
                                    [ z,  1, -x],
                                    [-y,  x,  1]])
 
-        return np.array(np.matrix(dcm_matrix) * update_matrix)
+        return np.matrix(dcm_matrix) * update_matrix
 
-    def euler_angles(self, dcm_matrix_):
-        dcm_matrix = np.matrix(dcm_matrix_)
+    def euler_angles(self, dcm_matrix):
         pitch = -np.arcsin(dcm_matrix[2, 0])
         roll = np.arctan2(dcm_matrix[2, 1], dcm_matrix[2, 2])
         yaw = np.arctan2(dcm_matrix[1, 0], dcm_matrix[0, 0])
         return {'pitch': pitch, 'roll': roll, 'yaw': yaw}
 
     def get_y_direction(self):
-        return self.dcm_matrix[:, 1]
+        return self.dcm_matrix[:, 1].A1

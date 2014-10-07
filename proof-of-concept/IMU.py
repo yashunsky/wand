@@ -159,7 +159,7 @@ class IMU(object):
         temporary = np.zeros((3, 3))
         error = -np.dot(dcm_matrix[0, :], dcm_matrix[1, :].T) * 0.5
         error = error[0, 0]
-        
+
         temporary[0, :] = dcm_matrix[1, :] * error + dcm_matrix[0, :]
         temporary[1, :] = dcm_matrix[0, :] * error + dcm_matrix[1, :]
         temporary[2, :] = np.cross(temporary[0, :], temporary[1, :])
@@ -179,15 +179,17 @@ class IMU(object):
 
         return accel_weight
 
-    def calculate_error(self, acceleration, dcm_matrix, mag_heading):
+    def calculate_error(self, acceleration, dcm_matrix_, mag_heading):
+        dcm_matrix = np.matrix(dcm_matrix_)
+
         mag_heading_x = np.cos(mag_heading)
         mag_heading_y = np.sin(mag_heading)
         error_course = ((dcm_matrix[0, 0] * mag_heading_y) -
                        (dcm_matrix[1, 0] * mag_heading_x))
         error_yaw = dcm_matrix[2, :] * error_course
-        error_roll_pitch = np.cross(acceleration, dcm_matrix[2, :])
+        error_roll_pitch = np.cross(acceleration, dcm_matrix[2, :].A1)
 
-        return error_yaw, error_roll_pitch
+        return error_yaw.A1, error_roll_pitch
 
     def drift_correction(self, accel_weight, error_yaw, error_roll_pitch,
                          original_omega_i):

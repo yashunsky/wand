@@ -56,7 +56,7 @@ class IMU(object):
 
         self.angles = {'roll': 0, 'pitch': 0, 'yaw': 0}
 
-        self.dcm_matrix = np.eye(3)
+        self.dcm_matrix = np.matrix(np.eye(3))
 
         self.counter = 0
 
@@ -153,14 +153,29 @@ class IMU(object):
         return array * renorm
 
     def normalize(self, dcm_matrix):
-        temporary = np.zeros((3, 3))
-        error = -np.dot(dcm_matrix[0, :], dcm_matrix[1, :]) * 0.5
+        temporary = np.matrix(np.zeros((3, 3)))
+        error = -np.dot(dcm_matrix[0, :].A1, dcm_matrix[1, :].A1) * 0.5
 
         temporary[0, :] = dcm_matrix[1, :] * error + dcm_matrix[0, :]
         temporary[1, :] = dcm_matrix[0, :] * error + dcm_matrix[1, :]
         temporary[2, :] = np.cross(temporary[0, :], temporary[1, :])
 
-        return np.array([self.renorm(temp) for temp in temporary])
+        # It's quite strange: the commented code should do exactly
+        # the same thing, as the uncommented, and it does pass the tests,
+        # but only with a much bigger EPSILON.
+        # I don't understand, how in could be so:)
+
+        # renorm_coeff = (np.array([3, 3, 3]) - 
+        #                 np.power(np.linalg.norm(temporary, axis=1),2)) * 0.5
+
+        # renorm_matrix = np.vstack((renorm_coeff,
+        #                            renorm_coeff,
+        #                            renorm_coeff))
+
+        # return np.matrix(np.multiply(renorm_matrix, temporary))
+
+        return np.matrix([self.renorm(temp.A1) for temp in temporary])
+
 
     def calculate_accel_weight(self, acceleration):
         accel_magnitude = np.linalg.norm(acceleration) / GRAVITY
@@ -180,9 +195,9 @@ class IMU(object):
         error_course = ((dcm_matrix[0, 0] * mag_heading_y) -
                        (dcm_matrix[1, 0] * mag_heading_x))
         error_yaw = dcm_matrix[2, :] * error_course
-        error_roll_pitch = np.cross(acceleration, dcm_matrix[2, :])
+        error_roll_pitch = np.cross(acceleration, dcm_matrix[2, :].A1)
 
-        return error_yaw, error_roll_pitch
+        return error_yaw.A1, error_roll_pitch
 
     def drift_correction(self, accel_weight, error_yaw, error_roll_pitch,
                          original_omega_i):
@@ -207,7 +222,7 @@ class IMU(object):
                                    [ z,  1, -x],
                                    [-y,  x,  1]])
 
-        return np.array(np.matrix(dcm_matrix) * update_matrix)
+        return np.matrix(dcm_matrix) * update_matrix
 
     def euler_angles(self, dcm_matrix):
         pitch = -np.arcsin(dcm_matrix[2, 0])
@@ -216,4 +231,4 @@ class IMU(object):
         return {'pitch': pitch, 'roll': roll, 'yaw': yaw}
 
     def get_y_direction(self):
-        return self.dcm_matrix[:, 1]
+        return self.dcm_matrix[:, 1].A1

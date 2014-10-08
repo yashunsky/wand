@@ -17,6 +17,6 @@ class AperiodicFilter(object):
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     ap = AperiodicFilter(0.5)
-    points = [0]+[ap.set_input(1, 0.1) for i in xrange(10)]
+    points = [0] + [ap.set_input(1, 0.1) for i in xrange(10)]
     plt.plot(points)
     plt.show()

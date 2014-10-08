@@ -8,7 +8,8 @@ import sys
 from time import time
 
 import numpy as np
-from PySide.QtGui import QApplication, QWidget, QTextEdit, QGridLayout, QComboBox
+from PySide.QtGui import QApplication, QWidget, QLabel
+from PySide.QtGui import QGridLayout, QComboBox, QFont
 from PySide.QtCore import QTimer
 
 from IMU import IMU
@@ -23,7 +24,7 @@ PLATFORM_SPECIFIC_QUOTIENTS = {
 }
 CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
-MAX_DATA_TIMELAPSE = 0.05
+MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
 DISPLAY_TIMEOUT = 1000 #ms
 
@@ -33,7 +34,11 @@ class Listener(QWidget):
         super(Listener, self).__init__()
         self.core_file_name = core_file_name
         self.resize(500, 500)
-        self.out = QTextEdit(self)
+        self.out = QLabel(self)
+        self.out.setMinimumHeight(100)
+        font = QFont()
+        font.setPixelSize(80)
+        self.out.setFont(font)
         self.grid = QGridLayout(self)
         self.display = StrokeWidget()
         self.letter_selector = QComboBox()
@@ -90,6 +95,9 @@ class Listener(QWidget):
     def get_stroke(self, stroke):
         letters = self.selector.check_stroke(stroke)
         letter = self.letter_selector.currentText()
+
+        if letters:
+            self.out.setText(self.out.text()+letters[0])
 
         if letter == 'free run' and letters:
             self.store_stroke(letters[0], stroke)

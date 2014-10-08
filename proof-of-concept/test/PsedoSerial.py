@@ -30,6 +30,9 @@ class Serial(object):
             self.timer = now
 
             # get timestamp from the *.raw file's first line
+            # it can be moved to __init__ but any way
+            # we can't return anything on first call
+            # because self.timer needs to be set
             with open(DATA_PATH, 'r') as f:
                 for line in f:
                     self.previus_timestamp = float(line.split()[0])
@@ -47,6 +50,7 @@ class Serial(object):
                 for line in f:
                     timestamp, buffer_line = line.split(' ', 1)
                     timestamp = float(timestamp)
+
                     if timestamp - self.previus_timestamp < delay:
                         # add line to buffer
                         buffer_line = buffer_line.replace(RAW_DELIMITER,
@@ -79,14 +83,26 @@ class Serial(object):
 if __name__ == '__main__':
     serial = Serial()
 
+    print 'serial.read(serial.inWaiting()) call Serial.update() twice '
+    print '1-2: setting up timers'
     print '>>>', serial.read(serial.inWaiting())
-    quit()
+    print 'inWaiting returned 0, nothing read.'
+    print '3-4: on call #2 files\' first line was put into the buffer'
     print '>>>', serial.read(serial.inWaiting())
+    print 'now it was read'
+    print '5-6: we\'re calling too often'
     print '>>>', serial.read(serial.inWaiting())
+    print 'nothing happens. let\'s wait 0.6s'
     sleep(0.6)
+    print '7-8:'
+    print '>>>', serial.read(serial.inWaiting())
+    print 'ta-dam: got 2 new lines'
+    print '9-14:'
     print '>>>', serial.read(serial.inWaiting())
     print '>>>', serial.read(serial.inWaiting())
     print '>>>', serial.read(serial.inWaiting())
-    print '>>>', serial.read(serial.inWaiting())
+    print 'anther too often calls with no result'
+    print '15-16: 0.02sec pause is ok to get one new line'
     sleep(0.02)
     print '>>>', serial.read(serial.inWaiting())
+    print 'and here it is'

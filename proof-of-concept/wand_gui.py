@@ -38,6 +38,7 @@ class Listener(QWidget):
         self.selector = QComboBox()
         self.grid.addWidget(self.display, 0, 0, 1, 1)
         self.grid.addWidget(self.selector, 1, 0, 1, 1)
+        self.grid.addWidget(self.out, 2, 0, 1, 1)
         self.serial_timer = QTimer()
         self.serial_timer.setInterval(20)
         self.serial_timer.timeout.connect(self.get_data)

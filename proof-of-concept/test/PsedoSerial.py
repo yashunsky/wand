@@ -6,8 +6,9 @@ This module should be included instead of 'serial'
 '''
 
 from time import time, sleep
+import os
 
-DATA_PATH = '../data.raw'
+DATA_PATH = os.path.join(os.path.dirname(__file__), '../data.raw')
 
 RAW_DELIMITER = '\r\n'
 BUFFER_DELIMITER = '\r\n'
@@ -15,7 +16,7 @@ BUFFER_DELIMITER = '\r\n'
 class Serial(object):
     """A psedo serial port object, acting on demand,
     and passing data from *.raw file"""
-    def __init__(self, *args):
+    def __init__(self, port, baude_rate, timeout=0):
         super(Serial, self).__init__()
         self.timer = None
         self.buffer = ''
@@ -81,7 +82,7 @@ class Serial(object):
         return result
 
 if __name__ == '__main__':
-    serial = Serial()
+    serial = Serial('serial', 115200, 0)
 
     print 'serial.read(serial.inWaiting()) call Serial.update() twice '
     print '1-2: setting up timers'

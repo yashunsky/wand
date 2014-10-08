@@ -2,14 +2,13 @@
 #-*- coding: utf-8 -*-
 
 from copy import deepcopy
-from math import sin, cos
 import os
 import serial
 import sys
 from time import time
 
 import numpy as np
-from PySide.QtGui import QApplication, QWidget, QLabel, QTextEdit, QGridLayout, QComboBox
+from PySide.QtGui import QApplication, QWidget, QTextEdit, QGridLayout, QComboBox
 from PySide.QtCore import QTimer
 
 from IMU import IMU

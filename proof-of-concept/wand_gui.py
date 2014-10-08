@@ -38,18 +38,8 @@ class Listener(QWidget):
     def __init__(self, core_file_name):
         super(Listener, self).__init__()
         self.core_file_name = core_file_name
-        self.resize(500, 500)
-        self.out = QLabel(self)
-        self.out.setMinimumHeight(100)
-        font = QFont()
-        font.setPixelSize(80)
-        self.out.setFont(font)
-        self.grid = QGridLayout(self)
-        self.display = StrokeWidget()
-        self.letter_selector = QComboBox()
-        self.grid.addWidget(self.display, 0, 0, 1, 1)
-        self.grid.addWidget(self.letter_selector, 1, 0, 1, 1)
-        self.grid.addWidget(self.out, 2, 0, 1, 1)
+
+        self.setup_ui()
         self.serial_timer = QTimer()
         self.serial_timer.setInterval(20)
         self.serial_timer.timeout.connect(self.get_data)
@@ -81,6 +71,20 @@ class Listener(QWidget):
 
         self.display_timer = QTimer()
         self.display_timer.timeout.connect(self.set_background)
+
+    def setup_ui(self):
+        self.resize(500, 500)
+        self.out = QLabel(self)
+        self.out.setMinimumHeight(100)
+        font = QFont()
+        font.setPixelSize(80)
+        self.out.setFont(font)
+        self.grid = QGridLayout(self)
+        self.display = StrokeWidget()
+        self.letter_selector = QComboBox()
+        self.grid.addWidget(self.display, 0, 0, 1, 1)
+        self.grid.addWidget(self.letter_selector, 1, 0, 1, 1)
+        self.grid.addWidget(self.out, 2, 0, 1, 1)
 
     def init_selector(self):
         sel_lines = self.selector.letters_dict.keys()

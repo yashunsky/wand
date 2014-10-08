@@ -24,6 +24,7 @@ PLATFORM_SPECIFIC_QUOTIENTS = {
 CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05
+BUFFER_DELIMITER = '\r\n'
 
 
 class Listener(QWidget):
@@ -111,21 +112,21 @@ class Listener(QWidget):
                 self.stroke.set_data(Yr, np.linalg.norm(gyro))
 
     def get_data(self):
-        line = ''
         try:
             self.data_buffer += self.serial.read(self.serial.inWaiting())
             if self.data_buffer == '':
                 return
-            # Is buffer guarranteed to return data delimited by \r\n?
-            # Can it pass data in some other format?
-            breaked = self.data_buffer.split('\r\n')
-            self.data_buffer = breaked[-1]
+            data_pieces = self.data_buffer.split(BUFFER_DELIMITER)
 
-            # What does this piece of code do? Should it raise some exception?
-            if len(breaked) > 1:
-                line = breaked[-2]
-            else:
+            # Put incomplete piece back to the buffer
+            self.data_buffer = data_pieces.pop(-1)
+
+            # If there are no complete data pieces - return from function
+            if not data_pieces:
                 return
+
+            # Else - get the last of the pieces and discard the rest
+            line = data_pieces[-1]
 
             result = [float(d) for d in line.split()]
             if len(result) != 9:
@@ -135,8 +136,7 @@ class Listener(QWidget):
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            # Why the exceptions are silenced? Shouldn't they be raised?
-            # Which types of exceptions are expected to be caught here?
+            # Something went wrong... nobody cares.
             print e
 
 

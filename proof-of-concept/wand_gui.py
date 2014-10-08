@@ -4,7 +4,7 @@
 from copy import deepcopy
 import os
 import serial
-# uncomment to use virtual serial port
+# uncomment next line to use virtual serial port
 #import test.PsedoSerial as serial
 import sys
 from time import time

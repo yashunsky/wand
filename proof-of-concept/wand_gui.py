@@ -36,6 +36,8 @@ ACCELERATION_TIME_CONST = 0.5 #s
 SERIAL_INTERVAL = 20 #ms
 PROCESS_INTERVAL = 100 #ms
 
+ACCELERATION_RESET = 6000 #perrot
+
 
 class Listener(QWidget):
     def __init__(self, core_file_name):
@@ -114,7 +116,10 @@ class Listener(QWidget):
         self.display_timer.start()
 
     def get_stroke(self, stroke):
-        letters = self.selector.check_stroke(stroke)
+        try:
+            letters = self.selector.check_stroke(stroke)
+        except: #TODO: check unify_stroke
+            return
         letter = self.letter_selector.currentText()
 
         if letters:
@@ -139,12 +144,18 @@ class Listener(QWidget):
             if data[0] < MAX_DATA_TIMELAPSE:
                 self.imu.calc(data)
                 gyro = np.linalg.norm(np.array([data[7:-1]]))
-                accel = np.linalg.norm(np.array([data[4:7]]))
+                accel = np.linalg.norm(np.array([data[0:3]]))
 
-                print self.acceleration_filter.set_input(accel)
+                accel = self.acceleration_filter.set_input(accel, data[0])
+
+                if accel > ACCELERATION_RESET:
+                    self.execute_spell()
 
                 Yr = self.imu.get_y_direction()
                 self.stroke.set_data(Yr, gyro)
+
+    def execute_spell(self):
+        self.out.setText('')
 
     def get_data(self):
         try:

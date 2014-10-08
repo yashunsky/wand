@@ -31,7 +31,10 @@ LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
 DISPLAY_TIMEOUT = 1000 #ms
-ACCELERATION_TIME_CONST = 0.5
+ACCELERATION_TIME_CONST = 0.5 #s
+
+SERIAL_INTERVAL = 20 #ms
+PROCESS_INTERVAL = 100 #ms
 
 
 class Listener(QWidget):
@@ -40,15 +43,6 @@ class Listener(QWidget):
         self.core_file_name = core_file_name
 
         self.setup_ui()
-        self.serial_timer = QTimer()
-        self.serial_timer.setInterval(20)
-        self.serial_timer.timeout.connect(self.get_data)
-        self.serial_timer.start()
-
-        self.process_timer = QTimer()
-        self.process_timer.setInterval(100)
-        self.process_timer.timeout.connect(self.process)
-        self.process_timer.start()
 
         port = SERIAL_PORT
         self.serial = serial.Serial(port, BAUDE_RATE, timeout=0)
@@ -69,8 +63,6 @@ class Listener(QWidget):
 
         self.init_selector()
 
-        self.display_timer = QTimer()
-        self.display_timer.timeout.connect(self.set_background)
 
     def setup_ui(self):
         self.resize(500, 500)
@@ -85,6 +77,23 @@ class Listener(QWidget):
         self.grid.addWidget(self.display, 0, 0, 1, 1)
         self.grid.addWidget(self.letter_selector, 1, 0, 1, 1)
         self.grid.addWidget(self.out, 2, 0, 1, 1)
+
+    def setup_timers(self):
+        self.serial_timer = QTimer()
+        self.serial_timer.setInterval(SERIAL_INTERVAL)
+        self.serial_timer.timeout.connect(self.get_data)
+        self.serial_timer.start()
+
+        self.process_timer = QTimer()
+        self.process_timer.setInterval(PROCESS_INTERVAL)
+        self.process_timer.timeout.connect(self.process)
+        self.process_timer.start()
+
+        self.display_timer = QTimer()
+        self.display_timer.setInterval(DISPLAY_TIMEOUT)
+        self.display_timer.setSingleShot(True)
+        self.display_timer.timeout.connect(self.set_background)
+
 
     def init_selector(self):
         sel_lines = self.selector.letters_dict.keys()
@@ -101,7 +110,7 @@ class Listener(QWidget):
         file_name = '{key}{time}.txt'.format(key=key, time=int(time()))
         file_path = os.path.join(LEARNED_FOLDER, file_name)
         np.savetxt(file_path, stroke)
-        self.display_timer.start(DISPLAY_TIMEOUT)
+        self.display_timer.start()
 
     def get_stroke(self, stroke):
         letters = self.selector.check_stroke(stroke)

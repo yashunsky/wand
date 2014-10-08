@@ -35,9 +35,9 @@ class Listener(QWidget):
         self.out = QTextEdit(self)
         self.grid = QGridLayout(self)
         self.display = StrokeWidget()
-        self.selector = QComboBox()
+        self.letter_selector = QComboBox()
         self.grid.addWidget(self.display, 0, 0, 1, 1)
-        self.grid.addWidget(self.selector, 1, 0, 1, 1)
+        self.grid.addWidget(self.letter_selector, 1, 0, 1, 1)
         self.grid.addWidget(self.out, 2, 0, 1, 1)
         self.serial_timer = QTimer()
         self.serial_timer.setInterval(20)
@@ -72,11 +72,11 @@ class Listener(QWidget):
     def init_selector(self):
         sel_lines = self.selector.letters_dict.keys()
         sel_lines.insert(0, 'free run')
-        self.selector.addItems(sel_lines)
-        self.selector.currentIndexChanged.connect(self.set_background)
+        self.letter_selector.addItems(sel_lines)
+        self.letter_selector.currentIndexChanged.connect(self.set_background)
 
     def set_background(self):
-        letter = self.selector.currentText()
+        letter = self.letter_selector.currentText()
         self.display.set_background(self.core_file_name, letter)
 
     def store_stroke(self, key, stroke):
@@ -88,7 +88,7 @@ class Listener(QWidget):
 
     def get_stroke(self, stroke):
         letters = self.selector.check_stroke(stroke)
-        letter = self.selector.currentText()
+        letter = self.letter_selector.currentText()
 
         if letter == 'free run' and letters:
             self.store_stroke(letters[0], stroke)

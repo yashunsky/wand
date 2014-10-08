@@ -16,17 +16,22 @@ from IMU import IMU
 from Selector import Selector
 from Stroke import Stroke
 from stroke_widget import StrokeWidget
+from Aperiodic import AperiodicFilter
 
 
 PLATFORM_SPECIFIC_QUOTIENTS = {
     'stm': ((744, -499, -491), (1857, 530, 426)),
     'arduino': ((-504, -615, -564), (597, 488, 384))
 }
+
+SERIAL_PORT = '/dev/ttyUSB0'
+BAUDE_RATE = 115200
 CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
 DISPLAY_TIMEOUT = 1000 #ms
+ACCELERATION_TIME_CONST = 0.5
 
 
 class Listener(QWidget):
@@ -55,13 +60,15 @@ class Listener(QWidget):
         self.process_timer.timeout.connect(self.process)
         self.process_timer.start()
 
-        port = "/dev/ttyUSB0"
-        self.serial = serial.Serial(port, 115200, timeout=0)
+        port = SERIAL_PORT
+        self.serial = serial.Serial(port, BAUDE_RATE, timeout=0)
         self.incoming_data = []
 
         self.imu = IMU(PLATFORM_SPECIFIC_QUOTIENTS['stm'])
         self.stroke = Stroke()
         self.selector = Selector(self.core_file_name)
+
+        self.acceleration_filter = AperiodicFilter(ACCELERATION_TIME_CONST)
 
         self.stroke.widget = self.display
         self.stroke.on_done = self.get_stroke

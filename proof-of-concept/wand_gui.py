@@ -25,6 +25,7 @@ CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05
 BUFFER_DELIMITER = '\r\n'
+DISPLAY_TIMEOUT = 1000 #ms
 
 
 class Listener(QWidget):
@@ -66,8 +67,8 @@ class Listener(QWidget):
 
         self.init_selector()
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.set_background)
+        self.display_timer = QTimer()
+        self.display_timer.timeout.connect(self.set_background)
 
     def init_selector(self):
         sel_lines = self.selector.letters_dict.keys()
@@ -84,7 +85,7 @@ class Listener(QWidget):
         file_name = '{key}{time}.txt'.format(key=key, time=int(time()))
         file_path = os.path.join(LEARNED_FOLDER, file_name)
         np.savetxt(file_path, stroke)
-        self.timer.start(1000)
+        self.display_timer.start(DISPLAY_TIMEOUT)
 
     def get_stroke(self, stroke):
         letters = self.selector.check_stroke(stroke)

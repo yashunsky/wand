@@ -43,6 +43,7 @@ class Listener(QWidget):
         self.core_file_name = core_file_name
 
         self.setup_ui()
+        self.setup_timers()
 
         port = SERIAL_PORT
         self.serial = serial.Serial(port, BAUDE_RATE, timeout=0)

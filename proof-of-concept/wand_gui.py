@@ -138,9 +138,13 @@ class Listener(QWidget):
 
             if data[0] < MAX_DATA_TIMELAPSE:
                 self.imu.calc(data)
-                gyro = np.array([data[7:]])
+                gyro = np.linalg.norm(np.array([data[7:-1]]))
+                accel = np.linalg.norm(np.array([data[4:7]]))
+
+                print self.acceleration_filter.set_input(accel)
+
                 Yr = self.imu.get_y_direction()
-                self.stroke.set_data(Yr, np.linalg.norm(gyro))
+                self.stroke.set_data(Yr, gyro)
 
     def get_data(self):
         try:

@@ -36,7 +36,7 @@ ACCELERATION_TIME_CONST = 0.5 #s
 SERIAL_INTERVAL = 20 #ms
 PROCESS_INTERVAL = 100 #ms
 
-ACCELERATION_RESET = 6000 #perrot
+ACCELERATION_RESET = 6000 #conventional units
 
 
 class Listener(QWidget):
@@ -65,7 +65,6 @@ class Listener(QWidget):
         self.data_buffer = ''
 
         self.init_selector()
-
 
     def setup_ui(self):
         self.resize(500, 500)
@@ -143,8 +142,8 @@ class Listener(QWidget):
 
             if data[0] < MAX_DATA_TIMELAPSE:
                 self.imu.calc(data)
-                gyro = np.linalg.norm(np.array([data[7:-1]]))
-                accel = np.linalg.norm(np.array([data[0:3]]))
+                gyro = np.linalg.norm(np.array([data[7:]]))
+                accel = np.linalg.norm(np.array([data[:3]]))
 
                 accel = self.acceleration_filter.set_input(accel, data[0])
 

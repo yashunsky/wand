@@ -42,6 +42,14 @@ def stereographic(x, y, z):
     using stereographic projection'''
     return x/(1+y), -z/(1+y)
 
+def make_cross(point, size=0.1):
+    x, y = point
+    l = np.array([x-size, y-size])
+    t = np.array([x-size, y+size])
+    r = np.array([x+size, y+size])
+    b = np.array([x+size, y-size])
+    return np.array([l, r, point, t, b, point])
+
 class StrokeWidget(QWidget):
     """docstring for StrokeWidget"""
     def __init__(self):
@@ -95,6 +103,11 @@ class StrokeWidget(QWidget):
             x = y = z = np.array([0])
 
         x, y = stereographic(x, y, z)
+        cross = make_cross(np.array([x[0], y[0]]))
+        
+        if x.size > 1:
+            x = np.hstack((cross[:, 0], x))
+            y = np.hstack((cross[:, 1], y))
 
         self.bg_stroke.setData(x=x, y=y, pen=pg.mkPen(width=5, color=color))
 
@@ -111,11 +124,7 @@ class StrokeWidget(QWidget):
     def set_coords(self, x, y):
         new_point = np.array([x, y])
         if self.stroke_data.size == 0:
-            l = np.array([x-0.1, y])
-            t = np.array([x, y+0.1])
-            r = np.array([x+0.1, y])
-            b = np.array([x, y-0.1])
-            self.stroke_data = np.array([l, r, new_point, t, b, new_point])
+            self.stroke_data = make_cross(new_point)
         else:
             self.stroke_data = np.vstack((self.stroke_data, new_point))
 
@@ -148,7 +157,7 @@ if __name__ == '__main__':
 
     sw = StrokeWidget()
 
-    sw.set_background('tetra_v2.txt', 'x', add_circles=False)
+    sw.set_background('mirror_xz.txt', '12', add_circles=False)
 
     sw.show()
 

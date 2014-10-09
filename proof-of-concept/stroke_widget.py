@@ -44,10 +44,10 @@ def stereographic(x, y, z):
 
 def make_cross(point, size=0.1):
     x, y = point
-    l = np.array([x-size, y])
-    t = np.array([x, y+size])
-    r = np.array([x+size, y])
-    b = np.array([x, y-size])
+    l = np.array([x-size, y-size])
+    t = np.array([x-size, y+size])
+    r = np.array([x+size, y+size])
+    b = np.array([x+size, y-size])
     return np.array([l, r, point, t, b, point])
 
 class StrokeWidget(QWidget):

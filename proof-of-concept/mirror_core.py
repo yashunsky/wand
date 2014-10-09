@@ -40,7 +40,7 @@ def mirror_core(source, destination, x=True, z=False):
     core['letters'] = to_lists(core['letters'])
 
     with open(destination, 'w') as destination_file:
-        json.dump(core, destination_file)
+        json.dump(core, destination_file, indent=1)
 
 
 if __name__ == '__main__':

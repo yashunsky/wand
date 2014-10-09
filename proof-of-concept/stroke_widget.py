@@ -103,8 +103,9 @@ class StrokeWidget(QWidget):
             x = y = z = np.array([0])
 
         x, y = stereographic(x, y, z)
-        cross = make_cross(np.array([x, y]))
-        print cross
+        cross = make_cross(np.array([x[0], y[0]]))
+        x = np.hstack((cross[:, 0], x))
+        y = np.hstack((cross[:, 1], y))
 
         self.bg_stroke.setData(x=x, y=y, pen=pg.mkPen(width=5, color=color))
 

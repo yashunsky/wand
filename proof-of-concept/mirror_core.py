@@ -5,7 +5,7 @@ import json
 import numpy as np
 
 SOURCE_FILE = 'tetra_v2.txt'
-DESTINATION = 'mirror_x.txt'
+DESTINATION = 'mirror_z.txt'
 
 def to_arrays(input_dict):
     return {key: np.array(points)
@@ -44,4 +44,4 @@ def mirror_core(source, destination, x=True, z=False):
 
 
 if __name__ == '__main__':
-    mirror_core(SOURCE_FILE, DESTINATION)
+    mirror_core(SOURCE_FILE, DESTINATION, x=False, z=True)

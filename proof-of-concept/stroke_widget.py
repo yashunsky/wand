@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     sw = StrokeWidget()
 
-    sw.set_background('mirror_z.txt', '0', add_circles=False)
+    sw.set_background('mirror_xz.txt', '12', add_circles=False)
 
     sw.show()
 

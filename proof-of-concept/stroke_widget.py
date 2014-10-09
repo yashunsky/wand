@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     sw = StrokeWidget()
 
-    sw.set_background('tetra_v2.txt', 'x', add_circles=False)
+    sw.set_background('mirror_x.txt', '7', add_circles=False)
 
     sw.show()
 

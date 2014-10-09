@@ -18,7 +18,7 @@ def to_lists(input_dict):
 def add_invertion(input_list, axis):
     add_on = []
     for letter in input_list:
-        new_letter = letter[:, :]
+        new_letter = np.copy(letter)
         new_letter[:, axis] *= -1
         add_on.append(new_letter)
     input_list += add_on

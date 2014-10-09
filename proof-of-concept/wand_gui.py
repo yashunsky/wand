@@ -3,7 +3,10 @@
 
 from copy import deepcopy
 import os
-import serial
+if __name__ == '__main__':
+    import serial
+else:
+    import test.PsedoSerial as serial
 # uncomment next line to use virtual serial port
 #import test.PsedoSerial as serial
 import sys

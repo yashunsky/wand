@@ -3,39 +3,36 @@
 
 '''Look at the strokes, select the best and make a core out of them'''
 
-from PySide.QtGui import QApplication, QWidget
-from PySide.QtGui import QLabel, QTextEdit, QGridLayout, QComboBox, QListView
-from PySide.QtGui import QPushButton, QCheckBox, QLineEdit
-from PySide.QtCore import QAbstractListModel
-from PySide.QtCore import Qt
-
+import json
 import sys
-import numpy as np
-import pyqtgraph as pg
-
 from os.path import join, isfile, basename
 from os import listdir
 
-import json
+from PySide.QtCore import QAbstractListModel
+from PySide.QtCore import Qt
+from PySide.QtGui import QApplication, QWidget, QGridLayout, QComboBox
+from PySide.QtGui import QPushButton, QLineEdit, QListView
 
+import numpy as np
+import pyqtgraph as pg
 from unify_definition import unify_stroke
 
+
 SEGMENTATION = 32
+
 
 def make_core(letters, points):
     core = {}
     for key, letters_group in letters.items():
-        unified = np.array([unify_stroke(letter, points) for letter in letters_group])
-
+        unified = np.array([unify_stroke(letter, points)
+                            for letter in letters_group])
         centers = np.mean(unified, axis=0)
 
         R = []
-
         for u in unified:
             dists = u - centers
             radius = np.linalg.norm(dists, axis=1)
             R.append(radius)
-
         R = np.max(np.array(R), axis=0)
 
         core[key] = np.hstack((centers, np.array([R]).T))
@@ -53,17 +50,19 @@ def get_letters(path):
         key = filename[0]
         if not key in letters:
             letters[key] = []
-        letters[key].append({'filename': filename, 'data':data})
+        letters[key].append({'filename': filename, 'data': data})
     return letters
+
 
 def stereographic(x, y, z):
     '''Transform 3D coords into 2D
     using stereographic projection'''
-    return x/(1+y), -z/(1+y)
+    return x / (1 + y), -z / (1 + y)
 
-def add_circles(plot, radiuses, segmentation = 32):
+
+def add_circles(plot, radiuses, segmentation=32):
     '''Draw concentric circles on given plot'''
-    pen = pg.mkPen(width=1, color=(0,0,0,50))
+    pen = pg.mkPen(width=1, color=(0, 0, 0, 50))
     angles = np.linspace(0, 2*np.pi, segmentation)
     angles = np.hstack((angles, np.zeros(1)))
     x = np.cos(angles)
@@ -71,6 +70,7 @@ def add_circles(plot, radiuses, segmentation = 32):
     for r in radiuses:
         circle_curve = pg.PlotCurveItem(x=x*r, y=y*r, pen=pen)
         plot.addItem(circle_curve)
+
 
 class StrokeList(QAbstractListModel):
     """Model, containing strokes and there curve-representation"""
@@ -85,7 +85,7 @@ class StrokeList(QAbstractListModel):
                 x, y = stereographic(letter['data'][:, 0],
                                      letter['data'][:, 1],
                                      letter['data'][:, 2])
-                pen = pg.mkPen(width=10, color=(0,0,255,50))
+                pen = pg.mkPen(width=10, color=(0, 0, 255, 50))
                 pen.setCapStyle(Qt.RoundCap)
                 letter['curve'] = pg.PlotCurveItem(x=x, y=y, pen=pen)
                 letter['curve'].setVisible(False)
@@ -100,7 +100,7 @@ class StrokeList(QAbstractListModel):
 
     def set_preview(self, reset=False):
 
-        pen = pg.mkPen(width=5, color=(255,0,0,255))
+        pen = pg.mkPen(width=5, color=(255, 0, 0, 255))
         pen.setCapStyle(Qt.RoundCap)
 
         if reset:
@@ -120,7 +120,7 @@ class StrokeList(QAbstractListModel):
 
     def make_dict(self, all_letters=True):
         return {key: [element['data'] for element in elements_list
-                      if element['checked'] == Qt.Checked] 
+                      if element['checked'] == Qt.Checked]
                 for key, elements_list in self.strokes.items()
                 if all_letters or key == self.key_letter}
 
@@ -135,12 +135,12 @@ class StrokeList(QAbstractListModel):
             self.stroke_group = []
 
         # hide all curves, the ones who need to be shown
-        # will be reset visible on modelReset 
+        # will be reset visible on modelReset
 
         for letter_group in self.strokes.values():
             for letter in letter_group:
                 letter['curve'].setVisible(False)
-        
+
         # reset model so changes become visivle
         self.modelReset.emit()
         self.set_preview(reset=False)
@@ -164,15 +164,16 @@ class StrokeList(QAbstractListModel):
             return None
 
     def setData(self, index, value, role):
-        # Update stroke 'checked' status 
+        # Update stroke 'checked' status
         row = index.row()
         if role == Qt.CheckStateRole:
-             self.stroke_group[row]['checked'] = value
-             self.set_preview()
+            self.stroke_group[row]['checked'] = value
+            self.set_preview()
         return True
 
     def flags(self, index):
         return Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
+
 
 class CoreCreator(QWidget):
     """Main module's widget"""
@@ -195,7 +196,7 @@ class CoreCreator(QWidget):
         letters = self.stroke_list.make_dict(all_letters=True)
         core = make_core(letters, segmentation)
         dump_data = {'segmentation': segmentation}
-        dump_data['letters'] = {key: data.tolist() for key, data in core.items()}
+        dump_data['letters'] = {key: val.tolist() for key, val in core.items()}
         with open('tetra_v2.txt', 'w') as f:
             json.dump(dump_data, f, indent=1)
 
@@ -209,7 +210,7 @@ class CoreCreator(QWidget):
         self.resize(800, 480)
         self.grid = QGridLayout(self)
 
-        self.display = pg.PlotWidget(name='st', background='w') 
+        self.display = pg.PlotWidget(name='st', background='w')
 
         add_circles(self.display, (1, 2))
 
@@ -224,10 +225,6 @@ class CoreCreator(QWidget):
 
         self.letter_selector = QComboBox(self)
         self.grid.addWidget(self.letter_selector, 1, 2, 1, 2)
-
-        # self.relative_chk = QCheckBox(self)
-        # self.relative_chk.setText('Relative coords')
-        # self.grid.addWidget(self.relative_chk, 2, 0, 1, 1)
 
         self.preview_btn = QPushButton(self)
         self.preview_btn.setText('Preview mean')
@@ -246,11 +243,7 @@ class CoreCreator(QWidget):
 
 
 if __name__ == '__main__':
-    
     app = QApplication(sys.argv)
-
     cc = CoreCreator('learned')
-
     cc.show()
-
     sys.exit(app.exec_())

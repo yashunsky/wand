@@ -8,14 +8,15 @@ if __name__ == '__main__':
 else:
     import test.PsedoSerial as serial
 # uncomment next line to use virtual serial port
-#import test.PsedoSerial as serial
+import test.PsedoSerial as serial
 import sys
 from time import time
 
 import numpy as np
-from PySide.QtGui import QApplication, QWidget, QLabel
-from PySide.QtGui import QGridLayout, QComboBox, QFont
-from PySide.QtCore import QTimer
+
+from PyQt4.QtGui import QApplication, QWidget, QLabel
+from PyQt4.QtGui import QGridLayout, QComboBox, QFont
+from PyQt4.QtCore import QTimer
 
 from IMU import IMU
 from Selector import Selector

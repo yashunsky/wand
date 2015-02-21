@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from PySide.QtGui import QWidget, QApplication, QGridLayout
-from PySide.QtGui import QVBoxLayout
-from PySide.QtCore import QTimer
+from PyQt4.QtGui import QWidget, QApplication, QGridLayout
+from PyQt4.QtGui import QVBoxLayout
+from PyQt4.QtCore import QTimer
 
 import pyqtgraph as pg
 import numpy as np

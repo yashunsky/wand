@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from PySide.QtGui import QApplication, QPushButton, QLineEdit, QGridLayout, QWidget
+from PyQt4.QtGui import QApplication, QPushButton, QLineEdit, QGridLayout, QWidget
 
 from stroke_widget import StrokeWidget
 

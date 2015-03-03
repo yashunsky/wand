@@ -8,10 +8,10 @@ import sys
 from os.path import join, isfile, basename
 from os import listdir
 
-from PySide.QtCore import QAbstractListModel
-from PySide.QtCore import Qt
-from PySide.QtGui import QApplication, QWidget, QGridLayout, QComboBox
-from PySide.QtGui import QPushButton, QLineEdit, QListView
+from PyQt4.QtCore import QAbstractListModel
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QApplication, QWidget, QGridLayout, QComboBox
+from PyQt4.QtGui import QPushButton, QLineEdit, QListView
 
 import numpy as np
 import pyqtgraph as pg
@@ -128,7 +128,7 @@ class StrokeList(QAbstractListModel):
         '''Select one list by key-letter'''
         # Choose the right list from the strokes dict
 
-        self.key_letter = letter
+        self.key_letter = str(letter)
         if self.key_letter in self.strokes:
             self.stroke_group = self.strokes[self.key_letter]
         else:

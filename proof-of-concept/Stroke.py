@@ -43,6 +43,27 @@ class Stroke(object):
 
         self.on_done = None
 
+        #calculating sroke global size vars
+        self.positions_range = None
+        self.reset_size()
+
+    def process_size(self, delay, acceleration):
+        # if np.linalg.norm(acceleration) < 4:
+        #     acceleration = np.array([0, 0, 0])
+        self.speed = self.speed + acceleration * delay
+        self.position = self.position + self.speed * delay + acceleration * (delay*delay) /2
+
+        if self.positions_range is None:
+            self.positions_range = np.array([self.position, self.position])
+        else:
+            self.positions_range[0] = np.min(np.array((self.positions_range[0], self.position)), axis=0)
+            self.positions_range[1] = np.max(np.array((self.positions_range[0], self.position)), axis=0)
+
+    def reset_size(self):     
+        self.positions_range = None
+        self.position = np.array([0, 0, 0])
+        self.speed = np.array([0, 0, 0])
+
     def set_data_sphere(self,Yr,g):
         # sign magic for compatibility with previus data
         # TO BE REMOVED
@@ -62,6 +83,7 @@ class Stroke(object):
                 x /= np.linalg.norm(x)
 
                 self.M = np.matrix(np.vstack((x,y,z)))
+                self.reset_size()
 
             #rotate vector to local system
             Yt = np.array([Yr]).T
@@ -86,6 +108,9 @@ class Stroke(object):
                     self.on_done(self.data)
                 self.data = np.array(())
                 self.widget.reset_stroke()
+                if self.positions_range is not None:
+                    print self.positions_range[1]-self.positions_range[0]  
+                self.reset_size()
                
 
 
@@ -98,6 +123,7 @@ class Stroke(object):
             
             if self.data.size == 0:
                 self.X_offset = np.arctan2(Yr[0],Yr[1])
+                self.reset_size()
 
             self.X_rad = np.arctan2(Yr[0],Yr[1]) - self.X_offset
 
@@ -132,7 +158,8 @@ class Stroke(object):
                     self.on_done(self.data)
                 self.data = np.array(())
                 self.widget.reset_stroke()
-                self.X_offset = 0                
+                self.X_offset = 0
+                self.reset_size()           
 
     def set_data(self,Yr,g):
         #self.set_data_radian(Yr, g)

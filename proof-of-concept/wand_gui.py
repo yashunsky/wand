@@ -44,7 +44,6 @@ PROCESS_INTERVAL = 100 #ms
 
 ACCELERATION_RESET = 6000 #conventional units
 
-
 class Listener(QWidget):
     def __init__(self, core_file_name):
         super(Listener, self).__init__()
@@ -71,6 +70,7 @@ class Listener(QWidget):
         self.data_buffer = ''
 
         self.init_selector()
+
 
     def setup_ui(self):
         self.resize(500, 500)
@@ -158,8 +158,10 @@ class Listener(QWidget):
 
                 Yr = self.imu.get_y_direction()
                 a = self.imu.get_global_acceleration()
-                print a
+                
                 self.stroke.set_data(Yr, gyro)
+
+                self.stroke.process_size(data[0], a)
 
     def execute_spell(self):
         self.out.setText('')

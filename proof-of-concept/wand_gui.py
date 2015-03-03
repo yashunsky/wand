@@ -8,7 +8,7 @@ if __name__ == '__main__':
 else:
     import test.PsedoSerial as serial
 # uncomment next line to use virtual serial port
-import test.PsedoSerial as serial
+#import test.PsedoSerial as serial
 import sys
 from time import time
 
@@ -30,7 +30,7 @@ PLATFORM_SPECIFIC_QUOTIENTS = {
     'arduino': ((-504, -615, -564), (597, 488, 384))
 }
 
-SERIAL_PORT = '/dev/ttyUSB0'
+SERIAL_PORT = '/dev/tty.SLAB_USBtoUART' #'/dev/ttyUSB0'
 BAUDE_RATE = 115200
 CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'

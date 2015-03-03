@@ -31,6 +31,7 @@ import numpy as np
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
 GRAVITY = 256
+G = 9.81
 GYRO_GAIN = 0.0012217304763960308  # np.radians(0.07) TODO: Check 0.064
 KP_ROLLPITCH = 0.02
 KI_ROLLPITCH = 0.00002
@@ -61,6 +62,8 @@ class IMU(object):
         self.counter = 0
 
         self.in_calibration = True
+
+        self.acceleration = np.array([0, 0, GRAVITY])
 
     def parse_data(self, data):
         delay = data[0]
@@ -100,6 +103,10 @@ class IMU(object):
     def main_loop(self, delay, sensors):
         self.counter += 1
         sensors = self.offset_sensors(sensors)
+
+        # acceleration shoud be accecible from outside
+        self.acceleration = sensors['accelerometer']
+        
         if self.counter > 5:
             self.counter = 0
             self.mag_heading = self.compass_heading(
@@ -232,3 +239,12 @@ class IMU(object):
 
     def get_y_direction(self):
         return self.dcm_matrix[:, 1].A1
+
+    def get_global_acceleration(self):
+        local_a = np.matrix([self.acceleration])
+        global_a = (local_a*self.dcm_matrix).A1 / GRAVITY
+        global_a = global_a - np.array([0, 0, 1])
+        global_a = global_a * G
+
+
+        return global_a

@@ -157,6 +157,8 @@ class Listener(QWidget):
                     self.execute_spell()
 
                 Yr = self.imu.get_y_direction()
+                a = self.imu.get_global_acceleration()
+                print a
                 self.stroke.set_data(Yr, gyro)
 
     def execute_spell(self):

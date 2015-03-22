@@ -42,6 +42,9 @@ MAGNETS_OFFSET = 0.5
 
 CALIBRATION_LENGTH = 32  # In cycles
 
+ACCELEROMETER_DIVIATION = 2
+GYROSCOPE_DIVIATION = 3
+
 
 class IMU(object):
     def __init__(self, magnet_boundaries):
@@ -65,6 +68,9 @@ class IMU(object):
 
         self.acceleration = np.array([0, 0, GRAVITY])
 
+        self.a_stack = np.array([0, 0, 0])
+        self.g_stack = np.array([0, 0, 0])
+
     def parse_data(self, data):
         delay = data[0]
         accelerometer_readings = np.array(data[1:4]) / ACCELEROMETER_SCALE
@@ -79,27 +85,44 @@ class IMU(object):
     def calc(self, data):
         delay, sensors = self.parse_data(data)
 
-        if self.in_calibration:
-            self.calibration_loop(sensors)
-        else:
+        self.recalibration(sensors)
+        
+        if not self.in_calibration:
             self.main_loop(delay, sensors)
 
-    def calibration_loop(self, sensors):
-        if self.counter < CALIBRATION_LENGTH:
-            self.gyroscope_readings_offset += sensors['gyroscope']
-            self.accelerometer_readings_offset += sensors['accelerometer']
-            self.counter += 1
-        else:
-            self.gyroscope_readings_offset /= CALIBRATION_LENGTH
-            self.accelerometer_readings_offset /= CALIBRATION_LENGTH
+    def recalibration(self, sensors):
+        '''Recalibrate the device if it wasn't significatly moving
+        within last CALIBRATION_LENGTH cycles'''
 
-            g_axis = (self.accelerometer_readings_offset /
-                      np.linalg.norm(self.accelerometer_readings_offset))
-            self.accelerometer_readings_offset -= GRAVITY * g_axis
+        self.a_stack = np.vstack((self.a_stack, 
+                                  sensors['accelerometer']))[-CALIBRATION_LENGTH:]
 
-            self.counter = 0
-            self.in_calibration = False
-            print 'calibration done'
+        self.g_stack = np.vstack((self.g_stack, 
+                                  sensors['gyroscope']))[-CALIBRATION_LENGTH:]
+
+        if len(self.a_stack) < CALIBRATION_LENGTH:
+            return
+        if len(self.g_stack) < CALIBRATION_LENGTH:
+            return
+
+        a_diviation = np.max(np.std(self.a_stack, axis=0))
+        g_diviation = np.max(np.std(self.g_stack, axis=0))
+
+        if a_diviation > ACCELEROMETER_DIVIATION:
+            return
+        if g_diviation > GYROSCOPE_DIVIATION:
+            return
+
+        self.gyroscope_readings_offset = np.mean(self.g_stack, axis=0)
+        self.accelerometer_readings_offset = np.mean(self.a_stack, axis=0)
+
+        g_axis = (self.accelerometer_readings_offset /
+                  np.linalg.norm(self.accelerometer_readings_offset))
+        self.accelerometer_readings_offset -= GRAVITY * g_axis
+
+        self.counter = 0
+        self.in_calibration = False
+        print 'calibration done'
 
     def main_loop(self, delay, sensors):
         self.counter += 1

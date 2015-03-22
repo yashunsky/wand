@@ -45,14 +45,16 @@ class Stroke(object):
 
         #calculating sroke global size vars
         self.positions_range = None
+        self.length = 0
         self.reset_size()
 
     def process_size(self, delay, acceleration):
         # if np.linalg.norm(acceleration) < 4:
         #     acceleration = np.array([0, 0, 0])
         self.speed = self.speed + acceleration * delay
-        self.position = self.position + self.speed * delay + acceleration * (delay*delay) /2
-
+        delta_p = self.speed * delay + acceleration * (delay*delay) /2
+        self.position = self.position + delta_p
+        self.length += np.linalg.norm(delta_p)
         if self.positions_range is None:
             self.positions_range = np.array([self.position, self.position])
         else:
@@ -63,11 +65,10 @@ class Stroke(object):
         self.positions_range = None
         self.position = np.array([0, 0, 0])
         self.speed = np.array([0, 0, 0])
+        self.length = 0
+
 
     def set_data_sphere(self,Yr,g):
-        # sign magic for compatibility with previus data
-        # TO BE REMOVED
-        Yr = np.array(Yr) * np.array([1, -1, -1])
         self.gyro = g
         if self.gyro > self.gyro_min:
 
@@ -108,8 +109,9 @@ class Stroke(object):
                     self.on_done(self.data)
                 self.data = np.array(())
                 self.widget.reset_stroke()
-                if self.positions_range is not None:
-                    print self.positions_range[1]-self.positions_range[0]  
+                # if self.positions_range is not None:
+                #     print self.positions_range[1]-self.positions_range[0]
+                print self.length
                 self.reset_size()
                
 

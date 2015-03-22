@@ -70,6 +70,7 @@ class IMU(object):
         accelerometer_readings = np.array(data[1:4]) / ACCELEROMETER_SCALE
         magnetometer_readings = np.array(data[4:7])
         gyroscope_readings = np.array(data[7:10])
+
         sensors = {'accelerometer': accelerometer_readings,
                    'magnetometer': magnetometer_readings,
                    'gyroscope': gyroscope_readings}
@@ -153,7 +154,8 @@ class IMU(object):
         return (gyro_readings - gyro_readings_offset) * GYRO_GAIN
 
     def offset_accel(self, accel_readings, accel_readings_offset):
-        return accel_readings_offset - accel_readings
+        return accel_readings - accel_readings_offset
+        #return accel_readings_offset - accel_readings ### has it realy passed tests with THAT?
 
     def renorm(self, array):
         renorm = 0.5 * (3 - np.dot(array, array))
@@ -242,9 +244,8 @@ class IMU(object):
 
     def get_global_acceleration(self):
         local_a = np.matrix([self.acceleration])
-        global_a = (local_a*self.dcm_matrix).A1 / GRAVITY
+        global_a = (local_a*self.dcm_matrix.T).A1 / GRAVITY
         global_a = global_a - np.array([0, 0, 1])
         global_a = global_a * G
-
 
         return global_a

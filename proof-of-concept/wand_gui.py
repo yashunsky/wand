@@ -37,12 +37,12 @@ LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
 DISPLAY_TIMEOUT = 1000 #ms
-ACCELERATION_TIME_CONST = 0.5 #s
+ACCELERATION_TIME_CONST = 0.2 #s
 
 SERIAL_INTERVAL = 20 #ms
 PROCESS_INTERVAL = 100 #ms
 
-ACCELERATION_RESET = 6000 #conventional units
+ACCELERATION_RESET = 10 #conventional units
 
 class Listener(QWidget):
     def __init__(self, core_file_name):
@@ -149,19 +149,20 @@ class Listener(QWidget):
             if data[0] < MAX_DATA_TIMELAPSE:
                 self.imu.calc(data)
                 gyro = np.linalg.norm(np.array([data[7:]]))
-                accel = np.linalg.norm(np.array([data[:3]]))
+                accel = self.imu.get_global_acceleration()
 
                 accel = self.acceleration_filter.set_input(accel, data[0])
 
-                if accel > ACCELERATION_RESET:
+                accel_magnitude = np.linalg.norm(accel)
+
+                if accel_magnitude > ACCELERATION_RESET:
                     self.execute_spell()
 
                 Yr = self.imu.get_y_direction()
-                a = self.imu.get_global_acceleration()
-                
+
                 self.stroke.set_data(Yr, gyro)
 
-                self.stroke.process_size(data[0], a)
+                self.stroke.process_size(data[0], accel)
 
     def execute_spell(self):
         self.out.setText('')

@@ -43,7 +43,7 @@ MAGNETS_OFFSET = 0.5
 CALIBRATION_LENGTH = 32  # In cycles
 
 ACCELEROMETER_DIVIATION = 2
-GYROSCOPE_DIVIATION = 3
+GYROSCOPE_DIVIATION = 4
 
 
 class IMU(object):
@@ -61,8 +61,6 @@ class IMU(object):
         self.angles = {'roll': 0, 'pitch': 0, 'yaw': 0}
 
         self.dcm_matrix = np.matrix(np.eye(3))
-
-        self.counter = 0
 
         self.in_calibration = True
 
@@ -120,21 +118,16 @@ class IMU(object):
                   np.linalg.norm(self.accelerometer_readings_offset))
         self.accelerometer_readings_offset -= GRAVITY * g_axis
 
-        self.counter = 0
         self.in_calibration = False
-        print 'calibration done'
 
     def main_loop(self, delay, sensors):
-        self.counter += 1
         sensors = self.offset_sensors(sensors)
 
         # acceleration shoud be accecible from outside
         self.acceleration = sensors['accelerometer']
         
-        if self.counter > 5:
-            self.counter = 0
-            self.mag_heading = self.compass_heading(
-                sensors['magnetometer'], self.angles, self.magnet_boundaries)
+        self.mag_heading = self.compass_heading(
+            sensors['magnetometer'], self.angles, self.magnet_boundaries)
 
         self.dcm_matrix = self.matrix_update(
             self.dcm_matrix, sensors['gyroscope'], delay,

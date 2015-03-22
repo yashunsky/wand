@@ -44,7 +44,7 @@ PROCESS_INTERVAL = 100 #ms
 
 ACCELERATION_RESET = 10 #conventional units
 
-MIN_DIMENTION = 1 #conventional units
+MIN_DIMENTION = 2 #conventional units
 
 class Listener(QWidget):
     def __init__(self, core_file_name):

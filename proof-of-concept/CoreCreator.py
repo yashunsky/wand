@@ -254,8 +254,8 @@ class CoreCreator(QWidget):
         letters = self.stroke_list.make_dict(all_letters=True)
         core = make_core(letters, segmentation)
         dump_data = {'segmentation': segmentation}
-        dump_data['letters'] = {key: val.tolist() for key, val in core.items()}
-        with open('tetra_v2.txt', 'w') as f:
+        dump_data['letters'] = {key: val.tolist() for key, val in core.items() if key != '_'}
+        with open('hs.txt', 'w') as f:
             json.dump(dump_data, f, indent=1)
 
     def select_letter(self):

@@ -32,7 +32,7 @@ PLATFORM_SPECIFIC_QUOTIENTS = {
 
 SERIAL_PORT = '/dev/tty.SLAB_USBtoUART' #'/dev/ttyUSB0'
 BAUDE_RATE = 115200
-CORE_FILENAME = 'tetra_v2.txt'
+CORE_FILENAME = 'hs.txt' #'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
@@ -113,7 +113,7 @@ class Listener(QWidget):
         self.letter_selector.currentIndexChanged.connect(self.set_background)
 
     def set_background(self):
-        letter = self.letter_selector.currentText()
+        letter = str(self.letter_selector.currentText())
         self.display.set_background(self.core_file_name, letter)
 
     def store_stroke(self, key, stroke, existing=True):

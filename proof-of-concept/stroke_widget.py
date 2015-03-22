@@ -85,6 +85,7 @@ class StrokeWidget(QWidget):
             data = json.load(f)
         letters_list = data['letters']
         circles = np.array([])
+
         if letter in letters_list:
             st = np.array(letters_list[letter])
 

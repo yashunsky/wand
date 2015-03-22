@@ -6,7 +6,7 @@
 import json
 import sys
 from os.path import join, isfile, basename
-from os import listdir
+from os import listdir, rename
 
 from PyQt4.QtCore import QAbstractListModel
 from PyQt4.QtCore import Qt
@@ -45,7 +45,11 @@ def get_letters(path):
     files = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
     letters = {}
     for f in files:
-        data = np.loadtxt(f)
+        try:
+            data = np.loadtxt(f)
+        except ValueError:
+            # unknown file opend by mistake
+            continue
         filename = basename(f)
         key = filename[0]
         if not key in letters:
@@ -174,15 +178,33 @@ class StrokeList(QAbstractListModel):
     def flags(self, index):
         return Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
 
+    def change_stroke_key(self, index, new_key, path):
+        row = index.row()
+        data = self.stroke_group[row]
+
+        del self.strokes[self.key_letter][row]
+        if not self.strokes[self.key_letter]:
+            del self.strokes[self.key_letter]
+            self.key_letter = ''
+        if not new_key in self.strokes:
+            self.strokes[new_key] = []
+        self.strokes[new_key].append(data)
+
+        new_filename = new_key + data['filename'][1:]
+        rename(join(path, data['filename']), join(path, new_filename))
+        data['filename'] = new_filename
+
+        self.set_key_letter(self.key_letter)
 
 class CoreCreator(QWidget):
     """Main module's widget"""
     def __init__(self, path):
         super(CoreCreator, self).__init__()
+        self.path = path
         self.setup_ui()
         self.stroke_list = StrokeList(get_letters(path), self.display)
 
-        self.letter_selector.addItems(['_'] + self.stroke_list.strokes.keys())
+        self.letter_selector.addItems(['clear'] + self.stroke_list.strokes.keys())
         self.list_view.setModel(self.stroke_list)
 
         self.letter_selector.currentIndexChanged.connect(self.select_letter)
@@ -190,6 +212,21 @@ class CoreCreator(QWidget):
         self.preview_btn.clicked.connect(self.stroke_list.set_preview)
 
         self.create_core_btn.clicked.connect(self.create_core)
+
+        self.set_letter_btn.clicked.connect(self.change_letter)
+
+    def change_letter(self):
+        new_key = str(self.letter_edt.text())
+
+        indexes = self.list_view.selectedIndexes()
+
+        if new_key and indexes:
+            new_key = new_key[0]
+            if new_key not in self.stroke_list.strokes:
+                # TODO: should be done with signal-slot
+                self.letter_selector.addItem(new_key)
+            self.stroke_list.change_stroke_key(indexes[0], new_key, self.path)
+
 
     def create_core(self):
         segmentation = SEGMENTATION

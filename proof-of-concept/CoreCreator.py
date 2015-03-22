@@ -18,7 +18,7 @@ import pyqtgraph as pg
 from unify_definition import unify_stroke
 
 
-SEGMENTATION = 32
+SEGMENTATION = 64
 
 
 def make_core(letters, points):
@@ -204,7 +204,7 @@ class CoreCreator(QWidget):
         self.setup_ui()
         self.stroke_list = StrokeList(get_letters(path), self.display)
 
-        self.letter_selector.addItems(['clear'] + self.stroke_list.strokes.keys())
+        self.letter_selector.addItems([''] + self.stroke_list.strokes.keys())
         self.list_view.setModel(self.stroke_list)
 
         self.letter_selector.currentIndexChanged.connect(self.select_letter)

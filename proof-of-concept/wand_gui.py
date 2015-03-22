@@ -34,6 +34,7 @@ SERIAL_PORT = '/dev/tty.SLAB_USBtoUART' #'/dev/ttyUSB0'
 BAUDE_RATE = 115200
 CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
+NEW_STROKES_FOLDER = 'new_strokes'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
 DISPLAY_TIMEOUT = 1000 #ms
@@ -107,6 +108,7 @@ class Listener(QWidget):
 
     def init_selector(self):
         sel_lines = self.selector.letters_dict.keys()
+        sel_lines.insert(0, 'new strokes')
         sel_lines.insert(0, 'free run')
         self.letter_selector.addItems(sel_lines)
         self.letter_selector.currentIndexChanged.connect(self.set_background)
@@ -115,12 +117,17 @@ class Listener(QWidget):
         letter = self.letter_selector.currentText()
         self.display.set_background(self.core_file_name, letter)
 
-    def store_stroke(self, key, stroke):
-        self.display.set_background(self.core_file_name, key, color='g')
-        file_name = '{key}{time}.txt'.format(key=key, time=int(time()))
-        file_path = os.path.join(LEARNED_FOLDER, file_name)
-        np.savetxt(file_path, stroke)
-        self.display_timer.start()
+    def store_stroke(self, key, stroke, existing=True):
+        if existing:
+            self.display.set_background(self.core_file_name, key, color='g')
+            file_name = '{key}{time}.txt'.format(key=key, time=int(time()))
+            file_path = os.path.join(LEARNED_FOLDER, file_name)
+            np.savetxt(file_path, stroke)
+            self.display_timer.start()
+        else:
+            file_name = '{time}.txt'.format(time=int(time()))
+            file_path = os.path.join(NEW_STROKES_FOLDER, file_name)
+            np.savetxt(file_path, stroke)            
 
     def get_stroke(self, data):
         stroke = data['stroke']
@@ -128,11 +135,16 @@ class Listener(QWidget):
         if dimention < MIN_DIMENTION:
             print 'too small'
             return
+
+        letter = self.letter_selector.currentText()
+        if letter == 'new strokes':
+            self.store_stroke(None, stroke, existing=False)
+            print 'recorded'
+
         try:
             letters = self.selector.check_stroke(stroke)
         except: #TODO: check unify_stroke
             return
-        letter = self.letter_selector.currentText()
 
         if letters:
             self.out.setText(self.out.text()+letters[0])
@@ -171,6 +183,8 @@ class Listener(QWidget):
 
                 self.stroke.process_size(data[0], accel)
 
+        self.setVisible(not self.imu.in_calibration)
+
     def execute_spell(self):
         self.out.setText('')
 
@@ -206,5 +220,6 @@ class Listener(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     listener = Listener(CORE_FILENAME)
+    print 'calibration started'
     listener.show()
     sys.exit(app.exec_())

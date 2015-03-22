@@ -34,7 +34,6 @@ SERIAL_PORT = '/dev/tty.SLAB_USBtoUART' #'/dev/ttyUSB0'
 BAUDE_RATE = 115200
 CORE_FILENAME = 'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
-NEW_STROKES_FOLDER = 'new_strokes'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'
 DISPLAY_TIMEOUT = 1000 #ms
@@ -45,7 +44,7 @@ PROCESS_INTERVAL = 100 #ms
 
 ACCELERATION_RESET = 10 #conventional units
 
-MIN_DIMENTION = 2 #conventional units
+MIN_DIMENTION = 1.5 #conventional units
 
 class Listener(QWidget):
     def __init__(self, core_file_name):
@@ -118,16 +117,12 @@ class Listener(QWidget):
         self.display.set_background(self.core_file_name, letter)
 
     def store_stroke(self, key, stroke, existing=True):
+        file_name = '{key}{time}.txt'.format(key=key, time=int(time()))
+        file_path = os.path.join(LEARNED_FOLDER, file_name)
+        np.savetxt(file_path, stroke)
         if existing:
             self.display.set_background(self.core_file_name, key, color='g')
-            file_name = '{key}{time}.txt'.format(key=key, time=int(time()))
-            file_path = os.path.join(LEARNED_FOLDER, file_name)
-            np.savetxt(file_path, stroke)
-            self.display_timer.start()
-        else:
-            file_name = '{time}.txt'.format(time=int(time()))
-            file_path = os.path.join(NEW_STROKES_FOLDER, file_name)
-            np.savetxt(file_path, stroke)            
+            self.display_timer.start()        
 
     def get_stroke(self, data):
         stroke = data['stroke']
@@ -138,7 +133,7 @@ class Listener(QWidget):
 
         letter = self.letter_selector.currentText()
         if letter == 'new strokes':
-            self.store_stroke(None, stroke, existing=False)
+            self.store_stroke('_', stroke, existing=False)
             print 'recorded'
 
         try:

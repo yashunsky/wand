@@ -75,6 +75,25 @@ def add_circles(plot, radiuses, segmentation=32):
         circle_curve = pg.PlotCurveItem(x=x*r, y=y*r, pen=pen)
         plot.addItem(circle_curve)
 
+class KeyList(QAbstractListModel):
+    def __init__(self, keys):
+        super(KeyList, self).__init__()
+        self.keys = [''] + keys
+
+    def set_keys(self, keys):
+        self.keys = [''] + keys
+        self.modelReset.emit()
+
+    def rowCount(self, *args):
+        return len(self.keys)
+
+    def data(self, index, role):
+        row = index.row()
+        # show stroke filename for display
+        if role == Qt.DisplayRole:
+            return self.keys[row]
+        else:
+            return None
 
 class StrokeList(QAbstractListModel):
     """Model, containing strokes and there curve-representation"""
@@ -101,6 +120,8 @@ class StrokeList(QAbstractListModel):
         self.plot.addItem(self.preview_stroke)
 
         self.set_preview(reset=True)
+
+        self.keys_model = KeyList(self.strokes.keys())
 
     def set_preview(self, reset=False):
 
@@ -196,6 +217,8 @@ class StrokeList(QAbstractListModel):
 
         self.set_key_letter(self.key_letter)
 
+        self.keys_model.set_keys(self.strokes.keys())
+
 class CoreCreator(QWidget):
     """Main module's widget"""
     def __init__(self, path):
@@ -204,7 +227,8 @@ class CoreCreator(QWidget):
         self.setup_ui()
         self.stroke_list = StrokeList(get_letters(path), self.display)
 
-        self.letter_selector.addItems([''] + self.stroke_list.strokes.keys())
+        self.letter_selector.setModel(self.stroke_list.keys_model)
+
         self.list_view.setModel(self.stroke_list)
 
         self.letter_selector.currentIndexChanged.connect(self.select_letter)
@@ -222,9 +246,6 @@ class CoreCreator(QWidget):
 
         if new_key and indexes:
             new_key = new_key[0]
-            if new_key not in self.stroke_list.strokes:
-                # TODO: should be done with signal-slot
-                self.letter_selector.addItem(new_key)
             self.stroke_list.change_stroke_key(indexes[0], new_key, self.path)
 
 

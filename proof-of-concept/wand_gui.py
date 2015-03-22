@@ -44,6 +44,8 @@ PROCESS_INTERVAL = 100 #ms
 
 ACCELERATION_RESET = 10 #conventional units
 
+MIN_DIMENTION = 1 #conventional units
+
 class Listener(QWidget):
     def __init__(self, core_file_name):
         super(Listener, self).__init__()
@@ -120,7 +122,12 @@ class Listener(QWidget):
         np.savetxt(file_path, stroke)
         self.display_timer.start()
 
-    def get_stroke(self, stroke):
+    def get_stroke(self, data):
+        stroke = data['stroke']
+        dimention = data['dimention']
+        if dimention < MIN_DIMENTION:
+            print 'too small'
+            return
         try:
             letters = self.selector.check_stroke(stroke)
         except: #TODO: check unify_stroke

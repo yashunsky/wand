@@ -45,7 +45,6 @@ class Stroke(object):
 
         #calculating sroke global size vars
         self.positions_range = None
-        self.length = 0
         self.reset_size()
 
     def process_size(self, delay, acceleration):
@@ -54,19 +53,15 @@ class Stroke(object):
         self.speed = self.speed + acceleration * delay
         delta_p = self.speed * delay + acceleration * (delay*delay) /2
         self.position = self.position + delta_p
-        self.length += np.linalg.norm(delta_p)
         if self.positions_range is None:
-            self.positions_range = np.array([self.position, self.position])
+            self.positions_range = np.array([self.position])
         else:
-            self.positions_range[0] = np.min(np.array((self.positions_range[0], self.position)), axis=0)
-            self.positions_range[1] = np.max(np.array((self.positions_range[0], self.position)), axis=0)
+            self.positions_range = np.vstack((self.positions_range, self.position))
 
     def reset_size(self):     
         self.positions_range = None
         self.position = np.array([0, 0, 0])
         self.speed = np.array([0, 0, 0])
-        self.length = 0
-
 
     def set_data_sphere(self,Yr,g):
         self.gyro = g
@@ -104,14 +99,17 @@ class Stroke(object):
         else:
             self.timer -= 1
             if self.timer == 0:
+                dimention = 0
+                if self.positions_range is not None:
+                    data = self.positions_range
+                    dimention = np.linalg.norm(np.max(data, axis=0) - np.min(data, axis=0))
+
                 if self.on_done is not None:
-                    pass
-                    self.on_done(self.data)
+  
+                    self.on_done({'stroke': self.data, 'dimention': dimention})
+
                 self.data = np.array(())
                 self.widget.reset_stroke()
-                # if self.positions_range is not None:
-                #     print self.positions_range[1]-self.positions_range[0]
-                print self.length
                 self.reset_size()
                
 

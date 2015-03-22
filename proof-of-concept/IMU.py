@@ -155,7 +155,6 @@ class IMU(object):
 
     def offset_accel(self, accel_readings, accel_readings_offset):
         return accel_readings - accel_readings_offset
-        #return accel_readings_offset - accel_readings ### has it realy passed tests with THAT?
 
     def renorm(self, array):
         renorm = 0.5 * (3 - np.dot(array, array))

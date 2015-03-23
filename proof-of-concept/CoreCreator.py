@@ -17,6 +17,8 @@ import numpy as np
 import pyqtgraph as pg
 from unify_definition import unify_stroke
 
+from preview3d import show_strokes_3d
+
 
 SEGMENTATION = 64
 
@@ -123,6 +125,15 @@ class StrokeList(QAbstractListModel):
 
         self.keys_model = KeyList(self.strokes.keys())
 
+    def make_preview(self):
+        preview = None
+        letters = self.make_dict(all_letters=False)
+
+        preview_set = make_core(letters, SEGMENTATION)
+        if self.key_letter in preview_set:
+            preview = preview_set[self.key_letter]
+        return preview
+
     def set_preview(self, reset=False):
 
         pen = pg.mkPen(width=5, color=(255, 0, 0, 255))
@@ -131,12 +142,8 @@ class StrokeList(QAbstractListModel):
         if reset:
             x = y = np.array([0])
         else:
-            letters = self.make_dict(all_letters=False)
-
-            preview_set = make_core(letters, SEGMENTATION)
-            if self.key_letter in preview_set:
-                preview = preview_set[self.key_letter]
-            else:
+            preview = self.make_preview()
+            if preview is None:
                 return
             x, y = stereographic(preview[:, 0],
                                  preview[:, 1],
@@ -220,7 +227,9 @@ class StrokeList(QAbstractListModel):
         self.keys_model.set_keys(self.strokes.keys())
 
     def show_3d(self):
-        print ':)'
+        preview = self.make_preview()
+        if preview is not None:
+            show_strokes_3d(self.key_letter, self.stroke_group, preview)
 
 class CoreCreator(QWidget):
     """Main module's widget"""

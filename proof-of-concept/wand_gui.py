@@ -131,7 +131,7 @@ class Listener(QWidget):
             print 'too small'
             return
 
-        letter = self.letter_selector.currentText()
+        letter = str(self.letter_selector.currentText())
         if letter == 'new strokes':
             self.store_stroke('_', stroke, existing=False)
             print 'recorded'

@@ -11,7 +11,7 @@ class Selector(object):
 
         self.letters_dict = {}
         
-        self.offset = 5
+        self.offset = 0.5
         
         with open(path, 'r') as f:
             data = json.load(f)

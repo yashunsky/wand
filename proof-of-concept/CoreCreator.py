@@ -219,6 +219,9 @@ class StrokeList(QAbstractListModel):
 
         self.keys_model.set_keys(self.strokes.keys())
 
+    def show_3d(self):
+        print ':)'
+
 class CoreCreator(QWidget):
     """Main module's widget"""
     def __init__(self, path):
@@ -233,7 +236,7 @@ class CoreCreator(QWidget):
 
         self.letter_selector.currentIndexChanged.connect(self.select_letter)
 
-        self.preview_btn.clicked.connect(self.stroke_list.set_preview)
+        self.preview_btn.clicked.connect(self.stroke_list.show_3d)
 
         self.create_core_btn.clicked.connect(self.create_core)
 
@@ -285,7 +288,7 @@ class CoreCreator(QWidget):
         self.grid.addWidget(self.letter_selector, 1, 2, 1, 2)
 
         self.preview_btn = QPushButton(self)
-        self.preview_btn.setText('Preview mean')
+        self.preview_btn.setText('Preview 3D')
         self.grid.addWidget(self.preview_btn, 2, 0, 1, 1)
 
         self.create_core_btn = QPushButton(self)

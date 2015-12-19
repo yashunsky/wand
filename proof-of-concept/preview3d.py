@@ -52,3 +52,14 @@ def show_strokes_3d(key,strokes, mean_stroke):
     # xgrid.rotate(90, 0, 1, 0)
     # ygrid.rotate(90, 1, 0, 0)
 
+    print 'var geometry = new THREE.Geometry();\ngeometry.vertices.push(\n'
+    for point in pos:
+        print 'new THREE.Vector3(%f, %f, %f),' % (point[0], point[1], point[2])
+    print ');\ngeometry.colors.push(\n'
+    for color in colors:
+        hexc = hex(int(color[0]*255)*65536+
+       int(color[1]*255)*256+
+       int(color[2]*255))
+
+        print 'new THREE.Color( %s ),' % hexc
+    print ');'

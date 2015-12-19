@@ -22,6 +22,8 @@ from preview3d import show_strokes_3d
 
 SEGMENTATION = 64
 
+CORE_NAME = 'alphabet.txt'
+
 
 def make_core(letters, points):
     core = {}
@@ -267,7 +269,7 @@ class CoreCreator(QWidget):
         core = make_core(letters, segmentation)
         dump_data = {'segmentation': segmentation}
         dump_data['letters'] = {key: val.tolist() for key, val in core.items() if key != '_'}
-        with open('hs.txt', 'w') as f:
+        with open(CORE_NAME, 'w') as f:
             json.dump(dump_data, f, indent=1)
 
     def select_letter(self):

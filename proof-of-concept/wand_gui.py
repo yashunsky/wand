@@ -32,7 +32,7 @@ PLATFORM_SPECIFIC_QUOTIENTS = {
 
 SERIAL_PORT = '/dev/tty.SLAB_USBtoUART' #'/dev/ttyUSB0'
 BAUDE_RATE = 115200
-CORE_FILENAME = 'mirror_x.txt' #'hs.txt' #'tetra_v2.txt'
+CORE_FILENAME = 'alphabet.txt' #'tetra_v2.txt'
 LEARNED_FOLDER = 'learned'
 MAX_DATA_TIMELAPSE = 0.05 #s
 BUFFER_DELIMITER = '\r\n'

@@ -18,7 +18,7 @@ import pyqtgraph as pg
 from unify_definition import unify_stroke
 
 
-SEGMENTATION = 64
+SEGMENTATION = 128
 
 CORE_NAME = 'generation.json'
 

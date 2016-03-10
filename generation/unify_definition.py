@@ -4,10 +4,8 @@ import numpy as np
 
 
 def unify_stroke(stroke, points_count):
-
     s_delta = np.diff(stroke, axis=0)
-    s_length = np.sqrt(s_delta[:, 0] ** 2 + s_delta[:, 1] ** 2)
-
+    s_length = np.linalg.norm(s_delta, axis=1)
     stroke_lengths = np.cumsum(s_length)
 
     stroke_lengths = np.hstack((np.array(0), stroke_lengths))
@@ -37,7 +35,7 @@ def unify_stroke(stroke, points_count):
     return new_stroke
 
 
-def check_stroke(stroke, description_, offset):
+def check_stroke(stroke, description_):
     if not isinstance(description_, np.ndarray):
         description = np.array(description_)
     else:
@@ -46,13 +44,17 @@ def check_stroke(stroke, description_, offset):
     delta = stroke - description[:, :-1]
     radius = np.linalg.norm(delta, axis=1)
 
-    return np.max(radius / (description[:, -1] * (1. + offset)))
+    error = radius - description[:, -1]
+
+    error = error * (error > 0)
+
+    return np.std(error)
 
 
-def get_letter(stroke, segmentation, letters, offset):
+def get_letter(stroke, segmentation, letters):
     u_st = unify_stroke(stroke, segmentation)
 
-    result = [(key, check_stroke(u_st, letter, offset))
+    result = [(key, check_stroke(u_st, letter))
               for key, letter in letters.items()]
 
     result.sort(key=lambda x: x[1])

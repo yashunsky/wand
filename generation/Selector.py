@@ -6,13 +6,12 @@ from unify_definition import get_letter
 
 import json
 
+
 class Selector(object):
     def __init__(self, path):
 
         self.letters_dict = {}
-        
-        self.offset = 0.5
-        
+
         with open(path, 'r') as f:
             data = json.load(f)
             letters_lists = data['letters']
@@ -20,11 +19,6 @@ class Selector(object):
                 self.letters_dict[key] = np.array(item)
             self.segmentation = data['segmentation']
 
-        
     def check_stroke(self, stroke):
-        letters = get_letter(stroke, self.segmentation, self.letters_dict, self.offset)
+        letters = get_letter(stroke, self.segmentation, self.letters_dict)
         return letters
-
-
-
-

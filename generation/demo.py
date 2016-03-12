@@ -35,7 +35,7 @@ MIN_STROKE_LENGTH = 20
 
 MIN_DIMENTION = 1.0  # conventional units
 
-COMPARE_LIMIT = 3.0
+COMPARE_LIMIT = 1.5
 
 CORE_STROKES_FILE = 'generation.json'
 CORE_STROKES_NAMES = 'stroke_names.json'
@@ -122,7 +122,8 @@ class StrokeSplitter(AbstractStrokeSplitter):
 
             main_letter = letters[0][0]
 
-            if letters[0][1] > COMPARE_LIMIT:
+            if (letters[0][1] != 0 and
+               letters[1][1] / letters[0][1] < COMPARE_LIMIT):
                 self.widget.set_state(self.widget.state,
                                       u'ни на что не похоже')
                 self.widget.reset_state(self.widget.state, 2)

@@ -32,7 +32,8 @@ def unify_stroke(stroke, length):
     stroke_lengths = [0.0] * STROKE_MAX_LENGTH
 
     for i in xrange(1, length):
-        stroke_lengths[i] = stroke_lengths[i - 1] + get_dist(stroke[i - 1], stroke[i])
+        stroke_lengths[i] = stroke_lengths[i - 1] + get_dist(stroke[i - 1],
+                                                             stroke[i])
 
     step = stroke_lengths[length - 1] / (SEGMENTATION - 1)
 

@@ -134,10 +134,6 @@ class StrokeSplitter(AbstractStrokeSplitter):
             for name, seq in self.sequences.items():
                 if seq[:step] == temp_seq:
                     self.current_sequence = temp_seq
-                    # if step == 1:
-                    #     self.widget.set_state('init_done')
-                    #     self.widget.reset_state('wait_for_definition', 2)
-                    # elif step == 2:
                     if step == 2:
                         self.widget.set_state('definition_done', name)
                         self.widget.reset_state('wait_for_activate', 2)

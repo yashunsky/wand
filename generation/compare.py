@@ -8,7 +8,7 @@ import json
 CORE_STROKES_FILE = 'generation.json'
 CORE_STROKES_NAMES = 'stroke_names.json'
 
-CELL_WIDTH = 15
+CELL_WIDTH = 18
 
 
 if __name__ == '__main__':

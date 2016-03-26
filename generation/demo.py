@@ -110,10 +110,20 @@ class StrokeSplitter(AbstractStrokeSplitter):
         elif self.widget.mode == 'demo':
             letters = self.selector.check_stroke(data)
 
-            letters = [self.format_letter(self.replace_name(letter))
-                       for letter in letters]
+            # letters = [self.format_letter(self.replace_name(letter))
+            #            for letter in letters]
 
-            self.widget.set_state('demo_done', '\n'.join(letters))
+            # text = '\n'.join(letters)
+
+            letters = [self.replace_name(letter) for letter in letters]
+
+            text = letters[0][0]
+
+            if (letters[0][1] != 0 and
+               letters[1][1] / letters[0][1] < COMPARE_LIMIT):
+                text = u'фигню какую-то'
+
+            self.widget.set_state('demo_done', text)
             self.widget.reset_state('wait_for_demo', 5)
 
         elif self.widget.mode == 'init':

@@ -42,8 +42,7 @@ class Listener(object):
             return
 
         for line in data_pieces:
-            if self.callback is not None:
-                self.callback(self.parse_line(line))
+            self.callback(self.parse_line(line))
 
     def parse_line(self, line):
         data = [float(value) for value in line.replace(";", "").split()]
@@ -56,7 +55,9 @@ class Listener(object):
 
         delta = delta + TIME_STAMP_RANGE if delta < 0 else delta
 
-        return {"delta": delta * TIME_SCALE,
+        data[0] = delta * TIME_SCALE
+
+        return {"delta": data[0],
                 "acc": data[1:4],
                 "mag": data[4:7],
                 "gyro": data[7:10]}

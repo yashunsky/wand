@@ -3,16 +3,13 @@
 
 import unittest
 
-import unify_definition as ud
+import src_py.unify_definition as ud
 import c_wrap
 import numpy as np
 import json
 
-EPSILON = 0.00001
 
-
-def almoste_equal(a, b):
-    return a == b == 0 or abs(1 - a / b) < EPSILON
+from full_test import almoste_zero, almoste_equal
 
 
 STROKE_PATH = ('../train/1ae92ed9-e850-11e5-8105-ac87a30aa589/' +
@@ -45,7 +42,7 @@ class CheckUnifyDefinition(unittest.TestCase):
 
         diff = np.linalg.norm(c_data - np_data)
 
-        assert diff < EPSILON
+        assert almoste_zero(diff)
 
     def test_check_stroke(self):
 

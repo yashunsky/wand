@@ -37,8 +37,8 @@ MIN_DIMENTION = 1.0  # conventional units
 
 COMPARE_LIMIT = 1.5
 
-CORE_STROKES_FILE = 'generation.json'
-CORE_STROKES_NAMES = 'stroke_names.json'
+CORE_STROKES_FILE = '../generation.json'
+CORE_STROKES_NAMES = '../stroke_names.json'
 
 
 class IMUwithCallback(IMU):
@@ -98,7 +98,7 @@ class StrokeSplitter(AbstractStrokeSplitter):
             self.widget.reset_state(next_state, 2)
             return
 
-        folder = '%s/%s' % (self.widget.mode, self.widget.prefix)
+        folder = '../%s/%s' % (self.widget.mode, self.widget.prefix)
         if not path.exists(folder):
             makedirs(folder)
         np.savetxt('%s/%s.txt' % (folder, uuid1()), data)

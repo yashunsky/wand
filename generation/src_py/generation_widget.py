@@ -44,7 +44,7 @@ STATES = {'calibration': {'bg': 'white', 'fg': 'black',
           'demo_in_progress': {'bg': 'white', 'fg': 'black',
                                'message': u'жест выполняется'},
           'demo_done': {'bg': 'white', 'fg': 'black',
-                        'message': u'жест распознан'}}
+                        'message': u'жест похож на'}}
 
 
 class GenerationWidget(QWidget):

@@ -57,6 +57,9 @@ class Listener(object):
 
         data[0] = delta * TIME_SCALE
 
+        # with open('log2.log', 'a') as f:
+        #     f.write('\t'.join(map(str, data)) + '\n')
+
         return {"delta": data[0],
                 "acc": data[1:4],
                 "mag": data[4:7],

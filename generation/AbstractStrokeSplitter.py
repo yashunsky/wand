@@ -36,7 +36,13 @@ class AbstractStrokeSplitter(object):
 
     def set_data(self, heading, gyro):
         self.gyro = gyro
+
+        is_moving = None
+        stroke = None
+        dimention = None
+
         if self.gyro > self.gyro_min:
+            is_moving = True
             self.on_gyro(True)
             self.timer = self.gyro_time_out
 
@@ -76,12 +82,18 @@ class AbstractStrokeSplitter(object):
                                                np.min(data, axis=0))
 
                 if self.data.size / 3 > self.min_length:
+                    stroke = self.data
                     self.on_stroke_done(self.data, dimention)
                 else:
+                    is_moving = False
                     self.on_gyro(False)
                 self.data = np.array(())
 
-    def on_stroke_done(self, data):
+        return {'is_moving': is_moving,
+                'stroke': stroke,
+                'dimention': dimention}
+
+    def on_stroke_done(self, data, dimention):
         pass
 
     def on_gyro(self, is_moving):

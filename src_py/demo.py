@@ -98,7 +98,7 @@ class StrokeSplitter(AbstractStrokeSplitter):
             self.widget.reset_state(next_state, 2)
             return
 
-        folder = '../%s/%s' % (self.widget.mode, self.widget.prefix)
+        folder = '../raw/%s/%s' % (self.widget.mode, self.widget.prefix)
         if not path.exists(folder):
             makedirs(folder)
         np.savetxt('%s/%s.txt' % (folder, uuid1()), data)

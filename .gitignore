@@ -1,10 +1,8 @@
 *.pyc
 *.log
 
-/proof-of-concept/learned
-/proof-of-concept/new_strokes
-/generation/train
-/generation/init
-/generation/demo
+/raw/train
+/raw/init
+/raw/demo
 *.gch
 *.so

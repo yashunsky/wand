@@ -2341,11 +2341,12 @@
   "min_dimention": 1.0, 
   "acceleration_time_const": 0.2, 
   "states": {
-   "too_short": 2, 
-   "too_small": 3, 
-   "stroke_done": 1, 
-   "unsupported": 4, 
-   "in_action": 0
+   "stroke_done": 2, 
+   "too_short": 3, 
+   "unsupported": 5, 
+   "not_in_action": 1, 
+   "in_action": 0, 
+   "too_small": 4
   }, 
   "gyro_min": 1000
  }, 

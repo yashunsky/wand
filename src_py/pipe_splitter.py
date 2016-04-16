@@ -34,7 +34,7 @@ class PipeSplitter(AbstractStrokeSplitter):
 
         stroke = None
 
-        if splitter_data['is_moving'] is False:
+        if splitter_data['too_short'] is True:
             state = self.states['too_short']
 
         elif (splitter_data['dimention'] is not None and
@@ -44,5 +44,8 @@ class PipeSplitter(AbstractStrokeSplitter):
         elif splitter_data['stroke'] is not None:
             state = self.states['stroke_done']
             stroke = splitter_data['stroke']
+
+        elif splitter_data['is_moving'] is False:
+            state = self.states['not_in_action']
 
         return {'state': state, 'stroke': stroke}

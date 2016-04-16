@@ -52,7 +52,6 @@ class DemoWidget(GenerationWidget):
 
         self.state = None
         self.split_state = None
-        self.prev_split_state = None
 
         self.popup_state = None
 
@@ -83,6 +82,8 @@ class DemoWidget(GenerationWidget):
             elif 'idle' in self.state:
                 if self.split_state == 'in_action':
                     self.set_state('splitting', u'выполняется')
+                else:
+                    self.set_state(self.state)
             else:
                 self.set_state(self.state)
 
@@ -97,14 +98,13 @@ class DemoWidget(GenerationWidget):
 
             self.split_state = None if split_state is None else self.split_states[split_state]
 
-            if self.state != 'calibration' and self.prev_split_state != self.split_state:
+            if self.state != 'calibration':
                 if self.split_state == 'too_small':
                     self.set_popup('splitting', u'слишком маленький', 1)
                 elif self.split_state == 'too_short':
                     self.set_popup('splitting', u'слишком короткий', 1)
                 elif self.split_state == 'unsupported':
                     self.set_popup('splitting', u'какой-то странный', 1)
-            self.prev_split_state = self.split_state
 
             if 'demo' in self.state:
                 stroke_name = self.knowledge['stroke_names'][self.state[5:]]

@@ -12,6 +12,8 @@ class AbstractStrokeSplitter(object):
 
         self.timer = 0
 
+        self.is_moving = False
+
         self.M = np.matrix(np.eye(3))
 
         self.data = np.array(())
@@ -37,13 +39,13 @@ class AbstractStrokeSplitter(object):
     def set_data(self, heading, gyro):
         self.gyro = gyro
 
-        is_moving = None
         stroke = None
         dimention = None
+        too_short = None
 
         if self.gyro > self.gyro_min:
-            is_moving = True
             self.on_gyro(True)
+            self.is_moving = True
             self.timer = self.gyro_time_out
 
             if self.data.size == 0:
@@ -75,6 +77,7 @@ class AbstractStrokeSplitter(object):
         else:
             self.timer -= 1
             if self.timer == 0:
+                self.timer = 0
                 dimention = 0
                 if self.positions_range is not None:
                     data = self.positions_range
@@ -83,15 +86,22 @@ class AbstractStrokeSplitter(object):
 
                 if self.data.size / 3 > self.min_length:
                     stroke = self.data
+                    too_short = False
                     self.on_stroke_done(self.data, dimention)
                 else:
-                    is_moving = False
                     self.on_gyro(False)
+                    too_short = True
+
+            elif self.timer < 0:
+                self.timer = -1
+                self.is_moving = False
+
                 self.data = np.array(())
 
-        return {'is_moving': is_moving,
+        return {'is_moving': self.is_moving,
                 'stroke': stroke,
-                'dimention': dimention}
+                'dimention': dimention,
+                'too_short': too_short}
 
     def on_stroke_done(self, data, dimention):
         pass

@@ -105,6 +105,7 @@ if __name__ == '__main__':
     s = data['splitting']['states'] = {}
 
     add_state('in_action', s)
+    add_state('not_in_action', s)
     add_state('stroke_done', s)
     add_state('too_short', s)
     add_state('too_small', s)

@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
+
 import sys
 
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import QThread
 
 import json
-from time import sleep
 
 from uuid import uuid1
 from pipe_generation_widget import GenerationWidget
 from pipe_state_machine import GenerationStateMachine
-from pipe_state_machine import MODE_RUN, MODE_DEMO
+from pipe_state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN
+from pipe_input_generator import InputGenerator
 
 
 INPUT_LOG = '../migration_to_c/test_input.log'
@@ -23,21 +25,11 @@ POPUP_COUNT_DOWN = 2
 STEP_NAMES = {0: u'первый жест', 1: u'второй жест'}
 
 
-def input_generator(input_log, realtime=False):
-    with open(input_log, 'r') as f:
-        for line in f:
-            data = map(float, line.split())
-            if realtime:
-                sleep(data[0])
-            yield {'delta': data[0],
-                   'acc': data[1:4],
-                   'mag': data[4:7],
-                   'gyro': data[7:10]}
-
-
 class DemoWidget(GenerationWidget):
-    def __init__(self, mode):
+    def __init__(self, mode, from_uart=True):
         super(DemoWidget, self).__init__()
+
+        self.from_uart = from_uart
 
         with open(KNOWLEDGE, 'r') as f:
             self.knowledge = json.load(f)
@@ -57,6 +49,8 @@ class DemoWidget(GenerationWidget):
 
         self.popup_count_down = 0
 
+        self.input_generator = InputGenerator()
+
         self.listener = QThread()
 
         self.state_machine = GenerationStateMachine(self.knowledge, MODE_DEMO)
@@ -70,13 +64,14 @@ class DemoWidget(GenerationWidget):
     def process(self):
         if self.popup_state is not None:
             self.set_state(*self.popup_state)
-        else:
+        elif self.state is not None:
             if 'in_progress' in self.state:
                 step_name = STEP_NAMES[int(self.state[12:])]
                 self.set_state('in_progress', step_name)
                 self.popup_count_down = 0
             elif 'done_sequence' in self.state:
-                seq_name = self.knowledge['sequences_names'][int(self.state[14:])]
+                seq_name = (self.knowledge['sequences_names']
+                            [int(self.state[14:])])
                 self.set_state('done_sequence', seq_name)
                 self.popup_count_down = 0
             elif 'idle' in self.state:
@@ -92,11 +87,13 @@ class DemoWidget(GenerationWidget):
         self.popup_count_down = count_down
 
     def listener_thread(self):
-        for input_data in input_generator(INPUT_LOG, True):
+        for input_data in self.input_generator(self.from_uart,
+                                               INPUT_LOG, True):
             state, split_state = self.state_machine(input_data)
             self.state = self.states[state]
 
-            self.split_state = None if split_state is None else self.split_states[split_state]
+            self.split_state = (None if split_state is None
+                                else self.split_states[split_state])
 
             if self.state != 'calibration':
                 if self.split_state == 'too_small':
@@ -114,14 +111,24 @@ class DemoWidget(GenerationWidget):
                 self.popup_count_down -= input_data['delta']
             else:
                 self.popup_state = None
-        print 'that''s all'
+
+        self.state = 'idle'
 
     def next_stroke(self):
         self.prefix = uuid1()
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='strokes processing')
+    parser.add_argument('mode', choices=['train', 'demo', 'run'])
+    parser.add_argument('-v', '--virtual', action='store_true')
+
+    args = parser.parse_args()
+
+    modes = {'demo': MODE_DEMO, 'train': MODE_TRAIN, 'run': MODE_RUN}
+
     app = QApplication(sys.argv)
-    widget = DemoWidget(sys.argv[1])
+    widget = DemoWidget(modes[args.mode], not args.virtual)
     widget.show()
     sys.exit(app.exec_())

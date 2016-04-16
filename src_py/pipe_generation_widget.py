@@ -27,6 +27,8 @@ DISPLAY_STATES = {'calibration': {'bg': 'white', 'fg': 'black',
                                 'message': u'жест'},
                   'demo': {'bg': 'white', 'fg': 'black',
                            'message': u'жест похож на'},
+                  'train_done': {'bg': 'white', 'fg': 'black',
+                                 'message': u'жест сохранен'},
                   'done_sequence': {'bg': 'white', 'fg': 'black',
                                           'message':
                                           u'выполнена'},

@@ -10,7 +10,6 @@ from PyQt4.QtCore import QThread
 
 import json
 
-from uuid import uuid1
 from pipe_generation_widget import GenerationWidget
 from pipe_state_machine import GenerationStateMachine
 from pipe_state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN
@@ -61,6 +60,9 @@ class DemoWidget(GenerationWidget):
 
         self.next_stroke()
 
+    def next_stroke(self):
+        self.state_machine.next_stroke()
+
     def process(self):
         if self.popup_state is not None:
             self.set_state(*self.popup_state)
@@ -100,8 +102,10 @@ class DemoWidget(GenerationWidget):
                     self.set_popup('splitting', u'слишком маленький', 1)
                 elif self.split_state == 'too_short':
                     self.set_popup('splitting', u'слишком короткий', 1)
-                elif self.split_state == 'unsupported':
+                elif self.split_state == 'strange':
                     self.set_popup('splitting', u'какой-то странный', 1)
+                elif self.split_state == 'unsupported':
+                    self.set_popup('splitting', u'какой-то не отсюда', 1)
 
             if 'demo' in self.state:
                 stroke_name = self.knowledge['stroke_names'][self.state[5:]]
@@ -113,9 +117,6 @@ class DemoWidget(GenerationWidget):
                 self.popup_state = None
 
         self.state = 'idle'
-
-    def next_stroke(self):
-        self.prefix = uuid1()
 
 
 if __name__ == '__main__':
@@ -131,4 +132,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     widget = DemoWidget(modes[args.mode], not args.virtual)
     widget.show()
-    sys.exit(app.exec_())
+    app.exec_()
+    widget.input_generator.stop()

@@ -69,6 +69,7 @@ if __name__ == '__main__':
 
     add_state('calibration', s)
     add_state('idle', s)
+    add_state('train_done', s)
 
     for name in names:
         add_state('demo_%s' % name, s)
@@ -110,6 +111,7 @@ if __name__ == '__main__':
     add_state('too_short', s)
     add_state('too_small', s)
     add_state('unsupported', s)
+    add_state('strange', s)
 
     data['splitting']['min_dimention'] = MIN_DIMENTION
     data['splitting']['acceleration_time_const'] = ACCELERATION_TIME_CONST

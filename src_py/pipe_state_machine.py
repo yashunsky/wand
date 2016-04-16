@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 
+from os import makedirs, path
+from uuid import uuid1
+
+import numpy as np
+
 from pipe_imu import IMU
 from pipe_splitter import PipeSplitter
 from pipe_sequence_processor import SequenceProcessor
 
 from unify_definition import get_letter as get_stroke
 
+
 MODE_TRAIN = 0
 MODE_DEMO = 1
 MODE_RUN = 2
+
+MODE_VALUES = {'train': MODE_TRAIN, 'demo': MODE_DEMO, 'run': MODE_RUN}
+MODE_NAMES = {value: key for key, value in MODE_VALUES.items()}
 
 
 class GenerationStateMachine(object):
@@ -26,6 +35,11 @@ class GenerationStateMachine(object):
         self.count_down = 0
 
         self.state = self.knowledge['states']['calibration']
+
+        self.next_stroke()
+
+    def next_stroke(self):
+        self.prefix = uuid1()
 
     def set_accessible_sequences(self, known):
         self.known = known or self.knowledge['strokes'].keys()
@@ -57,13 +71,23 @@ class GenerationStateMachine(object):
                                 self.knowledge['segmentation'],
                                 self.knowledge['strokes'])
 
+            folder = '../raw/%s/%s' % (MODE_NAMES[self.mode], self.prefix)
+            if not path.exists(folder):
+                makedirs(folder)
+            np.savetxt('%s/%s.txt' % (folder, uuid1()),
+                       splitter_state['stroke'])
+
             if self.mode == MODE_TRAIN:
-                pass
+                next_state = self.knowledge['states']['train_done']
+                self.state = self.knowledge['states']['idle']
 
             elif self.mode == MODE_DEMO:
                 state = self.sp.choose_best(stroke, self.known)
                 if state is not None:
                     next_state = self.knowledge['states']['demo_%s' % state]
+                else:
+                    split_state = (self.knowledge['splitting']
+                                   ['states']['strange'])
                 self.state = self.knowledge['states']['idle']
 
             elif self.mode == MODE_RUN:
@@ -79,7 +103,8 @@ class GenerationStateMachine(object):
                     next_state = self.state
                     self.count_down = self.knowledge['count_down']
                 else:
-                    split_state = self.knowledge['splitter']['state']['unsupported']
+                    split_state = (self.knowledge['splitting']
+                                   ['states']['unsupported'])
         else:
             split_state = splitter_state['state']
 

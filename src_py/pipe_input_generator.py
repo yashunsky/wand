@@ -68,6 +68,7 @@ class InputGenerator(object):
                 for data in self.get_data():
                     yield data
                 sleep(0.05)
+            self.serial.close()
         else:
             with open(path, 'r') as f:
                 for line in f:

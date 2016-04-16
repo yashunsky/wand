@@ -1,14 +1,15 @@
 {
  "states": {
+  "train_done": 2, 
   "calibration": 0, 
-  "demo_0f078bfa": 3, 
-  "demo_1ae92ed9": 4, 
-  "done_sequence_0": 5, 
+  "demo_0f078bfa": 4, 
+  "demo_1ae92ed9": 5, 
+  "done_sequence_0": 6, 
   "idle": 1, 
-  "done_sequence_1": 6, 
-  "in_progress_1": 8, 
-  "in_progress_0": 7, 
-  "demo_e5de21f0": 2
+  "done_sequence_1": 7, 
+  "in_progress_1": 9, 
+  "in_progress_0": 8, 
+  "demo_e5de21f0": 3
  }, 
  "segmentation": 128, 
  "magnet_boundaries": [
@@ -2345,6 +2346,7 @@
    "too_short": 3, 
    "unsupported": 5, 
    "not_in_action": 1, 
+   "strange": 6, 
    "in_action": 0, 
    "too_small": 4
   }, 

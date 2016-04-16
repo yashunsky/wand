@@ -56,7 +56,7 @@ def get_letters(path):
             except ValueError:
                 continue
             filename = basename(f)
-            key = dirpath.split('/')[1].split('-')[0]
+            key = dirpath.split('/')[-1].split('-')[0]
             if key not in letters:
                 letters[key] = []
             letters[key].append({'filename': filename, 'data': data})
@@ -309,6 +309,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('train')
+    cc = CoreCreator('../raw/train')
     cc.show()
     sys.exit(app.exec_())

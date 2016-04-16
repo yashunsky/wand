@@ -2344,6 +2344,7 @@
    "too_short": 2, 
    "too_small": 3, 
    "stroke_done": 1, 
+   "unsupported": 4, 
    "in_action": 0
   }, 
   "gyro_min": 1000

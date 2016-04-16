@@ -38,8 +38,10 @@ class GenerationStateMachine(object):
 
         next_state = self.state
 
+        split_state = None
+
         if imu_state['in_calibration']:
-            return self.state
+            return (self.state, split_state)
 
         splitter_state = self.splitter.set_data(sensor_data['delta'],
                                                 sensor_data['gyro'],
@@ -73,8 +75,10 @@ class GenerationStateMachine(object):
                     self.state = self.knowledge['states'][key]
                     next_state = self.state
                     self.count_down = self.knowledge['count_down']
+                else:
+                    split_state = self.knowledge['splitter']['state']['unsupported']
         else:
-            self.interface_callback(splitter_state['state'])
+            split_state = splitter_state['state']
 
         if self.mode == MODE_RUN:
             self.count_down -= sensor_data['delta']
@@ -84,4 +88,4 @@ class GenerationStateMachine(object):
                 self.state = self.knowledge['states']['idle']
                 next_state = self.state
 
-        return next_state
+        return (next_state, split_state)

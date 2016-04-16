@@ -23,12 +23,15 @@ DISPLAY_STATES = {'calibration': {'bg': 'white', 'fg': 'black',
                                   'message': u'идет калибровка'},
                   'idle': {'bg': 'white', 'fg': 'black',
                            'message': u'ждём жеста'},
+                  'splitting': {'bg': 'white', 'fg': 'black',
+                                'message': u'жест'},
                   'demo': {'bg': 'white', 'fg': 'black',
                            'message': u'жест похож на'},
                   'done_sequence': {'bg': 'white', 'fg': 'black',
-                                          'message': u'выполнена последовательность'},
+                                          'message':
+                                          u'выполнена'},
                   'in_progress': {'bg': 'white', 'fg': 'black',
-                                  'message': u'выполняется послдовательность'}}
+                                  'message': u'выполнен'}}
 
 
 class GenerationWidget(QWidget):
@@ -65,6 +68,8 @@ class GenerationWidget(QWidget):
 
         self.display_state = ''
 
+        self.pop_up = False
+
         self.main_timer = QTimer()
         self.main_timer.setInterval(PROCESS_INTERVAL)
         self.main_timer.timeout.connect(self.process)
@@ -95,6 +100,9 @@ class GenerationWidget(QWidget):
             return
 
         self.display_state = new_display_state
+        if self.pop_up:
+            return
+
         display_state = DISPLAY_STATES[self.display_state]
         self.set_color(display_state['bg'], display_state['fg'])
         self.set_message(display_state['message'])
@@ -104,16 +112,3 @@ class GenerationWidget(QWidget):
             self.button.show()
         else:
             self.button.hide()
-
-    def reset_state(self, target_display_state, delay):
-        origin_display_state = self.display_state
-
-        def on_timer():
-            if self.display_state == origin_display_state:
-                self.set_state(target_display_state)
-                self.reset_timer.stop()
-
-        self.reset_timer = QTimer()
-        self.reset_timer.setInterval(delay * 1000)
-        self.reset_timer.timeout.connect(on_timer)
-        self.reset_timer.start()

@@ -108,6 +108,7 @@ if __name__ == '__main__':
     add_state('stroke_done', s)
     add_state('too_short', s)
     add_state('too_small', s)
+    add_state('unsupported', s)
 
     data['splitting']['min_dimention'] = MIN_DIMENTION
     data['splitting']['acceleration_time_const'] = ACCELERATION_TIME_CONST

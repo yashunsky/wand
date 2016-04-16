@@ -5,9 +5,9 @@ from uuid import uuid1
 
 import numpy as np
 
-from pipe_imu import IMU
-from pipe_splitter import PipeSplitter
-from pipe_sequence_processor import SequenceProcessor
+from imu import IMU
+from splitter import PipeSplitter
+from sequence_processor import SequenceProcessor
 
 from unify_definition import get_letter as get_stroke
 

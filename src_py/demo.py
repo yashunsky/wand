@@ -10,10 +10,10 @@ from PyQt4.QtCore import QThread
 
 import json
 
-from pipe_generation_widget import GenerationWidget
-from pipe_state_machine import GenerationStateMachine
-from pipe_state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN
-from pipe_input_generator import InputGenerator
+from generation_widget import GenerationWidget
+from state_machine import GenerationStateMachine
+from state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN
+from input_generator import InputGenerator
 
 
 INPUT_LOG = '../migration_to_c/test_input.log'

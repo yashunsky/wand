@@ -2353,10 +2353,19 @@
   "gyro_min": 1000
  }, 
  "count_down": 10, 
+ "sequences_en_names": {
+  "\u0437\u0430\u0449\u0438\u0442\u0430": "defence", 
+  "\u0430\u0442\u0430\u043a\u0430": "atack"
+ }, 
  "sequences_names": [
   "\u0437\u0430\u0449\u0438\u0442\u0430", 
   "\u0430\u0442\u0430\u043a\u0430"
  ], 
+ "strokes_en_names": {
+  "e5de21f0": "circle down", 
+  "0f078bfa": "circle up", 
+  "1ae92ed9": "circle in front"
+ }, 
  "sequences": {
   "states": {
    "in_progress_1": 4, 

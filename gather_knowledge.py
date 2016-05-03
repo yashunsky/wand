@@ -41,7 +41,10 @@ if __name__ == '__main__':
     data['sequences']['compare_limit'] = COMPARE_LIMIT
 
     names = stroke_names['names']
+    strokes_en_names = stroke_names['strokes_en_names']
+
     sequences = stroke_names['sequences']
+    sequences_en_names = stroke_names['sequences_en_names']
 
     data['stroke_names'] = names
 
@@ -56,6 +59,9 @@ if __name__ == '__main__':
 
     data['sequences_names'] = [s_names_inv[index]
                                for index in sorted(s_names_inv.keys())]
+
+    data['strokes_en_names'] = strokes_en_names
+    data['sequences_en_names'] = sequences_en_names
 
     def add_state(state_name, state_dict):
         state_dict[state_name] = len(state_dict)

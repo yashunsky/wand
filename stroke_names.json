@@ -5,8 +5,20 @@
         "1ae92ed9": "круг перед собой",
         "e5de21f0": "круг вверх"
     },
+
     "sequences": {
         "атака": ["круг вниз", "круг вверх", "круг перед собой"],
         "защита": ["круг вниз", "круг перед собой"]
+    },
+
+    "strokes_en_names": {
+        "0f078bfa": "circle up",
+        "1ae92ed9": "circle in front",
+        "e5de21f0": "circle down"
+    },
+
+    "sequences_en_names": {
+        "атака": "atack",
+        "защита": "defence"
     }
 }

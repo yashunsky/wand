@@ -7,22 +7,25 @@
 #define STROKES_H_
 
 #define SEGMENTATION 128
+#define STROKES_COUNT 3
+#define SEQUENCES_COUNT 2
+#define NORMAL_ACTION_LENGTH 2
+#define STROKE_E5DE21F0 0 // circle down
+#define STROKE_0F078BFA 1 // circle up
+#define STROKE_1AE92ED9 2 // circle in front
+#define STROKE_________ 3 // used, if the seq is shorter then NORMAL_ACTION_LENGTH
 
-#define STROKE_E5DE21F0 0 // круг вверх
-#define STROKE_0F078BFA 1 // круг вниз
-#define STROKE_1AE92ED9 2 // круг перед собой
-#define STROKE_________ 3 // заглушка, если надо 2 жеста, а не 3
-
-#define ACTION_0 0 // защита
-#define ACTION_1 1 // атака
+#define INIT_STROKE STROKE_0F078BFA
+#define ACTION_0 0 // defence
+#define ACTION_1 1 // atack
 
 
-const int_16t actions[2][3] = {
-    {STROKE_E5DE21F0, STROKE_0F078BFA, STROKE_________},
-    {STROKE_E5DE21F0, STROKE_1AE92ED9, STROKE_0F078BFA}
+const int_16t actions[SEQUENCES_COUNT][NORMAL_ACTION_LENGTH] = {
+    {STROKE_1AE92ED9, STROKE_________},
+    {STROKE_E5DE21F0, STROKE_1AE92ED9}
 }
 
-const float_t strokes[3][128][4] = {
+const float_t strokes[STROKES_COUNT][SEGMENTATION][4] = {
     {
         { 0.00000,  0.98697, -0.15753,  0.04622},
         {-0.02876,  0.98142, -0.18670,  0.04630},
@@ -414,3 +417,5 @@ const float_t strokes[3][128][4] = {
         { 0.22130,  0.96730, -0.07376,  0.12661}
     }
 }
+
+#endif

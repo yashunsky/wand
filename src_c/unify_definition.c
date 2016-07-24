@@ -1,7 +1,7 @@
-#import <math.h>
-#import "unify_definition.h"
+#include <math.h>
+#include "unify_definition.h"
 
-float getDist(float a[DIMENTION], float b[DIMENTION]) {
+float getDist(const float a[DIMENTION], const float b[DIMENTION]) {
     float delta = 0;
     float d;
     int i;
@@ -20,7 +20,7 @@ void copyPoint(float source[DIMENTION], float dest[DIMENTION]) {
     }    
 }
 
-void unify_stroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEGMENTATION][DIMENTION], int length) {
+void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEGMENTATION][DIMENTION], int length) {
     float strokeLengths[STROKE_MAX_LENGTH];
     float step;
     int i, j;
@@ -62,7 +62,7 @@ void unify_stroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SE
     }
 }
 
-float checkStroke(float stroke[SEGMENTATION][DIMENTION], float description[SEGMENTATION][DIMENTION + 1]) {
+float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description[SEGMENTATION][DIMENTION + 1]) {
     float errors[SEGMENTATION];
     float mean = 0;
     float result = 0;
@@ -70,7 +70,7 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], float description[SEGME
     float d;
     int i;
 
-    for (i = 0; i < SEGMENTATION; i ++) {
+    for (i = 0; i < SEGMENTATION; i++) {
         radius = getDist(stroke[i], description[i]) - description[i][3];
         radius = radius < 0 ? 0 : radius;
         errors[i] = radius;
@@ -79,10 +79,19 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], float description[SEGME
 
     mean /= SEGMENTATION;
 
-    for (i = 0; i < SEGMENTATION; i ++) {
+    for (i = 0; i < SEGMENTATION; i++) {
         d = errors[i] - mean;
         result += d * d;
     }
 
     return sqrt(result / SEGMENTATION);
+}
+
+void getLetter(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length, float errors[STROKES_COUNT]) {
+    float unifiedStroke[SEGMENTATION][DIMENTION];
+    unifyStroke(stroke, unifiedStroke, length);
+    int i;
+    for (i = 0; i < STROKES_COUNT; i++) {
+        errors[i] = checkStroke(unifiedStroke, STROKES[i]);
+    }
 }

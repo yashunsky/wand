@@ -91,7 +91,7 @@ class IMU(object):
 
         return {'in_calibration': self.in_calibration,
                 'accel': self.get_global_acceleration(),
-                'heading': self.get_z_direction()}
+                'heading': self.get_x_direction()}
 
     def recalibration(self, sensors):
         '''Recalibrate the device if it wasn't significatly moving
@@ -123,6 +123,9 @@ class IMU(object):
                   np.linalg.norm(self.accelerometer_readings_offset))
         self.accelerometer_readings_offset -= GRAVITY * g_axis
 
+        print self.gyroscope_readings_offset
+        print self.accelerometer_readings_offset
+
         self.a_stack = np.array([0, 0, 0])
         self.g_stack = np.array([0, 0, 0])
 
@@ -136,6 +139,8 @@ class IMU(object):
 
         self.mag_heading = self.compass_heading(
             sensors['magnetometer'], self.angles, self.magnet_boundaries)
+
+        print np.degrees(self.mag_heading)
 
         self.dcm_matrix = self.matrix_update(
             self.dcm_matrix, sensors['gyroscope'], delay,
@@ -260,6 +265,9 @@ class IMU(object):
         roll = np.arctan2(dcm_matrix[2, 1], dcm_matrix[2, 2])
         yaw = np.arctan2(dcm_matrix[1, 0], dcm_matrix[0, 0])
         return {'pitch': pitch, 'roll': roll, 'yaw': yaw}
+
+    def get_x_direction(self):
+        return self.dcm_matrix[:, 0].A1
 
     def get_y_direction(self):
         return self.dcm_matrix[:, 1].A1

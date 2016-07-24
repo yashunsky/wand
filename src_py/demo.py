@@ -12,7 +12,7 @@ import json
 
 from generation_widget import GenerationWidget
 from state_machine import GenerationStateMachine
-from state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN
+from state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN, OUTPUT_WIDGET
 from input_generator import InputGenerator
 
 
@@ -91,7 +91,7 @@ class DemoWidget(GenerationWidget):
     def listener_thread(self):
         for input_data in self.input_generator(self.from_uart,
                                                INPUT_LOG, True):
-            state, split_state = self.state_machine(input_data)
+            state, split_state = self.state_machine(input_data, OUTPUT_WIDGET)
             self.state = self.states[state]
 
             self.split_state = (None if split_state is None

@@ -9,6 +9,7 @@ STROKES = 'generation.json'
 
 STROKE_NAMES = 'stroke_names.json'
 
+MAGNET_BOUNDERIES = ((-519, -542, -698), (546, 453, 408))
 MAGNET_BOUNDERIES = ((744, -499, -491), (1857, 530, 426))
 ACCELERATION_TIME_CONST = 0.2  # s
 

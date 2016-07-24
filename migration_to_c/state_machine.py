@@ -5,12 +5,12 @@ from uuid import uuid1
 
 import numpy as np
 
-from imu import IMU
-from splitter import PipeSplitter
-from sequence_processor import SequenceProcessor
+from src_py.imu import IMU
+from src_py.splitter import PipeSplitter
+from src_py.sequence_processor import SequenceProcessor
 
-from unify_definition import get_letter as get_stroke
 
+import c_wrap
 
 MODE_TRAIN = 0
 MODE_DEMO = 1
@@ -24,9 +24,20 @@ MODE_VALUES = {'train': MODE_TRAIN, 'demo': MODE_DEMO, 'run': MODE_RUN}
 MODE_NAMES = {value: key for key, value in MODE_VALUES.items()}
 
 
-class GenerationStateMachine(object):
+def get_stroke(stroke):
+    max_stroke_length = c_wrap.get_stroke_max_length()
+    stroke_length = len(stroke)
+
+    c_stroke = np.vstack((stroke, np.zeros((max_stroke_length -
+                                            stroke_length, 3))))
+
+    errors = c_wrap.get_letter(c_stroke, stroke_length)
+    print errors
+
+
+class MigrationStateMachine(object):
     def __init__(self, knowledge, mode, known=None):
-        super(GenerationStateMachine, self).__init__()
+        super(MigrationStateMachine, self).__init__()
 
         self.knowledge = knowledge
         self.mode = mode
@@ -63,6 +74,7 @@ class GenerationStateMachine(object):
         split_state = None
 
         if not imu_state['in_calibration']:
+
             if self.state == self.knowledge['states']['calibration']:
                 next_state = self.state = self.knowledge['states']['idle']
 
@@ -73,9 +85,7 @@ class GenerationStateMachine(object):
 
             if (splitter_state['state'] ==
                self.knowledge['splitting']['states']['stroke_done']):
-                strokes = get_stroke(splitter_state['stroke'],
-                                     self.knowledge['segmentation'],
-                                     self.knowledge['strokes'])
+                strokes = get_stroke(splitter_state['stroke'])
 
                 if output != OUTPUT_TEST:
                     folder = '../raw/%s/%s' % (MODE_NAMES[self.mode],

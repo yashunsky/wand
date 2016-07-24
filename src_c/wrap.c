@@ -1,7 +1,6 @@
 #include <Python.h>
 #include "unify_definition.h"
 
-
 static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
     int j;
@@ -19,7 +18,7 @@ static void PyListToArray(PyObject * source, float *dest, int width, int height)
 }
 
 
-static PyObject * arrayToPyList(float * source, int width, int height) {
+static PyObject * arrayToPyList(const float * source, int width, int height) {
     int i, j;
     PyObject * row;
     PyObject * newListObj = PyTuple_New(width);
@@ -72,7 +71,7 @@ static PyObject* py_unifyStroke(PyObject* self, PyObject* args) {
 
     PyListToArray(strokeObj, &stroke[0][0], STROKE_MAX_LENGTH, DIMENTION);
 
-    unify_stroke(stroke, newStroke, length);
+    unifyStroke(stroke, newStroke, length);
 
     return arrayToPyList(&newStroke[0][0], SEGMENTATION, DIMENTION);
 }
@@ -92,12 +91,27 @@ static PyObject* py_checkStroke(PyObject* self, PyObject* args) {
     return PyFloat_FromDouble((double) checkStroke(stroke, description));
 }
 
+static PyObject* py_getLetter(PyObject* self, PyObject* args) {
+    float stroke[STROKE_MAX_LENGTH][DIMENTION];
+    int length;    
+    float errors[STROKES_COUNT];
+
+    PyObject * strokeObj;
+
+    PyListToArray(strokeObj, &stroke[0][0], STROKE_MAX_LENGTH, DIMENTION);
+
+    getLetter(stroke, length, errors);
+
+    return arrayToPyList(&errors[0], STROKES_COUNT, 1);
+}
+
 static PyMethodDef c_methods[] = {
     {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
     {"get_dist", py_getDist, METH_VARARGS},
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
     {"check_stroke", py_checkStroke, METH_VARARGS},
+    {"get_letter", py_getLetter, METH_VARARGS},
     {NULL, NULL}
 };
 

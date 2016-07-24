@@ -4,9 +4,13 @@
 import json
 import unittest
 
-from src_py.pipe_state_machine import GenerationStateMachine
-from src_py.pipe_state_machine import MODE_DEMO, MODE_RUN
+from src_py.input_generator import InputGenerator
+from src_py.state_machine import GenerationStateMachine as PyStateMachine
+from src_py.state_machine import MODE_DEMO, MODE_RUN, OUTPUT_TEST
 
+from state_machine import MigrationStateMachine as CStateMachine
+
+from numpy import ndarray
 
 INPUT_LOG = 'test_input.log'
 KNOWLEDGE = 'test_knowledge.json'
@@ -22,14 +26,15 @@ def almoste_zero(value):
     return abs(value) < EPSILON
 
 
-def input_generator():
-    with open(INPUT_LOG, 'r') as f:
-        for line in f:
-            data = map(float, line.split())
-            yield {'delta': data[0],
-                   'acc': data[1:4],
-                   'mag': data[4:7],
-                   'gyro': data[7:10]}
+def deep_almose_equal(a, b):
+    if isinstance(a, dict):
+        return all((deep_almose_equal(a[key], b[key]) for key in a))
+    elif isinstance(a, str) or isinstance(a, unicode) or a is None:
+        return a == b
+    elif isinstance(a, tuple) or isinstance(a, list) or isinstance(a, ndarray):
+        return all((deep_almose_equal(_a, _b) for _a, _b in zip(a, b)))
+    else:
+        return almoste_equal(a, b)
 
 
 class CheckStateMachine(unittest.TestCase):
@@ -38,43 +43,29 @@ class CheckStateMachine(unittest.TestCase):
         super(CheckStateMachine, self).__init__(*args, **kwargs)
         with open(KNOWLEDGE, 'r') as f:
             self.knowledge = json.load(f)
+        self.input_generator = InputGenerator()
 
-    def decode_state(self, state):
-        def get_key_by_value(value, source):
-            for k, v in source.items():
-                if v == value:
-                    return k
+    def test_mode_demo(self):
 
-        state_name = get_key_by_value(state, self.knowledge['states'])
+        py_state_machine = PyStateMachine(self.knowledge, MODE_DEMO)
+        c_state_machine = CStateMachine(self.knowledge, MODE_DEMO)
 
-        if 'demo_' in state_name:
-            return self.knowledge['stroke_names'][state_name[5:]]
+        for input_data in self.input_generator(False, INPUT_LOG, False):
+            py_state = py_state_machine(input_data, OUTPUT_TEST)
+            c_state = c_state_machine(input_data, OUTPUT_TEST)
 
-        return state_name
-
-    def _test_mode_demo(self):
-
-        state_machine = GenerationStateMachine(self.knowledge, MODE_DEMO)
-
-        state = None
-
-        for input_data in input_generator():
-            new_state = state_machine(input_data)
-            if new_state != state:
-                state = new_state
-                print self.decode_state(new_state)
+            assert deep_almose_equal(py_state, c_state)
 
     def test_mode_run(self):
 
-        state_machine = GenerationStateMachine(self.knowledge, MODE_RUN)
+        py_state_machine = PyStateMachine(self.knowledge, MODE_RUN)
+        c_state_machine = PyStateMachine(self.knowledge, MODE_RUN)
 
-        state = None
+        for input_data in self.input_generator(False, INPUT_LOG, False):
+            py_state = py_state_machine(input_data, OUTPUT_TEST)
+            c_state = c_state_machine(input_data, OUTPUT_TEST)
 
-        for input_data in input_generator():
-            new_state = state_machine(input_data)
-            if new_state != state:
-                state = new_state
-                print self.decode_state(new_state)
+            assert deep_almose_equal(py_state, c_state)
 
 
 if __name__ == '__main__':

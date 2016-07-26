@@ -65,6 +65,7 @@ class IMU(object):
         self.in_calibration = True
 
         self.acceleration = np.array([0, 0, GRAVITY])
+        self.gyro = np.array([0, 0, 0])
 
         self.a_stack = np.array([0, 0, 0])
         self.g_stack = np.array([0, 0, 0])
@@ -91,6 +92,7 @@ class IMU(object):
 
         return {'in_calibration': self.in_calibration,
                 'accel': self.get_global_acceleration(),
+                'gyro': self.gyro / GYRO_GAIN,
                 'heading': self.get_x_direction()}
 
     def recalibration(self, sensors):
@@ -136,11 +138,10 @@ class IMU(object):
 
         # acceleration shoud be accecible from outside
         self.acceleration = sensors['accelerometer']
+        self.gyro = sensors['gyroscope']
 
         self.mag_heading = self.compass_heading(
             sensors['magnetometer'], self.angles, self.magnet_boundaries)
-
-        print np.degrees(self.mag_heading)
 
         self.dcm_matrix = self.matrix_update(
             self.dcm_matrix, sensors['gyroscope'], delay,

@@ -66,8 +66,10 @@ class GenerationStateMachine(object):
             if self.state == self.knowledge['states']['calibration']:
                 next_state = self.state = self.knowledge['states']['idle']
 
+            print imu_state['gyro']
+
             splitter_state = self.splitter.set_data(sensor_data['delta'],
-                                                    sensor_data['gyro'],
+                                                    imu_state['gyro'],
                                                     imu_state['accel'],
                                                     imu_state['heading'])
 

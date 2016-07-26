@@ -13,7 +13,7 @@ BUFFER_DELIMITER = '\r'
 TIME_SCALE = 0.001  # s/digit
 ACC_SCALE = 1
 MAG_SCALE = 1
-GYRO_SCALE = 1.0 / 300  # ????
+GYRO_SCALE = 1  # 1.0 / 300  # ????
 
 TIME_STAMP_RANGE = 2 ** 32
 

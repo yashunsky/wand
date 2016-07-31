@@ -12,7 +12,7 @@ import json
 from full_test import almoste_zero, almoste_equal
 
 
-STROKE_PATH = ('../train/1ae92ed9-e850-11e5-8105-ac87a30aa589/' +
+STROKE_PATH = ('../raw/train/1ae92ed9-e850-11e5-8105-ac87a30aa589/' +
                '1ed90bfa-e850-11e5-a5ec-ac87a30aa589.txt')
 
 DICT_PATH = 'migration_to_c.json'

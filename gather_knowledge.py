@@ -33,6 +33,8 @@ if __name__ == '__main__':
     with open(STROKE_NAMES, 'r') as f:
         stroke_names = json.load(f)
 
+    data['strokes_order'] = stroke_names['order']
+
     data['strokes'] = strokes['letters']
     data['segmentation'] = strokes['segmentation']
     data['magnet_boundaries'] = MAGNET_BOUNDERIES

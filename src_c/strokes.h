@@ -20,6 +20,8 @@
 #define SEQUENCE_0 0 // defence
 #define SEQUENCE_1 1 // atack
 
+#define MAX_ERROR 0.2
+
 extern int const SEQUENCES[SEQUENCES_COUNT][NORMAL_SEQUENCE_LENGTH];
 extern float const STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1];
 

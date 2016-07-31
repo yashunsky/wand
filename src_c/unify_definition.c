@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <math.h>
 #include "unify_definition.h"
 
@@ -34,7 +35,7 @@ void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEG
     strokeLengths[0] = 0;
 
     for (i = 1; i < length; i++) {
-        strokeLengths[i] = strokeLengths[i - 1] + getDist(stroke[i - 1], stroke[i]);        
+        strokeLengths[i] = strokeLengths[i - 1] + getDist(stroke[i - 1], stroke[i]);       
     }
 
     step = strokeLengths[length - 1] / (SEGMENTATION - 1);
@@ -45,7 +46,7 @@ void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEG
     nextLength = step;
 
     for (i = 1; i < length; i++) {
-        if (strokeLengths[i] > nextLength) {
+        while (strokeLengths[i] > nextLength) {
             p1 = stroke[i - 1];
             p2 = stroke[i];
             delta = strokeLengths[i] - strokeLengths[i - 1];
@@ -55,11 +56,9 @@ void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEG
             }
             newStrokeId += 1;
             nextLength += step;
-            if (newStrokeId == SEGMENTATION - 1) {
-                break;                
-            }
         }
-    }
+    } 
+
 }
 
 float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description[SEGMENTATION][DIMENTION + 1]) {
@@ -83,15 +82,22 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description
         d = errors[i] - mean;
         result += d * d;
     }
-
     return sqrt(result / SEGMENTATION);
 }
 
-void getLetter(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length, float errors[STROKES_COUNT]) {
+int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length, unsigned long access) {
     float unifiedStroke[SEGMENTATION][DIMENTION];
     unifyStroke(stroke, unifiedStroke, length);
     int i;
+    float error;
+    float min_error = MAX_ERROR;
+    int strokeId = -1;
     for (i = 0; i < STROKES_COUNT; i++) {
-        errors[i] = checkStroke(unifiedStroke, STROKES[i]);
+        error = checkStroke(unifiedStroke, STROKES[i]);
+        if (error < min_error) {
+            strokeId = i;
+            min_error = error;
+        }
     }
+    return strokeId;
 }

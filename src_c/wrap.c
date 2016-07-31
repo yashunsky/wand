@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <Python.h>
 #include "unify_definition.h"
 
@@ -25,7 +26,7 @@ static PyObject * arrayToPyList(const float * source, int width, int height) {
 
     for (i = 0; i < width; i++) {
         if (height == 1) {
-            PyTuple_SET_ITEM(newListObj, j, PyFloat_FromDouble(source[i]));
+            PyTuple_SET_ITEM(newListObj, i, PyFloat_FromDouble(source[i]));
         } else {
             row = PyTuple_New(height);
             for (j = 0; j < height; j++) {
@@ -91,18 +92,20 @@ static PyObject* py_checkStroke(PyObject* self, PyObject* args) {
     return PyFloat_FromDouble((double) checkStroke(stroke, description));
 }
 
-static PyObject* py_getLetter(PyObject* self, PyObject* args) {
+static PyObject* py_getStroke(PyObject* self, PyObject* args) {
     float stroke[STROKE_MAX_LENGTH][DIMENTION];
     int length;    
-    float errors[STROKES_COUNT];
+    unsigned long access;
 
     PyObject * strokeObj;
 
+    PyObject * accessObject;
+
+    PyArg_ParseTuple(args, "O!ik", &PyList_Type, &strokeObj, &length, &access);
+
     PyListToArray(strokeObj, &stroke[0][0], STROKE_MAX_LENGTH, DIMENTION);
 
-    getLetter(stroke, length, errors);
-
-    return arrayToPyList(&errors[0], STROKES_COUNT, 1);
+    return PyInt_FromLong(getStroke(stroke, length, access));
 }
 
 static PyMethodDef c_methods[] = {
@@ -111,7 +114,7 @@ static PyMethodDef c_methods[] = {
     {"get_dist", py_getDist, METH_VARARGS},
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
     {"check_stroke", py_checkStroke, METH_VARARGS},
-    {"get_letter", py_getLetter, METH_VARARGS},
+    {"get_stroke", py_getStroke, METH_VARARGS},
     {NULL, NULL}
 };
 

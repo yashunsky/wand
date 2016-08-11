@@ -20,7 +20,7 @@ from unify_definition import unify_stroke
 
 SEGMENTATION = 128
 
-CORE_NAME = 'generation.json'
+CORE_NAME = '../generation.json'
 
 
 def make_core(letters, points):
@@ -309,6 +309,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('../raw/train')
+    cc = CoreCreator('../raw/simple')
     cc.show()
     sys.exit(app.exec_())

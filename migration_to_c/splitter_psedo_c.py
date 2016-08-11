@@ -4,6 +4,8 @@ from math import sqrt
 
 from src_py.Aperiodic import AperiodicFilter
 
+BUFFER_LENGTH = 256
+
 
 def add_vec(vr, v1, v2):
     vr[0] = v1[0] + v2[0]
@@ -52,6 +54,23 @@ def adjust_vec(vr, m, v):
         vr[i] = m[i][0] * v[0] + m[i][1] * v[1] + m[i][2] * v[2]
 
 
+class CycleBuffer(object):
+    def __init__(self):
+        super(CycleBuffer, self).__init__()
+        self.reset()
+
+    def reset(self):
+        self.c = [[0, 0, 0]] * BUFFER_LENGTH
+        self.c_index = 0
+
+    def update(self, value):
+        self.c[self.c_index] = value
+        self.c_index = (self.c_index + 1) % BUFFER_LENGTH
+
+    def get(self):
+        return self.c[self.c_index:] + self.c[:self.c_index]
+
+
 class PipeSplitter(object):
     def __init__(self, knowledge):
         super(PipeSplitter, self).__init__()
@@ -66,8 +85,6 @@ class PipeSplitter(object):
 
         self.M = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
-        self.data = []
-
         # calculating sroke global size vars
         self.reset_size()
 
@@ -77,6 +94,9 @@ class PipeSplitter(object):
 
         t = knowledge['acceleration_time_const']
         self.acceleration_filter = AperiodicFilter(t)
+
+        self.buf = CycleBuffer()
+        self.stroke_len = 0
 
     def reset_size(self):
         self.positions_range = [[0, 0, 0], [0, 0, 0]]
@@ -115,7 +135,7 @@ class PipeSplitter(object):
             self.is_moving = True
             self.timer = self.gyro_time_out
 
-            if len(self.data) == 0:
+            if self.stroke_len == 0:
                 x = [0, 0, 0]
                 y = [heading[0], heading[1], 0]
 
@@ -136,7 +156,8 @@ class PipeSplitter(object):
 
             adjust_vec(new_point, self.M, heading)
 
-            self.data += [new_point]
+            self.buf.update(new_point)
+            self.stroke_len += 1
         else:
             self.timer -= 1
             if self.timer == 0:
@@ -149,8 +170,8 @@ class PipeSplitter(object):
 
                     dimention = norm(dim)
 
-                if len(self.data) > self.min_length:
-                    stroke = self.data
+                if self.stroke_len > self.min_length:
+                    stroke = self.buf.get()[-self.stroke_len:]
                     too_short = False
                 else:
                     too_short = True
@@ -159,7 +180,8 @@ class PipeSplitter(object):
                 self.timer = -1
                 self.is_moving = False
 
-                self.data = []
+                self.buf.reset()
+                self.stroke_len = 0
 
         return {'is_moving': self.is_moving,
                 'stroke': stroke,

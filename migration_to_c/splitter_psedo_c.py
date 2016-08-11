@@ -4,6 +4,8 @@ from math import sqrt
 
 from src_py.Aperiodic import AperiodicFilter
 
+BUFFER_LENGTH = 256
+
 
 def add_vec(vr, v1, v2):
     vr[0] = v1[0] + v2[0]
@@ -66,7 +68,9 @@ class PipeSplitter(object):
 
         self.M = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
-        self.data = []
+        self.data = [[0, 0, 0]] * BUFFER_LENGTH
+
+        self.stroke_length = 0
 
         # calculating sroke global size vars
         self.reset_size()
@@ -108,14 +112,14 @@ class PipeSplitter(object):
 
         stroke = None
         dimention = 0
-        too_short = None
+        invalide = False
         new_point = [0, 0, 0]
 
         if self.gyro > self.gyro_min:
             self.is_moving = True
             self.timer = self.gyro_time_out
 
-            if len(self.data) == 0:
+            if self.stroke_length == 0:
                 x = [0, 0, 0]
                 y = [heading[0], heading[1], 0]
 
@@ -136,7 +140,8 @@ class PipeSplitter(object):
 
             adjust_vec(new_point, self.M, heading)
 
-            self.data += [new_point]
+            self.data[self.stroke_length] = new_point
+            self.stroke_length += 1
         else:
             self.timer -= 1
             if self.timer == 0:
@@ -149,22 +154,22 @@ class PipeSplitter(object):
 
                     dimention = norm(dim)
 
-                if len(self.data) > self.min_length:
-                    stroke = self.data
-                    too_short = False
+                if self.min_length < self.stroke_length < BUFFER_LENGTH:
+                    stroke = self.data[:self.stroke_length]
+                    invalide = False
                 else:
-                    too_short = True
+                    invalide = True
 
             elif self.timer < 0:
                 self.timer = -1
                 self.is_moving = False
 
-                self.data = []
+                self.stroke_length = 0
 
         return {'is_moving': self.is_moving,
                 'stroke': stroke,
                 'dimention': dimention,
-                'too_short': too_short}
+                'invalide': invalide}
 
     def set_data(self, delta, gyro, accel, heading):
 
@@ -180,11 +185,10 @@ class PipeSplitter(object):
 
         stroke = None
 
-        if splitter_data['too_short'] is True:
+        if splitter_data['invalide'] is True:
             state = self.states['too_short']
 
-        elif (splitter_data['dimention'] is not None and
-              splitter_data['dimention'] < self.min_dimention):
+        elif splitter_data['dimention'] < self.min_dimention:
             state = self.states['too_small']
 
         elif splitter_data['stroke'] is not None:

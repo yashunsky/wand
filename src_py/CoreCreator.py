@@ -30,6 +30,12 @@ def make_core(letters, points):
                             for letter in letters_group])
         centers = np.mean(unified, axis=0)
 
+        n = np.linalg.norm(centers, axis=1)
+
+        norms = np.vstack((n, n, n)).T
+
+        centers = centers / norms
+
         r = []
         for u in unified:
             dists = u - centers

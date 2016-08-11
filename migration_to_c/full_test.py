@@ -15,7 +15,7 @@ from numpy import ndarray
 INPUT_LOG = 'test_input.log'
 KNOWLEDGE = 'test_knowledge.json'
 
-EPSILON = 0.00001
+EPSILON = 0.0001
 
 
 def almoste_equal(a, b):

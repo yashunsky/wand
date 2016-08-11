@@ -110,7 +110,7 @@ class GenerationWidget(QWidget):
         self.set_message(display_state['message'])
         self.set_subtitle(subtitle)
 
-        if 'train' in self.display_state:
-            self.button.show()
-        else:
-            self.button.hide()
+        # if 'train' in self.display_state:
+        #     self.button.show()
+        # else:
+        #     self.button.hide()

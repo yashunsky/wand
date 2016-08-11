@@ -129,9 +129,6 @@ class IMU(object):
                   np.linalg.norm(self.accelerometer_readings_offset))
         self.accelerometer_readings_offset -= GRAVITY * g_axis
 
-        print self.gyroscope_readings_offset
-        print self.accelerometer_readings_offset
-
         self.a_stack = np.array([0, 0, 0])
         self.g_stack = np.array([0, 0, 0])
 

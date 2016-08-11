@@ -8,7 +8,8 @@ import numpy as np
 
 from src_py.input_generator import InputGenerator
 from src_py.imu import IMU
-from src_py.splitter import PipeSplitter
+from src_py.splitter import PipeSplitter as PipeSplitterPy
+from splitter_psedo_c import PipeSplitter as PipeSplitterC
 
 from full_test import almoste_zero
 
@@ -25,8 +26,8 @@ class CheckSplitter(unittest.TestCase):
         input_generator = InputGenerator()
 
         imu = IMU(knowledge['magnet_boundaries'])
-        splitter_py = PipeSplitter(knowledge['splitting'])
-        splitter_psedo_c = PipeSplitter(knowledge['splitting'])
+        splitter_py = PipeSplitterPy(knowledge['splitting'])
+        splitter_psedo_c = PipeSplitterC(knowledge['splitting'])
 
         for sensor_data in input_generator(False, INPUT_LOG, False):
             imu_state = imu.calc(sensor_data)

@@ -40,7 +40,7 @@ class AbstractStrokeSplitter(object):
         self.gyro = gyro
 
         stroke = None
-        dimention = None
+        dimention = 0
         too_short = None
 
         if self.gyro > self.gyro_min:

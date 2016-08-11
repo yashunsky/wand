@@ -39,7 +39,7 @@ class StateMachine(object):
         pass
 
     def __call__(self, sensor_data, known, output=OUTPUT_MAIN):
-        imu_state = self.imu.calc(sensor_data)
+        imu_state = self.imu.calc(sensor_data, 'x')
 
         splitter_state = {"state": None, "stroke": None}
         strokes = None
@@ -59,16 +59,18 @@ class StateMachine(object):
 
             if (splitter_state['state'] ==
                self.knowledge['splitting']['states']['stroke_done']):
-                strokes = get_stroke(splitter_state['stroke'],
-                                     self.knowledge['segmentation'],
-                                     self.knowledge['strokes'])
 
                 if output != OUTPUT_TEST:
+                    print splitter_state['stroke']
                     folder = '../raw/simple/%s' % self.prefix
                     if not path.exists(folder):
                         makedirs(folder)
                     np.savetxt('%s/%s.txt' % (folder, uuid1()),
                                splitter_state['stroke'])
+
+                strokes = get_stroke(splitter_state['stroke'],
+                                     self.knowledge['segmentation'],
+                                     self.knowledge['strokes'])
 
                 choice = self.sp.choose_best(strokes, known)
                 if choice is not None:

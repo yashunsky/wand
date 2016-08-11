@@ -1,8 +1,6 @@
 *.pyc
 *.log
 
-/raw/train
-/raw/init
-/raw/demo
+/raw/*
 *.gch
 *.so

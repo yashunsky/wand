@@ -33,11 +33,10 @@ class CheckUnifyDefinition(unittest.TestCase):
 
         np_data = ud.unify_stroke(stroke, segmentation)
 
-        c_stroke = np.vstack((np.zeros((max_stroke_length - stroke_length, 3)),
-                             stroke))
+        c_stroke = np.vstack((stroke, np.zeros((max_stroke_length -
+                                                stroke_length, 3))))
 
-        c_data = c_wrap.unify_stroke(np.copy(c_stroke).tolist(),
-                                     max_stroke_length - stroke_length)
+        c_data = c_wrap.unify_stroke(np.copy(c_stroke).tolist(), stroke_length)
 
         c_data = np.array(c_data)
 
@@ -45,7 +44,7 @@ class CheckUnifyDefinition(unittest.TestCase):
 
         assert almoste_zero(diff)
 
-    def _test_check_stroke(self):
+    def test_check_stroke(self):
 
         segmentation = c_wrap.get_segmentation()
 

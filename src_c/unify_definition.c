@@ -21,7 +21,7 @@ void copyPoint(float source[DIMENTION], float dest[DIMENTION]) {
     }    
 }
 
-void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEGMENTATION][DIMENTION], int start) {
+void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEGMENTATION][DIMENTION], int length) {
     float strokeLengths[STROKE_MAX_LENGTH];
     float step;
     int i, j;
@@ -32,20 +32,20 @@ void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEG
     float delta;
     float coeff;
 
-    strokeLengths[start] = 0;
+    strokeLengths[0] = 0;
 
-    for (i = start + 1; i < STROKE_MAX_LENGTH; i++) {
+    for (i = 1; i < length; i++) {
         strokeLengths[i] = strokeLengths[i - 1] + getDist(stroke[i - 1], stroke[i]);       
     }
 
-    step = strokeLengths[STROKE_MAX_LENGTH - 1] / (SEGMENTATION - 1);
+    step = strokeLengths[length - 1] / (SEGMENTATION - 1);
 
-    copyPoint(stroke[start], newStroke[0]);
-    copyPoint(stroke[STROKE_MAX_LENGTH - 1], newStroke[SEGMENTATION - 1]);
+    copyPoint(stroke[0], newStroke[0]);
+    copyPoint(stroke[length - 1], newStroke[SEGMENTATION - 1]);
 
     nextLength = step;
 
-    for (i = start + 1; i < STROKE_MAX_LENGTH; i++) {
+    for (i = 1; i < length; i++) {
         while (strokeLengths[i] > nextLength) {
             p1 = stroke[i - 1];
             p2 = stroke[i];

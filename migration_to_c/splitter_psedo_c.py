@@ -64,8 +64,6 @@ class PipeSplitter(object):
 
         self.timer = 0
 
-        self.is_moving = False
-
         self.M = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
         self.data = [[0, 0, 0]] * BUFFER_LENGTH
@@ -110,13 +108,11 @@ class PipeSplitter(object):
 
         self.gyro = gyro
 
-        stroke = None
         dimention = 0
-        invalide = False
+        valide = False
         new_point = [0, 0, 0]
 
         if self.gyro > self.gyro_min:
-            self.is_moving = True
             self.timer = self.gyro_time_out
 
             if self.stroke_length == 0:
@@ -128,7 +124,7 @@ class PipeSplitter(object):
                 if y_norm != 0:
                     scale_vec(y, y, 1 / y_norm)
                 else:
-                    return
+                    return -1
 
                 z = [0., 0., 1.]
 
@@ -154,22 +150,16 @@ class PipeSplitter(object):
 
                     dimention = norm(dim)
 
-                if self.min_length < self.stroke_length < BUFFER_LENGTH:
-                    stroke = self.data[:self.stroke_length]
-                    invalide = False
-                else:
-                    invalide = True
+                if (self.min_length < self.stroke_length < BUFFER_LENGTH and
+                   dimention > self.min_dimention):
+                    valide = True
 
             elif self.timer < 0:
                 self.timer = -1
-                self.is_moving = False
 
                 self.stroke_length = 0
 
-        return {'is_moving': self.is_moving,
-                'stroke': stroke,
-                'dimention': dimention,
-                'invalide': invalide}
+        return self.stroke_length if valide else -1
 
     def set_data(self, delta, gyro, accel, heading):
 
@@ -179,23 +169,8 @@ class PipeSplitter(object):
 
         self.process_size(delta, accel)
 
-        splitter_data = self.set_data_inner(heading, gyro)
+        lenght = self.set_data_inner(heading, gyro)
 
-        state = self.states['in_action']
+        stroke = self.data[:lenght] if lenght > 0 else None
 
-        stroke = None
-
-        if splitter_data['invalide'] is True:
-            state = self.states['too_short']
-
-        elif splitter_data['dimention'] < self.min_dimention:
-            state = self.states['too_small']
-
-        elif splitter_data['stroke'] is not None:
-            state = self.states['stroke_done']
-            stroke = splitter_data['stroke']
-
-        elif splitter_data['is_moving'] is False:
-            state = self.states['not_in_action']
-
-        return {'state': state, 'stroke': stroke}
+        return {'stroke_done': lenght > 0, 'stroke': stroke}

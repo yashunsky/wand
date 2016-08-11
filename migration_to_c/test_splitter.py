@@ -29,6 +29,8 @@ class CheckSplitter(unittest.TestCase):
         splitter_py = PipeSplitterPy(knowledge['splitting'])
         splitter_psedo_c = PipeSplitterC(knowledge['splitting'])
 
+        stroke_done = knowledge['splitting']['states']['stroke_done']
+
         for sensor_data in input_generator(False, INPUT_LOG, False):
             imu_state = imu.calc(sensor_data)
             state_py = splitter_py.set_data(sensor_data['delta'],
@@ -40,7 +42,8 @@ class CheckSplitter(unittest.TestCase):
                                                       imu_state['gyro'],
                                                       imu_state['accel'],
                                                       imu_state['heading'])
-            assert state_py['state'] == state_pcedo_c['state']
+            assert ((state_py['state'] == stroke_done) ==
+                    state_pcedo_c['stroke_done'])
 
             if state_py['stroke'] is None and state_pcedo_c['stroke'] is None:
                 continue

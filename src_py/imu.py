@@ -82,7 +82,11 @@ class IMU(object):
                    'gyroscope': gyroscope_readings}
         return delay, sensors
 
-    def calc(self, data):
+    def calc(self, data, axis='z'):
+        headings = {'x': self.get_x_direction,
+                    'y': self.get_y_direction,
+                    'z': self.get_z_direction}
+
         delay, sensors = self.parse_data(data)
 
         if self.in_calibration:
@@ -93,7 +97,7 @@ class IMU(object):
         return {'in_calibration': self.in_calibration,
                 'accel': self.get_global_acceleration(),
                 'gyro': self.gyro / GYRO_GAIN,
-                'heading': self.get_x_direction()}
+                'heading': headings[axis]()}
 
     def recalibration(self, sensors):
         '''Recalibrate the device if it wasn't significatly moving

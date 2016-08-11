@@ -71,9 +71,9 @@ class AbstractStrokeSplitter(object):
                                   transformed[2, 0]])
 
             if self.data.size == 0:
-                self.data = np.array([new_point])
+                self.data = new_point
             else:
-                self.data = np.vstack((self.data, np.array(new_point)))
+                self.data = np.vstack((self.data, new_point))
         else:
             self.timer -= 1
             if self.timer == 0:

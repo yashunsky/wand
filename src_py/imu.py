@@ -263,7 +263,11 @@ class IMU(object):
         return np.matrix(dcm_matrix) * update_matrix
 
     def euler_angles(self, dcm_matrix):
-        pitch = -np.arcsin(dcm_matrix[2, 0])
+        p = dcm_matrix[2, 0]
+        p = p if p < 1 else 1
+        p = p if p > -1 else -1
+        pitch = -np.arcsin(p)
+
         roll = np.arctan2(dcm_matrix[2, 1], dcm_matrix[2, 2])
         yaw = np.arctan2(dcm_matrix[1, 0], dcm_matrix[0, 0])
         return {'pitch': pitch, 'roll': roll, 'yaw': yaw}

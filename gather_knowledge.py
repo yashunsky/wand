@@ -3,7 +3,7 @@
 
 import json
 
-OUTPUT = 'migration_to_c/test_knowledge.json'
+OUTPUT = 'migration_to_c/generation_knowledge.json'
 
 STROKES = 'generation.json'
 
@@ -14,8 +14,8 @@ MAGNET_BOUNDERIES = ((744, -499, -491), (1857, 530, 426))
 ACCELERATION_TIME_CONST = 0.2  # s
 
 GYRO_MIN = 1000
-GYRO_TIMEOUT = 20
-MIN_STROKE_LENGTH = 20
+GYRO_TIMEOUT = 5
+MIN_STROKE_LENGTH = 10
 
 MIN_DIMENTION = 1.0  # conventional units
 

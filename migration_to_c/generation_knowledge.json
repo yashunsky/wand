@@ -1,6 +1,18 @@
 {
  "segmentation": 128, 
- "letters": {
+ "magnet_boundaries": [
+  [
+   744, 
+   -499, 
+   -491
+  ], 
+  [
+   1857, 
+   530, 
+   426
+  ]
+ ], 
+ "strokes": {
   "1": [
    [
     1.217548084232813e-17, 
@@ -6931,5 +6943,36 @@
     0.20998823328394806
    ]
   ]
+ }, 
+ "splitting": {
+  "min_length": 10, 
+  "gyro_timeout": 5, 
+  "min_dimention": 1.0, 
+  "acceleration_time_const": 0.2, 
+  "compare_limit": 1.5, 
+  "states": {
+   "stroke_done": 2, 
+   "too_short": 3, 
+   "unsupported": 5, 
+   "not_in_action": 1, 
+   "strange": 6, 
+   "in_action": 0, 
+   "too_small": 4
+  }, 
+  "gyro_min": 1000
+ }, 
+ "count_down": 10, 
+ "states": {
+  "calibration": 0, 
+  "idle": 1, 
+  "done_8": 10, 
+  "done_3": 4, 
+  "done_2": 5, 
+  "done_1": 2, 
+  "done_0": 3, 
+  "done_7": 8, 
+  "done_6": 9, 
+  "done_5": 6, 
+  "done_4": 7
  }
 }

@@ -12,10 +12,9 @@ import json
 from full_test import almoste_zero, almoste_equal
 
 
-STROKE_PATH = ('../raw/train/1ae92ed9-e850-11e5-8105-ac87a30aa589/' +
-               '1ed90bfa-e850-11e5-a5ec-ac87a30aa589.txt')
+STROKE_PATH = ('test_stroke.txt')
 
-DICT_PATH = 'migration_to_c.json'
+DICT_PATH = 'generation_knowledge.json'
 
 
 class CheckUnifyDefinition(unittest.TestCase):
@@ -53,7 +52,7 @@ class CheckUnifyDefinition(unittest.TestCase):
         with open(DICT_PATH, 'r') as f:
             dictionary = json.load(f)
 
-        description = dictionary['letters']['e5de21f0']
+        description = dictionary['strokes']['0']
 
         assert segmentation == dictionary['segmentation']
 

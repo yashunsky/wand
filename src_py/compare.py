@@ -8,7 +8,6 @@ import numpy as np
 from unify_definition import get_letter
 
 CORE_STROKES_FILE = '../generation.json'
-CORE_STROKES_NAMES = '../stroke_names.json'
 
 CELL_WIDTH = 10
 
@@ -35,16 +34,10 @@ if __name__ == '__main__':
 
     selector = Selector(CORE_STROKES_FILE)
 
-    with open(CORE_STROKES_NAMES, 'r') as f:
-        strokes = json.load(f)
-
-        strokes_names = strokes['names']
-        sequences = strokes['sequences']
+    strokes_names = selector.letters_dict
 
     def format_cell(text):
-        if text in strokes_names:
-            text = strokes_names[text]
-        else:
+        if text not in strokes_names:
             try:
                 text = '{: .5f}'.format(float(text))
             except ValueError:

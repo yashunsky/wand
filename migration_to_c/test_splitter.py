@@ -9,12 +9,22 @@ import numpy as np
 from src_py.input_generator import InputGenerator
 from src_py.imu import IMU
 from src_py.splitter import PipeSplitter as PipeSplitterPy
-from splitter_psedo_c import PipeSplitter as PipeSplitterC
+from c_wrap import set_imu_data
 
-from full_test import almoste_zero
+from src_py.unify_definition import get_letter
+
 
 INPUT_LOG = 'test_input.log'
-KNOWLEDGE = 'test_knowledge.json'
+KNOWLEDGE = 'generation_knowledge.json'
+
+
+def choose_best(strokes, accessible, compare_limit):
+    result = strokes[0][0]
+    if (strokes[0][1] != 0 and
+       strokes[1][1] / strokes[0][1] < compare_limit):
+        result = None
+
+    return result if result in accessible else None
 
 
 class CheckSplitter(unittest.TestCase):
@@ -27,9 +37,13 @@ class CheckSplitter(unittest.TestCase):
 
         imu = IMU(knowledge['magnet_boundaries'])
         splitter_py = PipeSplitterPy(knowledge['splitting'])
-        splitter_psedo_c = PipeSplitterC(knowledge['splitting'])
 
         stroke_done = knowledge['splitting']['states']['stroke_done']
+
+        accessible = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+        access_c = sum([2 ** x for x in accessible])
+        access_py = map(str, accessible)
 
         for sensor_data in input_generator(False, INPUT_LOG, False):
             imu_state = imu.calc(sensor_data)
@@ -38,19 +52,23 @@ class CheckSplitter(unittest.TestCase):
                                             imu_state['accel'],
                                             imu_state['heading'])
 
-            state_pcedo_c = splitter_psedo_c.set_data(sensor_data['delta'],
-                                                      imu_state['gyro'],
-                                                      imu_state['accel'],
-                                                      imu_state['heading'])
-            assert ((state_py['state'] == stroke_done) ==
-                    state_pcedo_c['stroke_done'])
+            result_c = set_imu_data(sensor_data['delta'],
+                                    np.linalg.norm(imu_state['gyro']),
+                                    np.copy(imu_state['accel']).tolist(),
+                                    np.copy(imu_state['heading']).tolist(),
+                                    access_c)
 
-            if state_py['stroke'] is None and state_pcedo_c['stroke'] is None:
-                continue
-
-            diff = np.linalg.norm(state_py['stroke'] - state_pcedo_c['stroke'])
-
-            assert almoste_zero(diff)
+            if result_c != -1:
+                assert state_py['state'] == stroke_done
+                strokes = get_letter(state_py['stroke'],
+                                     knowledge['segmentation'],
+                                     knowledge['strokes'])
+                result_py = choose_best(strokes, access_py,
+                                        knowledge['splitting']
+                                        ['compare_limit'])
+                assert result_c == int(result_py)
+            else:
+                assert state_py['state'] != stroke_done
 
 if __name__ == '__main__':
     unittest.main()

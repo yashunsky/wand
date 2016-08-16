@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <Python.h>
+#include "splitter.h"
 #include "unify_definition.h"
+
+static Splitter splitter = Splitter();
 
 static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
@@ -8,7 +11,7 @@ static void PyListToArray(PyObject * source, float *dest, int width, int height)
     PyObject* row;
     for (i = 0; i < width; i++) {
         if (height == 1) {
-            dest[i] = (float) PyFloat_AsDouble(PyList_GetItem(source, (Py_ssize_t) i));  
+            dest[i] = (float) PyFloat_AsDouble(PyList_GetItem(source, (Py_ssize_t) i));
         } else {
             row = PyList_GetItem(source, (Py_ssize_t) i);
             for (j = 0; j < height; j++) {
@@ -108,9 +111,33 @@ static PyObject* py_getStroke(PyObject* self, PyObject* args) {
     return PyInt_FromLong(getStroke(stroke, length, access));
 }
 
+
+static PyObject* py_setIMUData(PyObject* self, PyObject* args) {
+    int result;
+    float delta;
+    float gyro;
+    float accel[DIMENTION];
+    float heading[DIMENTION];
+    unsigned long access;
+
+    PyObject * accelObj;
+    PyObject * headingObj;
+
+    PyArg_ParseTuple(args, "ffO!O!k", &delta, &gyro, &PyList_Type, &accelObj, &PyList_Type, &headingObj, &access);
+
+    PyListToArray(accelObj, &accel[0], DIMENTION, 1);
+
+    PyListToArray(headingObj, &heading[0], DIMENTION, 1);
+
+    result = splitter.setIMUData(delta, gyro, accel, heading, access);
+
+    return PyInt_FromLong(result);
+}
+
 static PyMethodDef c_methods[] = {
     {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
+    {"set_imu_data", py_setIMUData, METH_VARARGS},
     {"get_dist", py_getDist, METH_VARARGS},
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
     {"check_stroke", py_checkStroke, METH_VARARGS},
@@ -118,6 +145,8 @@ static PyMethodDef c_methods[] = {
     {NULL, NULL}
 };
 
-PyMODINIT_FUNC initc_wrap(void) {
-    (void) Py_InitModule("c_wrap", c_methods);
+extern "C" {
+    PyMODINIT_FUNC initc_wrap(void) {
+        (void) Py_InitModule("c_wrap", c_methods);
+    }
 }

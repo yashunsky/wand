@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include "matrix.h"
 #include "unify_definition.h"
 
 float getDist(const float a[DIMENTION], const float b[DIMENTION]) {
@@ -12,13 +13,6 @@ float getDist(const float a[DIMENTION], const float b[DIMENTION]) {
         delta += d * d;
     }
     return sqrt(delta);
-}
-
-void copyPoint(float source[DIMENTION], float dest[DIMENTION]) {
-    int i;
-    for (i = 0; i < DIMENTION; i++) {
-        dest[i] = source[i];
-    }    
 }
 
 void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEGMENTATION][DIMENTION], int length) {
@@ -91,13 +85,23 @@ int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length, unsigned l
     int i;
     float error;
     float min_error = MAX_ERROR;
+    float second = MAX_ERROR * COMPARE_LIMIT;
     int strokeId = -1;
     for (i = 0; i < STROKES_COUNT; i++) {
-        error = checkStroke(unifiedStroke, STROKES[i]);
-        if (error < min_error) {
-            strokeId = i;
-            min_error = error;
+        if ((access >> i) & 0x01) {
+            error = checkStroke(unifiedStroke, STROKES[i]);
+            if (error < min_error) {
+                if (strokeId > -1) {
+                    second = min_error;
+                }
+                min_error = error;
+                strokeId = i;
+            }
         }
+    }
+
+    if ((min_error != 0) && ((second / min_error) <= COMPARE_LIMIT)) {
+        return -1;
     }
     return strokeId;
 }

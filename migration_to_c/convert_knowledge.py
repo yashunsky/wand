@@ -80,9 +80,17 @@ const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1] = {{
 
     h_text += header + '\n'
 
-    h_text += 'extern float const STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1];\n'
+    h_text += 'extern const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1];\n'
+    h_text += 'extern const float MAGNETS_BOUNDARIES[2][DIMENTION];\n'
 
     c_text += formated_strokes
+
+    c_text += '''
+const float MAGNETS_BOUNDARIES[2][DIMENTION] =
+{formated_strokes}
+;'''.format(formated_strokes=format_formated_strokes_to_c(knowledge['magnet_boundaries']))
+
+    c_text += '\n'
 
     h_text += '\n\n#endif\n'
 

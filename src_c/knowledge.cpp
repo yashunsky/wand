@@ -1178,3 +1178,9 @@ const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1] = {
         { 0.17388,  0.88660,  0.42860,  0.20999}
     }
 };
+const float MAGNETS_BOUNDARIES[2][DIMENTION] =
+    {
+        { 744.00000, -499.00000, -491.00000},
+        { 1857.00000,  530.00000,  426.00000}
+    }
+;

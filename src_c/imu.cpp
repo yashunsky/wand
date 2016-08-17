@@ -128,7 +128,7 @@ float IMU::compassHeading(const float mag[DIMENTION]) {
     float magX, magY;
 
     for (int i=0; i<DIMENTION; i++) {
-        magnetsNorm = ((mag[i] - MAGNETS_BOUNDARIES[0][i]) / (MAGNETS_BOUNDARIES[1][i] - MAGNETS_BOUNDARIES[0][i])) - MAGNETS_OFFSET;
+        magnetsNorm[i] = ((mag[i] - MAGNETS_BOUNDARIES[0][i]) / (MAGNETS_BOUNDARIES[1][i] - MAGNETS_BOUNDARIES[0][i])) - MAGNETS_OFFSET;
     }
 
     magX = (magnetsNorm[0] * cosPitch + magnetsNorm[1] * sinRoll * sinPitch + magnetsNorm[2] * cosRoll * sinPitch);

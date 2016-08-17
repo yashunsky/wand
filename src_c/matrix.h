@@ -3,7 +3,7 @@
 
 #include "knowledge.h"
 
-void copyPoint(float source[DIMENTION], float dest[DIMENTION]);
+void copyPoint(const float source[DIMENTION], float dest[DIMENTION]);
 void addVec(float vr[DIMENTION], const float v1[DIMENTION], const float v2[DIMENTION]);
 void subVec(float vr[DIMENTION], const float v1[DIMENTION], const float v2[DIMENTION]);
 void scaleVec(float vr[DIMENTION], const float v[DIMENTION], const float k);

@@ -1,7 +1,7 @@
 #include <math.h>
 #include "matrix.h"
 
-void copyPoint(float source[DIMENTION], float dest[DIMENTION]) {
+void copyPoint(const float source[DIMENTION], float dest[DIMENTION]) {
     int i;
     for (i = 0; i < DIMENTION; i++) {
         dest[i] = source[i];
@@ -39,7 +39,7 @@ float norm(const float v[DIMENTION]) {
 }
 
 void normInplace(float v[DIMENTION]) {
-    scaleVec(v, v, 1 / norm(v));
+    scaleVec(v, v, 1.0 / norm(v));
 }
 
 float dot(const float v1[DIMENTION], const float v2[DIMENTION]) {

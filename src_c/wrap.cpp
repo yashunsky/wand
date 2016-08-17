@@ -134,14 +134,61 @@ static PyObject* py_setIMUData(PyObject* self, PyObject* args) {
     return PyInt_FromLong(result);
 }
 
+static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
+    float delta;
+    float acc[DIMENTION];
+    float gyro[DIMENTION];
+    float mag[DIMENTION];
+
+    PyObject * accObj;
+    PyObject * gyroObj;
+    PyObject * magObj;
+
+    bool outInClaibration;
+    float outGyro;
+    float outAcc[DIMENTION];
+    float outHeading[DIMENTION];    
+
+    PyArg_ParseTuple(args, "fO!O!O!", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
+
+    PyListToArray(accObj, &acc[0], DIMENTION, 1);
+    PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
+    PyListToArray(magObj, &mag[0], DIMENTION, 1);
+    
+    /* magic */
+
+    outInClaibration = true;
+    outGyro = 0.1;
+    outAcc[0] = 0.2;
+    outAcc[1] = 0.3;
+    outAcc[2] = 0.4;
+    outHeading[0] = 0.5;
+    outHeading[1] = 0.6;
+    outHeading[2] = 0.7;
+
+    /* magic */
+
+    PyObject * outAccObj = arrayToPyList(outAcc, DIMENTION, 1);
+    PyObject * outHeadingObj = arrayToPyList(outHeading, DIMENTION, 1);
+    
+    PyObject * result = PyTuple_New(4);
+    PyTuple_SET_ITEM(result, 0, PyBool_FromLong(outInClaibration ? 1 : 0));
+    PyTuple_SET_ITEM(result, 1, PyFloat_FromDouble(outGyro));
+    PyTuple_SET_ITEM(result, 2, outAccObj);
+    PyTuple_SET_ITEM(result, 3, outHeadingObj);
+
+    return result;
+}
+
 static PyMethodDef c_methods[] = {
     {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
-    {"set_imu_data", py_setIMUData, METH_VARARGS},
     {"get_dist", py_getDist, METH_VARARGS},
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
     {"check_stroke", py_checkStroke, METH_VARARGS},
     {"get_stroke", py_getStroke, METH_VARARGS},
+    {"set_imu_data", py_setIMUData, METH_VARARGS},
+    {"set_sensor_data", py_setSensorData, METH_VARARGS},
     {NULL, NULL}
 };
 

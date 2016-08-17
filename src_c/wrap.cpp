@@ -2,8 +2,10 @@
 #include <Python.h>
 #include "splitter.h"
 #include "unify_definition.h"
+#include "imu.h"
 
 static Splitter splitter = Splitter();
+static IMU imu = IMU();
 
 static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
@@ -139,6 +141,7 @@ static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
     float acc[DIMENTION];
     float gyro[DIMENTION];
     float mag[DIMENTION];
+    int axis;
 
     PyObject * accObj;
     PyObject * gyroObj;
@@ -149,24 +152,13 @@ static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
     float outAcc[DIMENTION];
     float outHeading[DIMENTION];    
 
-    PyArg_ParseTuple(args, "fO!O!O!", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
+    PyArg_ParseTuple(args, "fO!O!O!i", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj, &axis);
 
     PyListToArray(accObj, &acc[0], DIMENTION, 1);
     PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
     PyListToArray(magObj, &mag[0], DIMENTION, 1);
-    
-    /* magic */
 
-    outInClaibration = true;
-    outGyro = 0.1;
-    outAcc[0] = 0.2;
-    outAcc[1] = 0.3;
-    outAcc[2] = 0.4;
-    outHeading[0] = 0.5;
-    outHeading[1] = 0.6;
-    outHeading[2] = 0.7;
-
-    /* magic */
+    outInClaibration = imu.calc(delta, acc, gyro, mag, axis, &outGyro, outAcc, outHeading);
 
     PyObject * outAccObj = arrayToPyList(outAcc, DIMENTION, 1);
     PyObject * outHeadingObj = arrayToPyList(outHeading, DIMENTION, 1);

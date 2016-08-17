@@ -54,8 +54,8 @@ class CheckSplitter(unittest.TestCase):
 
             result_c = set_imu_data(sensor_data['delta'],
                                     np.linalg.norm(imu_state['gyro']),
-                                    np.copy(imu_state['accel']).tolist(),
-                                    np.copy(imu_state['heading']).tolist(),
+                                    imu_state['accel'].tolist(),
+                                    imu_state['heading'].tolist(),
                                     access_c)
 
             if result_c != -1:

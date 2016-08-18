@@ -53,10 +53,12 @@ private:
 
     void updateDcmMatrix(const float gyro[DIMENTION]);
     float calculateAccelWeight(const float acc[DIMENTION]);
-    void calculateError(const float acc[DIMENTION], float * errorYaw, float * errorRollPitch);
+    void calculateError(const float acc[DIMENTION], float errorYaw[DIMENTION], float errorRollPitch[DIMENTION]);
 
-    void driftCorrection(float accelWeight, float errorYaw, float errorRollPitch);
+    void driftCorrection(float accelWeight, float errorYaw, float errorRollPitch[DIMENTION]);
     void eulerAngles();
+
+    void renorm(float vr[DIMENTION], const float v[DIMENTION]);
 
 
 public:

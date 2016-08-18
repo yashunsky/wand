@@ -95,8 +95,9 @@ void IMU::mainLoop(const float delta, const float accIn[DIMENTION], const float 
     updateDcmMatrix(gyro);
 
     float accelWeight = calculateAccelWeight(acc);
-    float errorYaw, errorRollPitch;
-    calculateError(acc, &errorYaw, &errorRollPitch);
+    float errorYaw[DIMENTION];
+    float errorRollPitch[DIMENTION];
+    calculateError(acc, errorYaw, errorRollPitch);
     driftCorrection(accelWeight, errorYaw, errorRollPitch);
     eulerAngles();
 }
@@ -139,20 +140,45 @@ float IMU::compassHeading(const float mag[DIMENTION]) {
 
 void IMU::updateDcmMatrix(const float gyro[DIMENTION]) {
     //     self.dcm_matrix = self.normalize(self.dcm_matrix)
+
+    float temporary[DIMENTION][DIMENTION];
+    float error = -dot(dcmMatrix[0], dcmMatrix[1]) * 0.5;
+
+    scaleVec(temporary[0], dcmMatrix[1], error);
+    addVec(temporary[0], temporary[0], dcmMatrix[0]);
+
+    scaleVec(temporary[1], dcmMatrix[0], error);
+    addVec(temporary[1], temporary[1], dcmMatrix[1]);
+
+    cross(temporary[2], temporary[0], temporary[1]);
+
+    for (int i=0; i<DIMENTION; i++) {
+        renorm(dcmMatrix[i], temporary[i]);
+    }
 }
 
 float IMU::calculateAccelWeight(const float acc[DIMENTION]) {
-    return 0;
+    float accelMagnitude = norm(acc) / GRAVITY;
+    float accelWeight = 1 - 2 * fabs(1 - accelMagnitude);
+
+    if (accelWeight < 0) {return 0;}
+    if (accelWeight > 1) {return 1;}
+    return accelWeight;
 }
 
-void IMU::calculateError(const float acc[DIMENTION], float * errorYaw, float * errorRollPitch) {
+void IMU::calculateError(const float acc[DIMENTION], float errorYaw[DIMENTION], float errorRollPitch[DIMENTION]) {
 
 }
 
-void IMU::driftCorrection(float accelWeight, float errorYaw, float errorRollPitch) {
+void IMU::driftCorrection(float accelWeight, float errorYaw[DIMENTION], float errorRollPitch[DIMENTION]) {
 
 }
 
 void IMU::eulerAngles() {
 
+}
+
+void IMU::renorm(float vr[DIMENTION], const float v[DIMENTION]) {
+    float coeff = 0.5 * (3 - dot(v, v));
+    scaleVec(vr, v, coeff);
 }

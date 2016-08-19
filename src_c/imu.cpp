@@ -1,6 +1,7 @@
 #include "imu.h"
 #include "matrix.h"
 #include <math.h>
+#include <stdio.h>
 
 IMU::IMU() {
     magHeading = 0;
@@ -22,7 +23,6 @@ IMU::IMU() {
 
     acceleration[2] = GRAVITY;
 }
-
 
 bool IMU::calc(const float delta, 
                const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION],
@@ -66,9 +66,10 @@ void IMU::recalibration(const float acc[DIMENTION], const float gyro[DIMENTION],
     calcMean(aStack, accelerometerReadingsOffset);
     calcMean(gStack, gyroscopeReadingsOffset);
 
-    if ((calcDeviation(aStack, accelerometerReadingsOffset) > ACCELEROMETER_DIVIATION) 
-            || (calcDeviation(gStack, gyroscopeReadingsOffset) > GYROSCOPE_DIVIATION))
-    {
+    float aDeviation = calcDeviation(aStack, accelerometerReadingsOffset);
+    float gDeviation = calcDeviation(gStack, gyroscopeReadingsOffset);
+
+    if (( aDeviation > ACCELEROMETER_DIVIATION) || (gDeviation > GYROSCOPE_DIVIATION)) {
         return;
     }
 
@@ -92,30 +93,58 @@ void IMU::mainLoop(const float delta, const float accIn[DIMENTION], const float 
 
     magHeading = compassHeading(magIn);
 
-    updateDcmMatrix(gyro);
+    updateDcmMatrix(delta, gyro);
 
     float accelWeight = calculateAccelWeight(acc);
+
     float errorYaw[DIMENTION];
     float errorRollPitch[DIMENTION];
     calculateError(acc, errorYaw, errorRollPitch);
+
     driftCorrection(accelWeight, errorYaw, errorRollPitch);
+
     eulerAngles();
 }
 
 void IMU::getGlobalAcceleration(float acc[DIMENTION]) {
-
+    adjustVecT(acc, acceleration, dcmMatrix);
+    scaleVec(acc, acc, G / GRAVITY);
+    acc[DIMENTION - 1] -= G;
 }
 
 void IMU::getHeading(int axis, float heading[DIMENTION]) {
+    for (int i=0; i<DIMENTION; i++) {
+        heading[i] = dcmMatrix[i][axis];
+    }
 
 }
 
 void IMU::calcMean(const float data[CALIBRATION_LENGTH][DIMENTION], float mean[DIMENTION]) {
-
+    for (int i=0; i<DIMENTION; i++) {
+        float sum = 0;
+        for (int j=0; j<CALIBRATION_LENGTH; j++) {
+            sum += data[j][i];
+        }
+        mean[i] = sum / CALIBRATION_LENGTH;
+    }
 }
 
 float IMU::calcDeviation(const float data[CALIBRATION_LENGTH][DIMENTION], const float mean[DIMENTION]) {
-    return 0;
+    float maxDeviation = 0;
+
+    for (int i=0; i<DIMENTION; i++) {
+        float sum = 0;
+        for (int j=0; j<CALIBRATION_LENGTH; j++) {
+            float delta = data[j][i] - mean[i];
+            sum += delta * delta;
+        }
+        float deviation = sqrt(sum / (CALIBRATION_LENGTH));
+        if (deviation > maxDeviation) {
+            maxDeviation = deviation;
+        }
+    }
+
+    return maxDeviation;
 }
 
 float IMU::compassHeading(const float mag[DIMENTION]) {
@@ -138,8 +167,18 @@ float IMU::compassHeading(const float mag[DIMENTION]) {
     return atan2(-magY, magX);
 }
 
-void IMU::updateDcmMatrix(const float gyro[DIMENTION]) {
-    //     self.dcm_matrix = self.normalize(self.dcm_matrix)
+void IMU::updateDcmMatrix(const float delta, const float gyro[DIMENTION]) {
+    float omega[DIMENTION];
+    addVec(omega, omegaI, omegaP);
+    addVec(omega, omega, gyro);
+    scaleVec(omega, omega, delta);
+
+    float updateMatrix[DIMENTION][DIMENTION] =
+        {{        1, -omega[2],  omega[1]},
+         { omega[2],         1, -omega[0]},
+         {-omega[1],  omega[0],         1}};
+
+    multiply(dcmMatrix, dcmMatrix, updateMatrix);
 
     float temporary[DIMENTION][DIMENTION];
     float error = -dot(dcmMatrix[0], dcmMatrix[1]) * 0.5;
@@ -167,15 +206,35 @@ float IMU::calculateAccelWeight(const float acc[DIMENTION]) {
 }
 
 void IMU::calculateError(const float acc[DIMENTION], float errorYaw[DIMENTION], float errorRollPitch[DIMENTION]) {
+    float magHeadingX = cos(magHeading);
+    float magHeadingY = sin(magHeading);
+    float errorCourse = ((dcmMatrix[0][0] * magHeadingY) - (dcmMatrix[1][0] * magHeadingX));
 
+    scaleVec(errorYaw, dcmMatrix[2], errorCourse);
+    cross(errorRollPitch, acc, dcmMatrix[2]);
 }
 
 void IMU::driftCorrection(float accelWeight, float errorYaw[DIMENTION], float errorRollPitch[DIMENTION]) {
+    float scaledOmegaP[DIMENTION];
+    float scaledOmegaI[DIMENTION];
 
+    float additionalOmegaI[DIMENTION];
+
+    scaleVec(scaledOmegaP, errorYaw, KP_YAW);
+    scaleVec(omegaP, errorRollPitch, KP_ROLLPITCH * accelWeight);
+    addVec(omegaP, omegaP, scaledOmegaP);
+
+    scaleVec(scaledOmegaI, errorYaw, KI_YAW); 
+    scaleVec(additionalOmegaI, errorRollPitch, KI_ROLLPITCH * accelWeight);
+
+    addVec(omegaI, omegaI, additionalOmegaI);
+    addVec(omegaI, omegaI, scaledOmegaI);    
 }
 
 void IMU::eulerAngles() {
-
+    angles[0] = atan2(dcmMatrix[2][1], dcmMatrix[2][2]);
+    angles[1] = -asin(dcmMatrix[2][0]);
+    angles[2] = atan2(dcmMatrix[1][0], dcmMatrix[0][0]);
 }
 
 void IMU::renorm(float vr[DIMENTION], const float v[DIMENTION]) {

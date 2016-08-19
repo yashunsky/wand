@@ -28,6 +28,8 @@
 import numpy as np
 
 
+D_TYPE = np.float32
+
 # These are environment constants.
 # Don't mess with them unless you know what you are doing.
 GRAVITY = 256
@@ -50,32 +52,32 @@ class IMU(object):
     def __init__(self, magnet_boundaries):
         self.magnet_boundaries = map(np.array, magnet_boundaries)
 
-        self.gyroscope_readings_offset = np.zeros(3)
-        self.accelerometer_readings_offset = np.zeros(3)
+        self.gyroscope_readings_offset = np.zeros(3, dtype=D_TYPE)
+        self.accelerometer_readings_offset = np.zeros(3, dtype=D_TYPE)
 
         self.mag_heading = 0
 
-        self.omega_p = np.zeros(3)
-        self.omega_i = np.zeros(3)
+        self.omega_p = np.zeros(3, dtype=D_TYPE)
+        self.omega_i = np.zeros(3, dtype=D_TYPE)
 
         self.angles = {'roll': 0, 'pitch': 0, 'yaw': 0}
 
-        self.dcm_matrix = np.matrix(np.eye(3))
+        self.dcm_matrix = np.matrix(np.eye(3), dtype=D_TYPE)
 
         self.in_calibration = True
 
-        self.acceleration = np.array([0, 0, GRAVITY])
-        self.gyro = np.array([0, 0, 0])
+        self.acceleration = np.array([0, 0, GRAVITY], dtype=D_TYPE)
+        self.gyro = np.array([0, 0, 0], dtype=D_TYPE)
 
-        self.a_stack = np.array([0, 0, 0])
-        self.g_stack = np.array([0, 0, 0])
+        self.a_stack = None
+        self.g_stack = None
 
     def parse_data(self, data):
         delay = data['delta']
 
-        accelerometer_readings = np.array(data['acc']) / ACCELEROMETER_SCALE
-        magnetometer_readings = np.array(data['mag'])
-        gyroscope_readings = np.array(data['gyro'])
+        accelerometer_readings = np.array(data['acc'], dtype=D_TYPE) / ACCELEROMETER_SCALE
+        magnetometer_readings = np.array(data['mag'], dtype=D_TYPE)
+        gyroscope_readings = np.array(data['gyro'], dtype=D_TYPE)
 
         sensors = {'accelerometer': accelerometer_readings,
                    'magnetometer': magnetometer_readings,
@@ -103,11 +105,17 @@ class IMU(object):
         '''Recalibrate the device if it wasn't significatly moving
         within last CALIBRATION_LENGTH cycles'''
 
-        self.a_stack = np.vstack((self.a_stack,
-                                  sensors['accelerometer']))[-CALIBRATION_LENGTH:]
+        if self.a_stack is None:
+            self.a_stack = sensors['accelerometer']
+        else:
+            self.a_stack = np.vstack((self.a_stack,
+                                     sensors['accelerometer']))[-CALIBRATION_LENGTH:]
 
-        self.g_stack = np.vstack((self.g_stack,
-                                  sensors['gyroscope']))[-CALIBRATION_LENGTH:]
+        if self.g_stack is None:
+            self.g_stack = sensors['gyroscope']
+        else:
+            self.g_stack = np.vstack((self.g_stack,
+                                     sensors['gyroscope']))[-CALIBRATION_LENGTH:]
 
         if len(self.a_stack) < CALIBRATION_LENGTH:
             return
@@ -129,8 +137,8 @@ class IMU(object):
                   np.linalg.norm(self.accelerometer_readings_offset))
         self.accelerometer_readings_offset -= GRAVITY * g_axis
 
-        self.a_stack = np.array([0, 0, 0])
-        self.g_stack = np.array([0, 0, 0])
+        self.a_stack = None
+        self.g_stack = None
 
         self.in_calibration = False
 
@@ -147,12 +155,16 @@ class IMU(object):
         self.dcm_matrix = self.matrix_update(
             self.dcm_matrix, sensors['gyroscope'], delay,
             self.omega_p, self.omega_i)
+
         self.dcm_matrix = self.normalize(self.dcm_matrix)
         accel_weight = self.calculate_accel_weight(sensors['accelerometer'])
+
         error_yaw, error_roll_pitch = self.calculate_error(
             sensors['accelerometer'], self.dcm_matrix, self.mag_heading)
+
         self.omega_p, self.omega_i = self.drift_correction(
             accel_weight, error_yaw, error_roll_pitch, self.omega_i)
+
         self.angles = self.euler_angles(self.dcm_matrix)
 
     def offset_sensors(self, sensors):
@@ -192,7 +204,7 @@ class IMU(object):
         return array * renorm
 
     def normalize(self, dcm_matrix):
-        temporary = np.matrix(np.zeros((3, 3)))
+        temporary = np.matrix(np.zeros((3, 3)), dtype=D_TYPE)
         error = -np.dot(dcm_matrix[0, :].A1, dcm_matrix[1, :].A1) * 0.5
 
         temporary[0, :] = dcm_matrix[1, :] * error + dcm_matrix[0, :]
@@ -213,7 +225,7 @@ class IMU(object):
 
         # return np.matrix(np.multiply(renorm_matrix, temporary))
 
-        return np.matrix([self.renorm(temp.A1) for temp in temporary])
+        return np.matrix([self.renorm(temp.A1) for temp in temporary], dtype=D_TYPE)
 
     def calculate_accel_weight(self, acceleration):
         accel_magnitude = np.linalg.norm(acceleration) / GRAVITY
@@ -244,6 +256,7 @@ class IMU(object):
                    scaled_omega_p)
 
         scaled_omega_i = error_yaw * KI_YAW
+
         omega_i = (original_omega_i +
                    error_roll_pitch * KI_ROLLPITCH * accel_weight +
                    scaled_omega_i)
@@ -258,7 +271,7 @@ class IMU(object):
 
         update_matrix = np.matrix([[1, -z, y],
                                    [z, 1, -x],
-                                   [-y, x, 1]])
+                                   [-y, x, 1]], dtype=D_TYPE)
 
         return np.matrix(dcm_matrix) * update_matrix
 
@@ -282,7 +295,7 @@ class IMU(object):
         return self.dcm_matrix[:, 2].A1
 
     def get_global_acceleration(self):
-        local_a = np.matrix([self.acceleration])
+        local_a = np.matrix([self.acceleration], dtype=D_TYPE)
         global_a = (local_a * self.dcm_matrix.T).A1 / GRAVITY
         global_a = global_a - np.array([0, 0, 1])
         global_a = global_a * G

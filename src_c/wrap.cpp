@@ -3,9 +3,13 @@
 #include "splitter.h"
 #include "unify_definition.h"
 #include "imu.h"
+#include "state_machine.h"
 
 static Splitter splitter = Splitter();
 static IMU imu = IMU();
+static StateMachine SM1 = StateMachine(0);
+static StateMachine SM2 = StateMachine(0);
+static StateMachine SMZ = StateMachine(2);
 
 static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
@@ -172,6 +176,38 @@ static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
     return result;
 }
 
+
+static PyObject* py_setSMData(PyObject* self, PyObject* args) {
+    float delta;
+    float acc[DIMENTION];
+    float gyro[DIMENTION];
+    float mag[DIMENTION];
+    int dest;
+    unsigned long access;
+
+    PyObject * accObj;
+    PyObject * gyroObj;
+    PyObject * magObj;   
+
+    PyArg_ParseTuple(args, "ifO!O!O!k", &dest, &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj, &access);
+
+    PyListToArray(accObj, &acc[0], DIMENTION, 1);
+    PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
+    PyListToArray(magObj, &mag[0], DIMENTION, 1);
+
+    StateMachine * sm;
+
+    switch (dest) {
+        case 0: sm = &SM1; break;
+        case 1: sm = &SM2; break;
+        default: sm = &SMZ; break;
+    }
+
+    return PyInt_FromLong(sm->setData(delta, acc, gyro, mag, access));
+}
+
+
+
 static PyMethodDef c_methods[] = {
     {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
@@ -181,6 +217,7 @@ static PyMethodDef c_methods[] = {
     {"get_stroke", py_getStroke, METH_VARARGS},
     {"set_imu_data", py_setIMUData, METH_VARARGS},
     {"set_sensor_data", py_setSensorData, METH_VARARGS},
+    {"set_sm_data", py_setSMData, METH_VARARGS},
     {NULL, NULL}
 };
 

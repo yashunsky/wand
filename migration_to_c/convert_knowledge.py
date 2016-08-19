@@ -64,6 +64,10 @@ def convert_knowledge(knowledge):
     h_text += format_define_to_c('MIN_STROKE_LENGTH', knowledge['splitting']['min_length'])
     h_text += format_define_to_c('COMPARE_LIMIT', knowledge['splitting']['compare_limit'])
 
+    h_text += format_define_to_c('CALIBRATION', knowledge['states']['calibration'])
+    h_text += format_define_to_c('IDLE', knowledge['states']['idle'])
+    h_text += format_define_to_c('STATES_OFFSET', knowledge['states']['idle'] + 1)
+
     header = ''
 
     formated_strokes = []

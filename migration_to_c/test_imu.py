@@ -9,7 +9,7 @@ import numpy as np
 from src_py.input_generator import InputGenerator
 from src_py.imu import IMU
 from c_wrap import set_sensor_data
-from full_test import almoste_equal, deep_almose_equal
+from almoste import almoste_equal, deep_almose_equal
 
 INPUT_LOG = 'test_input.log'
 KNOWLEDGE = 'generation_knowledge.json'

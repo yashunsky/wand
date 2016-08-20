@@ -5,11 +5,19 @@
 #include "imu.h"
 #include "state_machine.h"
 
+#include <stdint.h>
+#include "extern_sm/generation_light.h"
+#include "extern_sm/service.h"
+
+#include "full_state_machine.h"
+
 static Splitter splitter = Splitter();
 static IMU imu = IMU();
 static StateMachine SM1 = StateMachine(0);
 static StateMachine SM2 = StateMachine(0);
 static StateMachine SMZ = StateMachine(2);
+
+static FullStateMachine FSM[2] = {FullStateMachine(0), FullStateMachine(0)};
 
 static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
@@ -206,9 +214,64 @@ static PyObject* py_setSMData(PyObject* self, PyObject* args) {
     return PyInt_FromLong(sm->setData(delta, acc, gyro, mag, access));
 }
 
+static PyObject* py_setSignal(PyObject* self, PyObject* args) {
+  int sig;
+  PyArg_ParseTuple(args, "i", &sig);
 
+  QEvt e;
 
-static PyMethodDef c_methods[] = {
+  e.sig = (uint8_t) sig;
+  QMSM_DISPATCH(the_hand, &e);
+
+  uint8_t color, blink, vibro;
+
+  getState(the_hand, &color, &blink, &vibro);
+
+  PyObject * result = PyTuple_New(3);
+  PyTuple_SET_ITEM(result, 0, PyInt_FromLong(color));
+  PyTuple_SET_ITEM(result, 1, PyInt_FromLong(blink));
+  PyTuple_SET_ITEM(result, 2, PyInt_FromLong(vibro));
+
+  return result;  
+}
+
+static PyObject* py_getQ_USER_SIG(PyObject* self, PyObject* args) {
+  return PyInt_FromLong(Q_USER_SIG);
+}
+
+static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
+    float delta;
+    float acc[DIMENTION];
+    float gyro[DIMENTION];
+    float mag[DIMENTION];
+    int dest;
+    unsigned long access;
+
+    PyObject * accObj;
+    PyObject * gyroObj;
+    PyObject * magObj;   
+
+    PyArg_ParseTuple(args, "ifO!O!O!k", &dest, &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj, &access);
+
+    PyListToArray(accObj, &acc[0], DIMENTION, 1);
+    PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
+    PyListToArray(magObj, &mag[0], DIMENTION, 1);
+
+    uint8_t color, blink, vibro;
+
+    dest = dest > 1 ? 1 : 0;
+
+    FSM[dest].setData(delta, acc, gyro, mag, access, &color, &blink, &vibro);
+
+    PyObject * result = PyTuple_New(3);
+    PyTuple_SET_ITEM(result, 0, PyInt_FromLong(color));
+    PyTuple_SET_ITEM(result, 1, PyInt_FromLong(blink));
+    PyTuple_SET_ITEM(result, 2, PyInt_FromLong(vibro));
+
+    return result;     
+}
+
+static PyMethodDef c_methods[] = {    
     {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
     {"get_dist", py_getDist, METH_VARARGS},
@@ -218,11 +281,16 @@ static PyMethodDef c_methods[] = {
     {"set_imu_data", py_setIMUData, METH_VARARGS},
     {"set_sensor_data", py_setSensorData, METH_VARARGS},
     {"set_sm_data", py_setSMData, METH_VARARGS},
+    {"set_fsm_data", py_setFSMData, METH_VARARGS},    
+    {"set_signal", py_setSignal, METH_VARARGS},
+    {"get_q_user_sig", py_getQ_USER_SIG, METH_VARARGS},
     {NULL, NULL}
 };
 
 extern "C" {
     PyMODINIT_FUNC initc_wrap(void) {
+        DebugSM = 0;
+        Hand_ctor(the_hand);
         (void) Py_InitModule("c_wrap", c_methods);
     }
 }

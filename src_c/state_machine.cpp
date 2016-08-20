@@ -2,9 +2,8 @@
 
 StateMachine::StateMachine(int axis) {
     this->axis = axis;
-    this->imu = IMU();
-    this->splitter = Splitter();
 }
+
 
 int StateMachine::setData(const float delta,
     const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION], 

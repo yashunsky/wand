@@ -68,7 +68,6 @@ class StateMachine(object):
                self.knowledge['splitting']['states']['stroke_done']):
 
                 if output != OUTPUT_TEST:
-                    print splitter_state['stroke']
                     folder = '../raw/simple/%s' % self.prefix
                     if not path.exists(folder):
                         makedirs(folder)
@@ -82,7 +81,7 @@ class StateMachine(object):
                 choice = self.choose_best(strokes, known)
                 if choice is not None:
                     next_state = (self.knowledge['states']
-                                  ['demo_%s' % choice])
+                                  ['done_%s' % choice])
                 else:
                     split_state = (self.knowledge['splitting']
                                    ['states']['strange'])

@@ -57,7 +57,8 @@ class DemoWidget(GenerationWidget):
         self.popup_count_down = 0
 
         self.input_generator = InputGenerator(serial_port='/dev/tty.usbmodem1411',
-                                              dual=True)
+                                              dual=True,
+                                              gyro_remap=lambda g: [g[1], -g[0], g[2]])
 
         self.listener = QThread()
 
@@ -109,12 +110,11 @@ class DemoWidget(GenerationWidget):
                 elif self.split_state == 'unsupported':
                     self.set_popup('splitting', u'какой-то не отсюда', 1)
 
-            if 'demo' in self.state:
-                stroke_name = self.knowledge['stroke_names'][self.state[5:]]
-                self.set_popup('demo', stroke_name)
+            if 'done' in self.state:
+                self.set_popup('idle', self.state[5:])
 
             if (self.state in FEEDBACK):
-                self.input_generator.set_feedback(FEEDBACK[self.state])
+                self.input_generator.set_feedback(0, FEEDBACK[self.state])
                 self.reset_timer.start()
 
             if self.popup_count_down > 0:
@@ -133,7 +133,7 @@ class DemoWidget(GenerationWidget):
         super(DemoWidget, self).closeEvent(event)
 
     def light_off(self):
-        self.input_generator.set_feedback(FEEDBACK['none'])
+        self.input_generator.set_feedback(0, FEEDBACK['none'])
         self.reset_timer.stop()
 
 if __name__ == '__main__':

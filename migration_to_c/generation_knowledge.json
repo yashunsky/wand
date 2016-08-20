@@ -6945,8 +6945,8 @@
   ]
  }, 
  "splitting": {
-  "min_length": 10, 
-  "gyro_timeout": 5, 
+  "min_length": 20, 
+  "gyro_timeout": 20, 
   "min_dimention": 1.0, 
   "acceleration_time_const": 0.2, 
   "compare_limit": 1.5, 

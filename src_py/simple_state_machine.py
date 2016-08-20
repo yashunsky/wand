@@ -7,7 +7,6 @@ import numpy as np
 
 from imu import IMU
 from splitter import PipeSplitter
-from sequence_processor import SequenceProcessor
 
 from unify_definition import get_letter as get_stroke
 
@@ -23,8 +22,8 @@ class StateMachine(object):
         self.knowledge = knowledge
 
         self.imu = IMU(self.knowledge['magnet_boundaries'])
-        self.sp = SequenceProcessor(self.knowledge['sequences'])
         self.splitter = PipeSplitter(self.knowledge['splitting'])
+        self.compare_limit = self.knowledge['splitting']['compare_limit']
 
         self.count_down = 0
 
@@ -37,6 +36,14 @@ class StateMachine(object):
 
     def interface_callback(self, state):
         pass
+
+    def choose_best(self, strokes, accessible):
+        result = strokes[0][0]
+        if (strokes[0][1] != 0 and
+           strokes[1][1] / strokes[0][1] < self.compare_limit):
+            result = None
+
+        return result if result in accessible else None
 
     def __call__(self, sensor_data, known, output=OUTPUT_MAIN):
         imu_state = self.imu.calc(sensor_data, 'x')
@@ -72,7 +79,7 @@ class StateMachine(object):
                                      self.knowledge['segmentation'],
                                      self.knowledge['strokes'])
 
-                choice = self.sp.choose_best(strokes, known)
+                choice = self.choose_best(strokes, known)
                 if choice is not None:
                     next_state = (self.knowledge['states']
                                   ['demo_%s' % choice])

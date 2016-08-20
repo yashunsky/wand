@@ -26,6 +26,8 @@ class InputGenerator(object):
 
         self.prev_timestamp = [None, None]
 
+        self.first_line = True
+
     def get_data(self):
         self.data_buffer += self.serial.read(self.serial.inWaiting())
 
@@ -41,7 +43,9 @@ class InputGenerator(object):
             return
 
         for line in data_pieces:
-            if line:
+            if self.first_line:
+                self.first_line = False
+            elif line:
                 print line
                 yield self.parse_line(line)
 

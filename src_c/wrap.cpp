@@ -223,14 +223,16 @@ static PyObject* py_setSignal(PyObject* self, PyObject* args) {
   e.sig = (uint8_t) sig;
   QMSM_DISPATCH(the_hand, &e);
 
-  uint8_t color, blink, vibro;
+  uint8_t color, vibro;
+  uint16_t blinkOn, blinkOff;
 
-  getState(the_hand, &color, &blink, &vibro);
+  getState(the_hand, &color, &blinkOn, &blinkOff, &vibro);
 
-  PyObject * result = PyTuple_New(3);
+  PyObject * result = PyTuple_New(4);
   PyTuple_SET_ITEM(result, 0, PyInt_FromLong(color));
-  PyTuple_SET_ITEM(result, 1, PyInt_FromLong(blink));
-  PyTuple_SET_ITEM(result, 2, PyInt_FromLong(vibro));
+  PyTuple_SET_ITEM(result, 1, PyInt_FromLong(blinkOn));
+  PyTuple_SET_ITEM(result, 2, PyInt_FromLong(blinkOff));
+  PyTuple_SET_ITEM(result, 3, PyInt_FromLong(vibro));
 
   return result;  
 }
@@ -257,16 +259,18 @@ static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
     PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
     PyListToArray(magObj, &mag[0], DIMENTION, 1);
 
-    uint8_t color, blink, vibro;
+    uint8_t color, vibro;
+    uint16_t blinkOn, blinkOff;
 
     dest = dest > 1 ? 1 : 0;
 
-    FSM[dest].setData(delta, acc, gyro, mag, access, &color, &blink, &vibro);
+    FSM[dest].setData(delta, acc, gyro, mag, access, &color, &blinkOn, &blinkOff, &vibro);
 
-    PyObject * result = PyTuple_New(3);
+    PyObject * result = PyTuple_New(4);
     PyTuple_SET_ITEM(result, 0, PyInt_FromLong(color));
-    PyTuple_SET_ITEM(result, 1, PyInt_FromLong(blink));
-    PyTuple_SET_ITEM(result, 2, PyInt_FromLong(vibro));
+    PyTuple_SET_ITEM(result, 1, PyInt_FromLong(blinkOn));
+    PyTuple_SET_ITEM(result, 2, PyInt_FromLong(blinkOff));
+    PyTuple_SET_ITEM(result, 3, PyInt_FromLong(vibro));
 
     return result;     
 }

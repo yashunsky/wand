@@ -10,27 +10,14 @@ from c_wrap import set_fsm_data
 
 KNOWLEDGE = 'generation_knowledge.json'
 
-COLORS = ((0, 0, 0),  # BLANK,
-          (255, 255, 255),  # WHITE,
-          (255, 0, 0),  # RED,
-          (100, 100, 0),  # ORANGE,
-          (255, 255, 0),  # YELLOW,
-          (0, 255, 0),  # GREEN,
-          (255, 0, 255),  # VIOLET
-          (0, 0, 255))  # CALIBRATION
-
-
-FEEDBACK = {'calibration': (100, 100, 0, 0),
-            "done_0": (0, 0, 0, 30),
-            "done_1": (0, 0, 0, 100),
-            "done_2": (255, 255, 255, 65),
-            "done_3": (255, 0, 0, 65),
-            "done_4": (255, 255, 0, 65),
-            "done_5": (255, 0, 255, 65),
-            "done_6": (255, 255, 255, 65),
-            "done_7": (255, 127, 0, 65),
-            "done_8": (0, 255, 0, 65),
-            'none': (10, 10, 10, 0)}
+COLORS = ([0, 0, 0],  # BLANK,
+          [255, 255, 255],  # WHITE,
+          [255, 0, 0],  # RED,
+          [100, 100, 0],  # ORANGE,
+          [255, 255, 0],  # YELLOW,
+          [0, 255, 0],  # GREEN,
+          [255, 0, 255],  # VIOLET
+          [0, 0, 255])  # CALIBRATION
 
 
 class DualFSM(object):
@@ -51,20 +38,17 @@ class DualFSM(object):
         self.access = sum([2 ** x for x in accessible])
 
     def run(self):
-        for sensor_data in self.input_generator(True):
-            device_id = sensor_data['device_id']
+        for data in self.input_generator(True):
+            device_id = data['device_id']
 
-            if device_id == 1:
-                continue
+            color, blink_on, blink_off, vibro = set_fsm_data(device_id,
+                                                             data['delta'],
+                                                             data['acc'],
+                                                             data['gyro'],
+                                                             data['mag'],
+                                                             self.access)
 
-            color, blink, vibro = set_fsm_data(device_id,
-                                               sensor_data['delta'],
-                                               sensor_data['acc'],
-                                               sensor_data['gyro'],
-                                               sensor_data['mag'],
-                                               self.access)
-
-            feedback = tuple(list(COLORS[color]) + [vibro])
+            feedback = tuple(COLORS[color] + [vibro, blink_on, blink_off])
 
             self.input_generator.set_feedback(device_id, feedback)
 

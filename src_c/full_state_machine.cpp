@@ -13,13 +13,14 @@ FullStateMachine::FullStateMachine(int axis) : innerMachine(axis) {
 
 void FullStateMachine::setData(const float delta,
     const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION], 
-    const unsigned long access, uint8_t * color, uint8_t * blink, uint8_t * vibro)
+    const unsigned long access, uint8_t * color, uint16_t * blinkOn, uint16_t * blinkOff, uint8_t * vibro)
 {
     int innerState = innerMachine.setData(delta, acc, gyro, mag, access);
 
     if (innerState == CALIBRATION) {
         * color = VIOLET + 1;
-        * blink = 0;
+        * blinkOn = 1000;
+        * blinkOff = 0;        
         * vibro = 0;
     } else {
         QEvt e;
@@ -36,6 +37,6 @@ void FullStateMachine::setData(const float delta,
 
         innerTimer %= EXTERN_TICK_MS;
 
-        getState(externMachine, color, blink, vibro);        
+        getState(externMachine, color, blinkOn, blinkOff, vibro);        
     }
 }

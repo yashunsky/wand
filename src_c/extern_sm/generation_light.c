@@ -29,17 +29,20 @@ int DebugSM = 1;
 
 
 static void blinkFast(Hand * const me, uint8_t color) {
-    me->fbBlink = 2;
+    me->fbBlinkOn = 250;
+    me->fbBlinkOff = 250;
     me->fbColor = color;
 }
 
 static void blinkSlow(Hand * const me, uint8_t color) {
-    me->fbBlink = 1;
+    me->fbBlinkOn = 500;
+    me->fbBlinkOff = 500;
     me->fbColor = color;    
 }
 
 static void blinkStop(Hand * const me) {
-    me->fbBlink = 0;
+    me->fbBlinkOn = 0;
+    me->fbBlinkOff = 0;
     me->fbColor = BLANK;  
 }
 
@@ -68,9 +71,10 @@ static Hand hand; /* the only instance of the Hand class */
 /* global-scope definitions -----------------------------------------*/
 QHsm * const the_hand = (QHsm *)&hand;       /* the opaque pointer */
 
-void getState(QHsm * const me, uint8_t *color, uint8_t *blink, uint8_t *vibro) {
+void getState(QHsm * const me, uint8_t *color, uint16_t *blinkOn, uint16_t *blinkOff, uint8_t *vibro) {
     * color = ((Hand *)me)->fbColor;
-    * blink = ((Hand *)me)->fbBlink;
+    * blinkOn = ((Hand *)me)->fbBlinkOn;
+    * blinkOff = ((Hand *)me)->fbBlinkOff;
     * vibro = ((Hand *)me)->fbVibro;
 }
 

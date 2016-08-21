@@ -123,6 +123,6 @@ class InputGenerator(object):
     def stop(self):
         self.in_loop = False
 
-    def set_feedback(self, device_id, feedback):
-        feedback = '%d,%d,%d,%d' % feedback
-        self.serial.write('set %d %s\r' % (device_id, feedback))
+    def set_feedback(self, device_id, r, g, b, blink_on, blink_off, vibro):
+        self.serial.write('set %d %d,%d,%d,%d,%d,%d\r' %
+                          (device_id, r, g, b, blink_on, blink_off, vibro))

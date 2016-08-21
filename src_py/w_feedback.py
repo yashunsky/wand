@@ -90,6 +90,10 @@ class DemoWidget(GenerationWidget):
         self.popup_state = (state, subtitle)
         self.popup_count_down = count_down
 
+    def set_feedback(self, feedback):
+        args = [0] + feedback[:3] + [1000, 0] + feedback[3]
+        self.input_generator.set_feedback(*tuple(args))
+
     def listener_thread(self):
         for input_data in self.input_generator(True, '', True):
             state, split_state = self.state_machine(input_data,
@@ -114,7 +118,7 @@ class DemoWidget(GenerationWidget):
                 self.set_popup('idle', self.state[5:])
 
             if (self.state in FEEDBACK):
-                self.input_generator.set_feedback(0, FEEDBACK[self.state])
+                self.set_feedback(FEEDBACK[self.state])
                 self.reset_timer.start()
 
             if self.popup_count_down > 0:
@@ -133,7 +137,7 @@ class DemoWidget(GenerationWidget):
         super(DemoWidget, self).closeEvent(event)
 
     def light_off(self):
-        self.input_generator.set_feedback(0, FEEDBACK['none'])
+        self.set_feedback(FEEDBACK['none'])
         self.reset_timer.stop()
 
 if __name__ == '__main__':

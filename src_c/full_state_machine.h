@@ -33,7 +33,7 @@ public:
     FullStateMachine(int axis);
     void setData(const float delta, 
         const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION],
-        const unsigned long access, uint8_t * color, uint8_t * blink, uint8_t * vibro);
+        const unsigned long access, uint8_t * color, uint16_t * blinkOn, uint16_t * blinkOff, uint8_t * vibro);
 
 };
 #endif

@@ -56,7 +56,8 @@ typedef struct {
     uint8_t Color;
 
     uint8_t fbColor;
-    uint8_t fbBlink;
+    uint16_t fbBlinkOn;
+    uint16_t fbBlinkOff;
     uint8_t fbVibro;
 
 } Hand;
@@ -66,6 +67,6 @@ extern QHsm * const the_hand; /* opaque pointer to the player HSM */
 /*${SMs::Hand_ctor} ........................................................*/
 void Hand_ctor(QHsm * const me);
 
-void getState(QHsm * const me, uint8_t *color, uint8_t *blink, uint8_t *vibro);
+void getState(QHsm * const me, uint8_t *color, uint16_t *blinkOn, uint16_t *blinkOff, uint8_t *vibro);
 
 #endif /* generation_h */

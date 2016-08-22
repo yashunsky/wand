@@ -10,15 +10,15 @@
 
 const uint8_t SIG_MAP[11] =  {
     CHARGE_SIG,
-    SONG_SIG,
-    SINGULAR_SIG,
-    BARRIER_SIG,
+    RELEASE_SIG,
     THROW_SIG,
     PUNCH_SIG,
     LIFT_SIG,
     WARP_SIG,
+    BARRIER_SIG,
+    SINGULAR_SIG,
+    SONG_SIG,
     CLEANSE_SIG,
-    RELEASE_SIG,
     PWR_RELEASE_SIG
 };
 

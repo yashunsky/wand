@@ -82,7 +82,7 @@ void getState(QHsm * const me, uint8_t *color, uint16_t *blinkOn, uint16_t *blin
 void Hand_ctor(QHsm * const me) {
     Hand * hand = (Hand *)me;
     QHsm_ctor(&hand->super, Q_STATE_CAST(&Hand_initial));
-    QMSM_INIT(me, (QEvt *)0);
+    QMsm_init(me, (QEvt *)0);
     vibro(hand, 0);
     blinkStop(hand);
 }

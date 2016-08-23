@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define DEBUG                             /* n - neutralise, omit to enable */
+
 typedef uint8_t QSignal;
 typedef uint16_t QState;
 
@@ -49,9 +51,10 @@ typedef struct {
 #define Q_SUPER(super_) \
       ((Q_MSM_UPCAST(me))->temp.fun = Q_STATE_CAST(super_), (QState)Q_RET_SUPER)
 
-void QMSM_INIT(QHsm *me, QEvt const * const e);
-void QMSM_DISPATCH(QHsm *me, QEvt const * const e);
-void QHsm_ctor(QHsm * const me, QStateHandler initial);
-QState QHsm_top(void const * const me, QEvt const * const e);
+void    QMsm_init(QHsm *me, QEvt const * const e);
+QState  QMsm_dispatch(QHsm *me, QEvt const * const e);
+void    QHsm_ctor(QHsm * const me, QStateHandler initial);
+QState  QHsm_top(void const * const me, QEvt const * const e);
+
 
 #endif

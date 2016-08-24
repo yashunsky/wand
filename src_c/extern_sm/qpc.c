@@ -1,4 +1,6 @@
-/* 20/08/2016 "Light" framework version. Works only for one parent and no complex transitions */
+/* 22/08/2016 Framework now supports multiple parent objects for state machine*/
+/* 20/08/2016 "Light" framework version.                                      */
+/* Works only for one parent and no complex transitions                       */
 
 #include "qpc.h"
 
@@ -25,7 +27,7 @@ void QHsm_ctor (QHsm * const me, QStateHandler initial) {
   me->temp.fun  = initial;
 }
 
-void QMSM_INIT(QHsm *me, QEvt const * const e){
+void QMsm_init(QHsm *me, QEvt const * const e){
    (*me->temp.fun)(me, e);        /* execute the top-most initial transition */
                                                          /* enter the target */
    (void)(*me->temp.fun)(me , &QEP_reservedEvt_[Q_ENTRY_SIG]);
@@ -33,29 +35,31 @@ void QMSM_INIT(QHsm *me, QEvt const * const e){
    me->state.fun = me->temp.fun; /* mark configuration as stable - MSM stuff */
 }
 
-void QMSM_DISPATCH(QHsm *me, QEvt const * const e) {
+QState QMsm_dispatch(QHsm *me, QEvt const * const e) {
    QStateHandler s = me->state.fun;                /* save the current state */
    QStateHandler t;                             /* save state in transitions */
    QState r = (*s)(me, e);                         /* call the event handler */
    #ifdef DEBUG
-      printf("dispatch: %u\n\r", r);
+      //printf("dispatch: %u\n\r", r);
    #endif
    if (r == Q_RET_SUPER) {                           /* ask parent to handle */
-      r = (*me->temp.fun)(me, e);                              /*pass event  */
-      #ifdef DEBUG
-         printf("return: %u\n\r", r);
-      #endif   
+      do {
+          r = (*me->temp.fun)(me, e);                          /*pass event  */
+          #ifdef DEBUG
+          //   printf("return: %u\n\r", r);
+          #endif                 /* bubble event up until handled or ignored */   
+      } while (r == Q_RET_SUPER);
    }
 
    if (r == Q_RET_TRAN) {                               /* transition taken? */
       t = me->temp.fun;                                       /* save target */
       (void)(*s)(me, &QEP_reservedEvt_[Q_EXIT_SIG]);      /* exit the source */
-      (void)(*t)(me,&QEP_reservedEvt_[Q_ENTRY_SIG]);/*enter target*/
+      (void)(*t)(me,&QEP_reservedEvt_[Q_ENTRY_SIG]);           /*enter target*/
       me->state.fun = t;                              /* finalize transition */
    }
    if (r == Q_RET_HANDLED) {
       me->temp.fun = me->state.fun;      /* in case it was handled by parent */
    }
-   
+    return r; 
 }
 

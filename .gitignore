@@ -4,3 +4,7 @@
 /raw/*
 *.gch
 *.so
+*.d
+*.map
+*.o
+*.bak

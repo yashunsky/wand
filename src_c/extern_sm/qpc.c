@@ -27,7 +27,7 @@ void QHsm_ctor (QHsm * const me, QStateHandler initial) {
   me->temp.fun  = initial;
 }
 
-void QMsm_init(QHsm *me, QEvt const * const e){
+void QMsm_init_(QHsm *me, QEvt const * const e){
    (*me->temp.fun)(me, e);        /* execute the top-most initial transition */
                                                          /* enter the target */
    (void)(*me->temp.fun)(me , &QEP_reservedEvt_[Q_ENTRY_SIG]);
@@ -35,7 +35,7 @@ void QMsm_init(QHsm *me, QEvt const * const e){
    me->state.fun = me->temp.fun; /* mark configuration as stable - MSM stuff */
 }
 
-QState QMsm_dispatch(QHsm *me, QEvt const * const e) {
+QState QMsm_dispatch_(QHsm *me, QEvt const * const e) {
    QStateHandler s = me->state.fun;                /* save the current state */
    QStateHandler t;                             /* save state in transitions */
    QState r = (*s)(me, e);                         /* call the event handler */

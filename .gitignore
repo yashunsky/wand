@@ -8,3 +8,7 @@
 *.map
 *.o
 *.bak
+src_c/extern_sm/!Шпаргалка.txt
+*.png
+*.qm
+*.bat

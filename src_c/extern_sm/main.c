@@ -41,8 +41,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "RGB_desktop.h"
 #include "generation_light.h"
 #include "service.h"
+#include "biotics.h"
 
 /*..........................................................................*/
     
@@ -50,17 +52,20 @@ int main() {
     uint8_t     i;                                      // Universal counter
     printf("GENERATION Light State Machines\n");
     for (i = 0; i < ARRAY_SIZE(KeyStrokes) - 1;i++)     // Exluding ESC
-        printf("%s\t- '%c'\n\r", KeyStrokes[i].Alias, KeyStrokes[i].Key);
+        printf("%18s - '%c'\n\r", KeyStrokes[i].Alias, KeyStrokes[i].Key);
     printf("Press ESC to quit...\n");
 
       /* instantiate the HSM and trigger the initial transition */
 
-    Hand_ctor(the_hand);
-    //QMsm_init(the_hand, (QEvt *)0);
+    Biotics_ctor();
+    QMSM_INIT(the_biotics, (QEvt *)0);
+    Hand_ctor();
+    QMSM_INIT(the_hand, (QEvt *)0);
+    QEvt e;
+    uint8_t c;
+    //e.sig = MAX_PILL_SIG;
+    //QMSM_DISPATCH(the_hand,  &e);
     for (;;) {
-        QEvt e;
-        uint8_t c;
-       
         static int tickCtr = 1;
         char const *msg = (char *)0;
 
@@ -82,15 +87,22 @@ int main() {
             e.sig = TICK_SEC_SIG;
             msg = "TICK";
             }
+        if (BlinkOn) {
+            if (tickCtr % BlinkTimer == 0) RGB_blink_toggle();
+        }
         if (msg != (char *)0) {
                                  /* dispatch the event into the state machine */
             QState r;
-            r = QMsm_dispatch(the_hand,  &e);
+            r = QMSM_DISPATCH(the_biotics,  &e);
+            QMSM_DISPATCH(the_hand,  &e);
             #ifdef DEBUG
                 printf("returned: %u\n\r", r);
             #endif    
-            if (msg != "TICK") printf("\n");
+            if (msg != "TICK") {
+                printf("\n");
+                //BlinkCoord.Y--;   // FAR manager console needs this
             }
+        }
     }
     return 0;
 }

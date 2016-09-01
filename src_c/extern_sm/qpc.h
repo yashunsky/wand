@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define DEBUG                             /* n - neutralise, omit to enable */
+#define DEBUGn                             /* n - neutralise, omit to enable */
 
 typedef uint8_t QSignal;
 typedef uint16_t QState;
@@ -29,6 +29,7 @@ enum {
 
 enum {
      Q_RET_SUPER,
+     Q_RET_UNHANDLED,
      Q_RET_HANDLED,
      Q_RET_IGNORED, 
      Q_RET_TRAN,      
@@ -39,20 +40,20 @@ typedef struct {
      union QMAttr temp;    
 } QHsm;
 
-//!typedef struct QHsmTag { /* Partly hierarchical State Machine */
-//!   QStateHandler state; /* current active state */
-//!} QHsm;
-
 #define Q_MSM_UPCAST(ptr_) ((QHsm *)(ptr_))
 #define Q_STATE_CAST(handler_) ((QStateHandler)(handler_))
+#define Q_UNHANDLED() ((QState)Q_RET_UNHANDLED)
 #define Q_HANDLED() ((QState)Q_RET_HANDLED)
 #define Q_TRAN(target_) \
       ((Q_MSM_UPCAST(me))->temp.fun = Q_STATE_CAST(target_), (QState)Q_RET_TRAN)
 #define Q_SUPER(super_) \
       ((Q_MSM_UPCAST(me))->temp.fun = Q_STATE_CAST(super_), (QState)Q_RET_SUPER)
+#define QMSM_DISPATCH(me_, e_) (QMsm_dispatch_(me_, e_)) 
+#define QMSM_INIT(me_, e_) (QMsm_init_(me_, e_))    // Macro for external calls   
+                                                    // for compatibility with QP
 
-void    QMsm_init(QHsm *me, QEvt const * const e);
-QState  QMsm_dispatch(QHsm *me, QEvt const * const e);
+void    QMsm_init_(QHsm *me, QEvt const * const e);
+QState  QMsm_dispatch_(QHsm *me, QEvt const * const e);
 void    QHsm_ctor(QHsm * const me, QStateHandler initial);
 QState  QHsm_top(void const * const me, QEvt const * const e);
 

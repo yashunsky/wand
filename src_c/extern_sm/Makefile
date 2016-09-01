@@ -86,8 +86,9 @@ RCINCLUDES = \
 # C source files...
 C_SRCS := \
 	main.c \
-	generation_light.c 
-
+	generation_light.c \
+	biotics.c \
+	RGB_desktop.c
 # C++ source files...
 CPP_SRCS :=	
 

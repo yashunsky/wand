@@ -21,17 +21,17 @@ KNOWLEDGE = '../migration_to_c/generation_knowledge.json'
 
 POPUP_COUNT_DOWN = 2
 
-FEEDBACK = {'calibration': (100, 100, 0, 0),
-            "demo_0": (0, 0, 0, 30),
-            "demo_1": (0, 0, 0, 100),
-            "demo_2": (255, 255, 255, 65),
-            "demo_3": (255, 0, 0, 65),
-            "demo_4": (255, 255, 0, 65),
-            "demo_5": (255, 0, 255, 65),
-            "demo_6": (255, 255, 255, 65),
-            "demo_7": (255, 127, 0, 65),
-            "demo_8": (0, 255, 0, 65),
-            'none': (10, 10, 10, 0)}
+FEEDBACK = {'calibration': [100, 100, 0, 0],
+            "done_0": [0, 0, 0, 30],
+            "done_1": [0, 0, 0, 100],
+            "done_2": [255, 255, 255, 65],
+            "done_3": [255, 0, 0, 65],
+            "done_4": [255, 255, 0, 65],
+            "done_5": [255, 0, 255, 65],
+            "done_6": [255, 255, 255, 65],
+            "done_7": [255, 127, 0, 65],
+            "done_8": [0, 255, 0, 65],
+            'none': [10, 10, 10, 0]}
 
 
 class DemoWidget(GenerationWidget):
@@ -91,7 +91,7 @@ class DemoWidget(GenerationWidget):
         self.popup_count_down = count_down
 
     def set_feedback(self, feedback):
-        args = [0] + feedback[:3] + [1000, 0] + feedback[3]
+        args = [0] + feedback[:3] + [1000, 0] + [feedback[3]]
         self.input_generator.set_feedback(*tuple(args))
 
     def listener_thread(self):

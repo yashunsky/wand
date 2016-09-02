@@ -56,7 +56,7 @@ class DemoWidget(GenerationWidget):
 
         self.popup_count_down = 0
 
-        self.input_generator = InputGenerator(serial_port='/dev/tty.usbmodem1411',
+        self.input_generator = InputGenerator(serial_port='/dev/tty.usbmodem1A1211',  # '/dev/tty.usbmodem1411',
                                               dual=True,
                                               gyro_remap=lambda g: [g[1], -g[0], g[2]])
 

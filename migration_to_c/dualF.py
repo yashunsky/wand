@@ -28,7 +28,7 @@ class DualFSM(object):
         with open(KNOWLEDGE, 'r') as f:
             self.knowledge = json.load(f)
 
-        self.input_generator = Ig(serial_port='/dev/tty.usbmodem1411',
+        self.input_generator = Ig(serial_port='/dev/tty.usbmodem1A1211',  # '/dev/tty.usbmodem1411',
                                   dual=True,
                                   gyro_remap=lambda g: [g[1], -g[0], g[2]])
 

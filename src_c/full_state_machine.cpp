@@ -5,38 +5,30 @@
 #include <stdio.h>
 
 FullStateMachine::FullStateMachine(int axis) : innerMachine(axis) {
-    externMachine = (QHsm *)&externMachineStruct;
-    Hand_ctor(externMachine);
-
     innerTimer = 0;    
 }
 
-void FullStateMachine::setData(const float delta,
-    const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION], 
-    const unsigned long access, uint8_t * color, uint16_t * blinkOn, uint16_t * blinkOff, uint8_t * vibro)
+bool FullStateMachine::setData(const float delta,
+    const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION])
 {
     int innerState = innerMachine.setData(delta, acc, gyro, mag);
 
     if (innerState == CALIBRATION) {
-        * color = VIOLET + 1;
-        * blinkOn = 1000;
-        * blinkOff = 0;        
-        * vibro = 0;
+        return false;
     } else {
         QEvt e;
         if (innerState > IDLE) {
             e.sig = SIG_MAP[innerState - STATES_OFFSET];
-            QMSM_DISPATCH(externMachine, &e);
+            QMSM_DISPATCH(the_hand, &e);
         }
 
         innerTimer += (uint16_t) (delta * 1000);
         if (innerTimer > EXTERN_TICK_MS) {
             e.sig = TICK_SEC_SIG;
-            QMSM_DISPATCH(externMachine, &e);
+            QMSM_DISPATCH(the_hand, &e);
         }
 
-        innerTimer %= EXTERN_TICK_MS;
-
-        getState(externMachine, color, blinkOn, blinkOff, vibro);        
+        innerTimer %= EXTERN_TICK_MS;    
     }
+    return true;
 }

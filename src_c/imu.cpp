@@ -4,24 +4,7 @@
 #include <stdio.h>
 
 IMU::IMU() {
-    magHeading = 0;
-    inCalibration = true;
-    calibrationCounter = 0;
-    stacksReady = false;
-    gyroNorm = 0;
-
-    for (int i=0; i<DIMENTION; i++) {
-        omegaP[i] = 0;
-        omegaI[i] = 0;
-        angles[i] = 0;
-        acceleration[i] = 0;
-
-        for (int j=0; j<DIMENTION; j++) {
-            dcmMatrix[i][j] = i == j ? 1 : 0;
-        }
-    }
-
-    acceleration[2] = GRAVITY;
+    resetCalibration();
 }
 
 bool IMU::calc(const float delta, 
@@ -44,6 +27,27 @@ bool IMU::calc(const float delta,
     * gyroOut = gyroNorm;
 
     return inCalibration;
+}
+
+void IMU::resetCalibration() {
+    inCalibration = true;
+    calibrationCounter = 0;
+    stacksReady = false;
+    magHeading = 0;
+    gyroNorm = 0;
+
+    for (int i=0; i<DIMENTION; i++) {
+        omegaP[i] = 0;
+        omegaI[i] = 0;
+        angles[i] = 0;
+        acceleration[i] = 0;
+
+        for (int j=0; j<DIMENTION; j++) {
+            dcmMatrix[i][j] = i == j ? 1 : 0;
+        }
+    }
+
+    acceleration[2] = GRAVITY;
 }
 
 void IMU::recalibration(const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION]) {

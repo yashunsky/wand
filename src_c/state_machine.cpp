@@ -21,3 +21,7 @@ int StateMachine::setData(const float delta,
 
     return splitter.setIMUData(delta, gyro, acc, heading) + STATES_OFFSET;
 }
+
+void StateMachine::resetCalibration() {
+    imu.resetCalibration();
+}

@@ -32,3 +32,7 @@ bool FullStateMachine::setData(const float delta,
     }
     return true;
 }
+
+void FullStateMachine::resetCalibration() {
+    innerMachine.resetCalibration();
+}

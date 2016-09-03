@@ -94,6 +94,7 @@ public:
               const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION],
               int axis,
               float * gyroOut, float accOut[DIMENTION], float headingOut[DIMENTION]);
+    void resetCalibration();
 
 };
 #endif

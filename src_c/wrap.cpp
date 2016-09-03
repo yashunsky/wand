@@ -96,7 +96,7 @@ static PyObject* py_unifyStroke(PyObject* self, PyObject* args) {
 
 static PyObject* py_checkStroke(PyObject* self, PyObject* args) {
     float stroke[SEGMENTATION][DIMENTION];
-    float description[SEGMENTATION][DIMENTION + 1];
+    float description[SEGMENTATION][DIMENTION];
     
     PyObject * strokeObj;
     PyObject * descriptionObj;
@@ -104,7 +104,7 @@ static PyObject* py_checkStroke(PyObject* self, PyObject* args) {
     PyArg_ParseTuple(args, "O!O!", &PyList_Type, &strokeObj, &PyList_Type, &descriptionObj);
 
     PyListToArray(strokeObj, &stroke[0][0], SEGMENTATION, DIMENTION);
-    PyListToArray(descriptionObj, &description[0][0], SEGMENTATION, DIMENTION + 1);
+    PyListToArray(descriptionObj, &description[0][0], SEGMENTATION, DIMENTION);
 
     return PyFloat_FromDouble((double) checkStroke(stroke, description));
 }

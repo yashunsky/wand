@@ -55,19 +55,16 @@ void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEG
 
 }
 
-float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description[SEGMENTATION][DIMENTION + 1]) {
+float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description[SEGMENTATION][DIMENTION]) {
     float errors[SEGMENTATION];
     float mean = 0;
     float result = 0;
-    float radius;
     float d;
     int i;
 
     for (i = 0; i < SEGMENTATION; i++) {
-        radius = getDist(stroke[i], description[i]) - description[i][3];
-        radius = radius < 0 ? 0 : radius;
-        errors[i] = radius;
-        mean += radius;
+        errors[i] = getDist(stroke[i], description[i]);
+        mean += errors[i];
     }
 
     mean /= SEGMENTATION;

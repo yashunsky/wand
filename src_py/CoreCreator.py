@@ -23,7 +23,7 @@ SEGMENTATION = 128
 CORE_NAME = '../generation.json'
 
 
-PRESETS = {'alphabet': ['a', 'b', 'c'],
+PRESETS = {'alphabet': ['a', 'b', 'c', 'd', 'e', 'g', 'h'],
                        # ['a', 'b', 'c', 'd', 'e', 'f',
                        #  'g', 'h', 'k', 'l', 'o', 'r', 's'],
            'generation': ['charge', 'throw', 'punch', 'lift',

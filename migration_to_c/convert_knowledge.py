@@ -70,8 +70,7 @@ def convert_knowledge(knowledge):
 
     formated_strokes = []
 
-    for index in xrange(len(strokes)):
-        name = str(index)
+    for name in knowledge['strokes_order']:
         value = strokes[name]
         formated_strokes += [format_formated_strokes_to_c(value)]
 

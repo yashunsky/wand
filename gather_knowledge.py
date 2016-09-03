@@ -30,6 +30,7 @@ if __name__ == '__main__':
 
     data['strokes'] = strokes['letters']
     data['segmentation'] = strokes['segmentation']
+    data['strokes_order'] = strokes['order']
     data['magnet_boundaries'] = MAGNET_BOUNDERIES
     data['count_down'] = COUNT_DOWN
 
@@ -43,7 +44,7 @@ if __name__ == '__main__':
     add_state('calibration', s)
     add_state('idle', s)
 
-    for name in data['strokes']:
+    for name in strokes['order']:
         add_state('done_%s' % name, s)
 
     data['splitting'] = {}

@@ -23,6 +23,13 @@ SEGMENTATION = 128
 CORE_NAME = '../generation.json'
 
 
+PRESETS = {'alphabet': ['a', 'b', 'c', 'd', 'e', 'f',
+                        'g', 'h', 'k', 'l', 'o', 'r', 's'],
+           'generation': ['charge', 'throw', 'punch', 'lift',
+                          'warp', 'barrier', 'cleanse', 'singular',
+                          'song', 'release', 'pwr_release']}
+
+
 def make_core(letters, points):
     core = {}
     for key, letters_group in letters.items():
@@ -40,7 +47,7 @@ def make_core(letters, points):
     return core
 
 
-def get_letters(path):
+def get_letters(path, strokes_set):
     '''Read stroke files from given folder
     and arange them into a dict of lists by key-letter'''
 
@@ -49,13 +56,15 @@ def get_letters(path):
     for (dirpath, dirnames, filenames) in walk(path):
         if dirpath == path:
             continue
-        for f in filenames:
+        for f in sorted(filenames):
             try:
                 data = np.loadtxt(join(dirpath, f))
             except ValueError:
                 continue
             filename = basename(f)
             key = dirpath.split('/')[-1].split('-')[0]
+            if key not in strokes_set:
+                continue
             if key not in letters:
                 letters[key] = []
             letters[key].append({'filename': filename, 'data': data})
@@ -103,12 +112,16 @@ class KeyList(QAbstractListModel):
 
 class StrokeList(QAbstractListModel):
     """Model, containing strokes and there curve-representation"""
-    def __init__(self, strokes, plot):
+    def __init__(self, strokes, order, plot):
         super(StrokeList, self).__init__()
         self.strokes = strokes
         self.plot = plot
 
-        for letter_group in self.strokes.values():
+        for stroke_key in order:
+            if stroke_key not in self.strokes:
+                continue
+            letter_group = self.strokes[stroke_key]
+
             for letter in letter_group:
                 letter['checked'] = Qt.Checked
                 x, y = stereographic(letter['data'][:, 0],
@@ -127,7 +140,7 @@ class StrokeList(QAbstractListModel):
 
         self.set_preview(reset=True)
 
-        self.keys_model = KeyList(self.strokes.keys())
+        self.keys_model = KeyList(order)
 
     def make_preview(self):
         preview = None
@@ -233,11 +246,14 @@ class StrokeList(QAbstractListModel):
 
 class CoreCreator(QWidget):
     """Main module's widget"""
-    def __init__(self, path):
+    def __init__(self, path, strokes_set):
         super(CoreCreator, self).__init__()
         self.path = path
+        self.strokes_order = strokes_set
         self.setup_ui()
-        self.stroke_list = StrokeList(get_letters(path), self.display)
+        self.stroke_list = StrokeList(get_letters(path, strokes_set),
+                                      strokes_set,
+                                      self.display)
 
         self.letter_selector.setModel(self.stroke_list.keys_model)
 
@@ -263,6 +279,7 @@ class CoreCreator(QWidget):
         letters = self.stroke_list.make_dict(all_letters=True)
         core = make_core(letters, segmentation)
         dump_data = {'segmentation': segmentation}
+        dump_data['order'] = self.strokes_order
         dump_data['letters'] = {key: val.tolist()
                                 for key, val in core.items() if key != '_'}
         with open(CORE_NAME, 'w') as f:
@@ -308,6 +325,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('../raw/simple')
+    cc = CoreCreator('../raw/source', PRESETS['generation'])
     cc.show()
     sys.exit(app.exec_())

@@ -12,7 +12,7 @@ float getDist(const float a[DIMENTION], const float b[DIMENTION]) {
         d = a[i] - b[i];
         delta += d * d;
     }
-    return sqrt(delta);
+    return sqrtf(delta);
 }
 
 void unifyStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], float newStroke[SEGMENTATION][DIMENTION], int length) {
@@ -73,7 +73,7 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description
         d = errors[i] - mean;
         result += d * d;
     }
-    return sqrt(result / SEGMENTATION);
+    return sqrtf(result / SEGMENTATION);
 }
 
 int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length) {

@@ -142,7 +142,7 @@ float IMU::calcDeviation(const float data[CALIBRATION_LENGTH][DIMENTION], const 
             float delta = data[j][i] - mean[i];
             sum += delta * delta;
         }
-        float deviation = sqrt(sum / (CALIBRATION_LENGTH));
+        float deviation = sqrtf(sum / (CALIBRATION_LENGTH));
         if (deviation > maxDeviation) {
             maxDeviation = deviation;
         }
@@ -152,10 +152,10 @@ float IMU::calcDeviation(const float data[CALIBRATION_LENGTH][DIMENTION], const 
 }
 
 float IMU::compassHeading(const float mag[DIMENTION]) {
-    float cosRoll = cos(angles[0]);
-    float sinRoll = sin(angles[0]);
-    float cosPitch = cos(angles[1]);
-    float sinPitch = sin(angles[1]);
+    float cosRoll = cosf(angles[0]);
+    float sinRoll = sinf(angles[0]);
+    float cosPitch = cosf(angles[1]);
+    float sinPitch = sinf(angles[1]);
 
     float magnetsNorm[DIMENTION];
 
@@ -168,7 +168,7 @@ float IMU::compassHeading(const float mag[DIMENTION]) {
     magX = (magnetsNorm[0] * cosPitch + magnetsNorm[1] * sinRoll * sinPitch + magnetsNorm[2] * cosRoll * sinPitch);
     magY = (magnetsNorm[1] * cosRoll - magnetsNorm[2] * sinRoll);
 
-    return atan2(-magY, magX);
+    return atan2f(-magY, magX);
 }
 
 void IMU::updateDcmMatrix(const float delta, const float gyro[DIMENTION]) {
@@ -210,8 +210,8 @@ float IMU::calculateAccelWeight(const float acc[DIMENTION]) {
 }
 
 void IMU::calculateError(const float acc[DIMENTION], float errorYaw[DIMENTION], float errorRollPitch[DIMENTION]) {
-    float magHeadingX = cos(magHeading);
-    float magHeadingY = sin(magHeading);
+    float magHeadingX = cosf(magHeading);
+    float magHeadingY = sinf(magHeading);
     float errorCourse = ((dcmMatrix[0][0] * magHeadingY) - (dcmMatrix[1][0] * magHeadingX));
 
     scaleVec(errorYaw, dcmMatrix[2], errorCourse);
@@ -236,9 +236,9 @@ void IMU::driftCorrection(float accelWeight, float errorYaw[DIMENTION], float er
 }
 
 void IMU::eulerAngles() {
-    angles[0] = atan2(dcmMatrix[2][1], dcmMatrix[2][2]);
-    angles[1] = -asin(dcmMatrix[2][0]);
-    angles[2] = atan2(dcmMatrix[1][0], dcmMatrix[0][0]);
+    angles[0] = atan2f(dcmMatrix[2][1], dcmMatrix[2][2]);
+    angles[1] = -asinf(dcmMatrix[2][0]);
+    angles[2] = atan2f(dcmMatrix[1][0], dcmMatrix[0][0]);
 }
 
 void IMU::renorm(float vr[DIMENTION], const float v[DIMENTION]) {

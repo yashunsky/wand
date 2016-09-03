@@ -30,7 +30,7 @@ float norm(const float v[DIMENTION]) {
     for (int i=0; i<DIMENTION; i++) {
         sum += v[i] * v[i];
     }
-    return sqrt(sum);
+    return sqrtf(sum);
 }
 
 void normInplace(float v[DIMENTION]) {

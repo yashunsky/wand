@@ -16,7 +16,7 @@ typedef struct BIO_Abil_ {
     BIOStore   Power;       // Power abilities
 } BIO_Abil;
 
-BIO_Abil BIO, BIO_Default, BIO_Max;
+extern BIO_Abil BIO, BIO_Default, BIO_Max;
 
 // Variable macro to set BIO, depends on signal enum
 #define BIO_ENABLE(abil_, ...) \

@@ -4,6 +4,8 @@ Color defenitions to use in different modules
 #ifndef colors_h
 #define colors_h
 
+#include <stdint.h>
+
 enum ColorsNum {
     BLANK,
     WHITE,
@@ -22,15 +24,7 @@ typedef struct Color_ {
     uint8_t B;
 } Color;
 
-static const Color Colors[MAX_COLOR] = {
-    {   0,   0,   0},
-    { 255, 255, 255},
-    { 255,   0,   0},
-    { 255, 165,   0},
-    { 255, 255,   0},
-    {   0,   0, 255},
-    { 127,   0, 255}
-};
+extern const Color Colors[MAX_COLOR];
     
     
 #endif

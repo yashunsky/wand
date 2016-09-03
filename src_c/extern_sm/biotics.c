@@ -1,5 +1,7 @@
 #include "biotics.h"
 
+BIO_Abil BIO, BIO_Default, BIO_Max;
+
 void BIO_init(void) {
     BIO_ENABLE(THROW, _Default);
     BIO_ENABLE(THROW);

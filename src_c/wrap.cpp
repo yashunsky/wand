@@ -116,13 +116,11 @@ static PyObject* py_getStroke(PyObject* self, PyObject* args) {
 
     PyObject * strokeObj;
 
-    PyObject * accessObject;
-
-    PyArg_ParseTuple(args, "O!ik", &PyList_Type, &strokeObj, &length, &access);
+    PyArg_ParseTuple(args, "O!i", &PyList_Type, &strokeObj, &length);
 
     PyListToArray(strokeObj, &stroke[0][0], STROKE_MAX_LENGTH, DIMENTION);
 
-    return PyInt_FromLong(getStroke(stroke, length, access));
+    return PyInt_FromLong(getStroke(stroke, length));
 }
 
 
@@ -132,18 +130,17 @@ static PyObject* py_setIMUData(PyObject* self, PyObject* args) {
     float gyro;
     float accel[DIMENTION];
     float heading[DIMENTION];
-    unsigned long access;
 
     PyObject * accelObj;
     PyObject * headingObj;
 
-    PyArg_ParseTuple(args, "ffO!O!k", &delta, &gyro, &PyList_Type, &accelObj, &PyList_Type, &headingObj, &access);
+    PyArg_ParseTuple(args, "ffO!O!", &delta, &gyro, &PyList_Type, &accelObj, &PyList_Type, &headingObj);
 
     PyListToArray(accelObj, &accel[0], DIMENTION, 1);
 
     PyListToArray(headingObj, &heading[0], DIMENTION, 1);
 
-    result = splitter.setIMUData(delta, gyro, accel, heading, access);
+    result = splitter.setIMUData(delta, gyro, accel, heading);
 
     return PyInt_FromLong(result);
 }
@@ -191,13 +188,12 @@ static PyObject* py_setSMData(PyObject* self, PyObject* args) {
     float gyro[DIMENTION];
     float mag[DIMENTION];
     int dest;
-    unsigned long access;
 
     PyObject * accObj;
     PyObject * gyroObj;
     PyObject * magObj;   
 
-    PyArg_ParseTuple(args, "ifO!O!O!k", &dest, &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj, &access);
+    PyArg_ParseTuple(args, "ifO!O!O!", &dest, &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
 
     PyListToArray(accObj, &acc[0], DIMENTION, 1);
     PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
@@ -211,7 +207,7 @@ static PyObject* py_setSMData(PyObject* self, PyObject* args) {
         default: sm = &SMZ; break;
     }
 
-    return PyInt_FromLong(sm->setData(delta, acc, gyro, mag, access));
+    return PyInt_FromLong(sm->setData(delta, acc, gyro, mag));
 }
 
 static PyObject* py_setSignal(PyObject* self, PyObject* args) {

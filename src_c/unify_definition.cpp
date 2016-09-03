@@ -76,24 +76,22 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description
     return sqrt(result / SEGMENTATION);
 }
 
-int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length, unsigned long access) {
+int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length) {
     float unifiedStroke[SEGMENTATION][DIMENTION];
     unifyStroke(stroke, unifiedStroke, length);
     int i;
     float error;
-    float min_error = MAX_ERROR;
-    float second = MAX_ERROR * COMPARE_LIMIT;
+    float min_error = STROKE_MAX_LENGTH;
+    float second = STROKE_MAX_LENGTH;
     int strokeId = -1;
     for (i = 0; i < STROKES_COUNT; i++) {
-        if ((access >> i) & 0x01) {
-            error = checkStroke(unifiedStroke, STROKES[i]);
-            if (error < min_error) {
-                if (strokeId > -1) {
-                    second = min_error;
-                }
-                min_error = error;
-                strokeId = i;
+        error = checkStroke(unifiedStroke, STROKES[i]);
+        if (error < min_error) {
+            if (strokeId > -1) {
+                second = min_error;
             }
+            min_error = error;
+            strokeId = i;
         }
     }
 

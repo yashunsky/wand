@@ -40,7 +40,7 @@ void Splitter::processSize(const float accel[DIMENTION], const float delta) {
     adjustRange(positionsRange, position);    
 }
 
-int Splitter::setIMUData(const float delta, const float gyro, const float accel[DIMENTION], const float heading[DIMENTION], const unsigned long access) {
+int Splitter::setIMUData(const float delta, const float gyro, const float accel[DIMENTION], const float heading[DIMENTION]) {
     float dimention;
     float dimentionVec[DIMENTION];
     float newPoint[DIMENTION];
@@ -95,7 +95,7 @@ int Splitter::setIMUData(const float delta, const float gyro, const float accel[
             dimention = norm(dimentionVec);  
 
             if ((MIN_STROKE_LENGTH < strokeLength) && (strokeLength <= STROKE_MAX_LENGTH) && (dimention > MIN_DIMENTION)) {
-                result = getStroke(buffer, strokeLength, access);
+                result = getStroke(buffer, strokeLength);
             }
             strokeLength = 0;
         } else if (timer < 0) {

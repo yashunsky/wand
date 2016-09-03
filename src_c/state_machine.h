@@ -14,8 +14,7 @@ private:
 public:
     StateMachine(int axis);
     int setData(const float delta, 
-        const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION],
-        const unsigned long access);
+        const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION]);
 
 };
 #endif

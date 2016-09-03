@@ -21,7 +21,7 @@ public:
     float buffer[STROKE_MAX_LENGTH][DIMENTION];
 
     Splitter();
-    int setIMUData(const float delta, const float gyro, const float accel[DIMENTION], const float heading[DIMENTION], const unsigned long access);
+    int setIMUData(const float delta, const float gyro, const float accel[DIMENTION], const float heading[DIMENTION]);
 
 };
 #endif

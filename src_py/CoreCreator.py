@@ -65,7 +65,7 @@ def get_letters(path):
 def stereographic(x, y, z):
     '''Transform 3D coords into 2D
     using stereographic projection'''
-    return x / (1 + y), -z / (1 + y)
+    return -x / (1 - y), z / (1 - y)
 
 
 def add_circles(plot, radiuses, segmentation=32):

@@ -10,27 +10,28 @@ def unify_stroke(stroke, points_count):
 
     stroke_lengths = np.hstack((np.array(0), stroke_lengths))
 
-    out_division = np.linspace(0, stroke_lengths[-1], points_count)
-
     new_stroke = np.zeros((points_count, stroke.shape[1]))
 
     new_stroke[0] = stroke[0]
     new_stroke[-1] = stroke[-1]
 
-    for p_id, div_point in enumerate(out_division[1:-1]):
-        right_id = np.nonzero(stroke_lengths >= div_point)[0][0]
-        left_id = right_id - 1
-        offset = div_point - stroke_lengths[left_id]
-        try:
-            coeff = offset / s_length[left_id]
-        except IndexError:
-            coeff = 0
+    step = stroke_lengths[-1] / (points_count - 1)
 
-        pl = stroke[left_id]
-        pr = stroke[right_id]
+    next_length = step
 
-        p = pl + (pr - pl) * coeff
-        new_stroke[p_id + 1] = p
+    new_stroke_id = 1
+
+    for i in xrange(len(stroke)):
+        while (stroke_lengths[i] > next_length):
+            p1 = stroke[i - 1]
+            p2 = stroke[i]
+            delta = stroke_lengths[i] - stroke_lengths[i - 1]
+            coeff = (0 if delta == 0
+                     else (1 - ((stroke_lengths[i] - next_length) / delta)))
+
+            new_stroke[new_stroke_id] = p1 + (p2 - p1) * coeff
+            new_stroke_id += 1
+            next_length += step
 
     return new_stroke
 

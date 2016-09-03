@@ -4,8 +4,6 @@ import unittest
 
 import json
 
-import numpy as np
-
 from src_py.input_generator import InputGenerator
 from c_wrap import set_sm_data
 
@@ -24,19 +22,13 @@ class CheckSM(unittest.TestCase):
 
         input_generator = InputGenerator()
 
-        accessible = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-
-        access_c = sum([2 ** x for x in accessible])
-        access_py = map(str, accessible)
-
         for sensor_data in input_generator(False, INPUT_LOG, False):
 
             result_c = set_sm_data(-1,
                                    sensor_data['delta'],
                                    sensor_data['acc'],
                                    sensor_data['gyro'],
-                                   sensor_data['mag'],
-                                   access_c)
+                                   sensor_data['mag'])
 
             decoded_result = states[result_c]
             if decoded_result not in ('idle', 'calibration'):

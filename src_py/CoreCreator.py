@@ -36,14 +36,7 @@ def make_core(letters, points):
 
         centers = centers / norms
 
-        r = []
-        for u in unified:
-            dists = u - centers
-            radius = np.linalg.norm(dists, axis=1)
-            r.append(radius)
-        r = np.max(np.array(r), axis=0)
-
-        core[key] = np.hstack((centers, np.array([r]).T))
+        core[key] = centers
     return core
 
 

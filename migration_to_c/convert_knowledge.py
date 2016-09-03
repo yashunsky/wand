@@ -50,8 +50,6 @@ def convert_knowledge(knowledge):
 
     h_text += format_define_to_c('STROKE_MAX_LENGTH', 256)
 
-    h_text += format_define_to_c('MAX_ERROR', 0.2)
-
     h_text += format_define_to_c('SEGMENTATION', knowledge['segmentation'])
 
     h_text += format_define_to_c('STROKES_COUNT', len(strokes))
@@ -78,13 +76,13 @@ def convert_knowledge(knowledge):
         formated_strokes += [format_formated_strokes_to_c(value)]
 
     formated_strokes = '''
-const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1] = {{
+const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION] = {{
 {formated_strokes}
 }};'''.format(formated_strokes=',\n'.join(formated_strokes))
 
     h_text += header + '\n'
 
-    h_text += 'extern const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION + 1];\n'
+    h_text += 'extern const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION];\n'
     h_text += 'extern const float MAGNETS_BOUNDARIES[2][DIMENTION];\n'
 
     c_text += formated_strokes

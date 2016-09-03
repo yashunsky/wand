@@ -42,12 +42,8 @@ def check_stroke(stroke, description_):
     else:
         description = np.copy(description_)
 
-    delta = stroke - description[:, :-1]
-    radius = np.linalg.norm(delta, axis=1)
-
-    error = radius - description[:, -1]
-
-    error = error * (error > 0)
+    delta = stroke - description
+    error = np.linalg.norm(delta, axis=1)
 
     return np.std(error)
 

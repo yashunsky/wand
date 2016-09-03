@@ -51,11 +51,17 @@ typedef struct {
 #define QMSM_DISPATCH(me_, e_) (QMsm_dispatch_(me_, e_)) 
 #define QMSM_INIT(me_, e_) (QMsm_init_(me_, e_))    // Macro for external calls   
                                                     // for compatibility with QP
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void    QMsm_init_(QHsm *me, QEvt const * const e);
 QState  QMsm_dispatch_(QHsm *me, QEvt const * const e);
 void    QHsm_ctor(QHsm * const me, QStateHandler initial);
 QState  QHsm_top(void const * const me, QEvt const * const e);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

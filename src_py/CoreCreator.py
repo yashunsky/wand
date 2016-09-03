@@ -23,8 +23,9 @@ SEGMENTATION = 128
 CORE_NAME = '../generation.json'
 
 
-PRESETS = {'alphabet': ['a', 'b', 'c', 'd', 'e', 'f',
-                        'g', 'h', 'k', 'l', 'o', 'r', 's'],
+PRESETS = {'alphabet': ['a', 'b', 'c'],
+                       # ['a', 'b', 'c', 'd', 'e', 'f',
+                       #  'g', 'h', 'k', 'l', 'o', 'r', 's'],
            'generation': ['charge', 'throw', 'punch', 'lift',
                           'warp', 'barrier', 'cleanse', 'singular',
                           'song', 'release', 'pwr_release']}
@@ -74,7 +75,7 @@ def get_letters(path, strokes_set):
 def stereographic(x, y, z):
     '''Transform 3D coords into 2D
     using stereographic projection'''
-    return -x / (1 - y), z / (1 - y)
+    return x / (1 + y), z / (1 + y)
 
 
 def add_circles(plot, radiuses, segmentation=32):
@@ -325,6 +326,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('../raw/source', PRESETS['generation'])
+    cc = CoreCreator('../raw/source', PRESETS['alphabet'])
     cc.show()
     sys.exit(app.exec_())

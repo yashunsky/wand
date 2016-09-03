@@ -30,7 +30,7 @@ along with MinIMU-9-Arduino-AHRS. If not, see <http://www.gnu.org/licenses/>.
 #include "knowledge.h"
 
 #define GRAVITY 256
-#define G 9.81
+#define G_CONST 9.81
 #define GYRO_GAIN 0.0012217304763960308
 #define KP_ROLLPITCH 0.02
 #define KI_ROLLPITCH 0.00002

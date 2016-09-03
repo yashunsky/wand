@@ -108,8 +108,8 @@ void IMU::mainLoop(const float delta, const float accIn[DIMENTION], const float 
 
 void IMU::getGlobalAcceleration(float acc[DIMENTION]) {
     adjustVecT(acc, acceleration, dcmMatrix);
-    scaleVec(acc, acc, G / GRAVITY);
-    acc[DIMENTION - 1] -= G;
+    scaleVec(acc, acc, G_CONST / GRAVITY);
+    acc[DIMENTION - 1] -= G_CONST;
 }
 
 void IMU::getHeading(int axis, float heading[DIMENTION]) {

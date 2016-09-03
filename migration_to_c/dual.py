@@ -42,11 +42,6 @@ class DualSM(object):
                                   dual=True,
                                   gyro_remap=lambda g: [g[1], -g[0], g[2]])
 
-        self.set_accessible()
-
-    def set_accessible(self, accessible=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
-        self.access = sum([2 ** x for x in accessible])
-
     def set_feedback(self, device_id, feedback):
         args = [device_id] + feedback[:3] + [500, 500] + [feedback[3]]
         self.input_generator.set_feedback(*tuple(args))
@@ -60,8 +55,7 @@ class DualSM(object):
                                  sensor_data['delta'],
                                  sensor_data['acc'],
                                  sensor_data['gyro'],
-                                 sensor_data['mag'],
-                                 self.access)
+                                 sensor_data['mag'])
 
             decoded_result = self.states[result]
             if decoded_result not in ('idle', 'calibration'):

@@ -81,20 +81,27 @@ int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length) {
     unifyStroke(stroke, unifiedStroke, length);
     int i;
     float error;
-    float min_error = STROKE_MAX_LENGTH;
-    float second = STROKE_MAX_LENGTH;
+    float min_error = -1;
+    float second = -1;
     int strokeId = -1;
     for (i = 0; i < STROKES_COUNT; i++) {
         error = checkStroke(unifiedStroke, STROKES[i]);
-        if (error < min_error) {
-            if (strokeId > -1) {
+
+        if (min_error < 0) {
+            min_error = error;
+            strokeId = i;
+        } else if (error < min_error) {
+            if (second < 0) {
                 second = min_error;
             }
             min_error = error;
             strokeId = i;
+        } else {
+            if (second < 0) {
+                second = error;
+            }            
         }
     }
-
     if ((min_error != 0) && ((second / min_error) <= COMPARE_LIMIT)) {
         return -1;
     }

@@ -8,7 +8,7 @@
 
 #define EXTERN_TICK_MS 1000
 
-const uint8_t SIG_MAP[11] =  {
+const uint8_t SIG_MAP[STROKES_COUNT] =  {
     CHARGE_SIG,
     THROW_SIG,
     PUNCH_SIG,

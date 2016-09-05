@@ -17,6 +17,9 @@
 /*${.::generation_light.h} .................................................*/
 #ifndef generation_h
 #define generation_h
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "qpc.h"    /* include own framework */
 
@@ -60,10 +63,6 @@ enum PlayerSignals {
 
 extern QHsm * const the_biotics; /* opaque pointer to the biotics HSM */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*${SMs::Biotics_ctor} .....................................................*/
 void Biotics_ctor(void);
 
@@ -73,8 +72,8 @@ extern QHsm * const the_hand; /* opaque pointer to the hand HSM */
 /*${SMs::Hand_ctor} ........................................................*/
 void Hand_ctor(void);
 
+
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* generation_h */

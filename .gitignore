@@ -12,3 +12,5 @@ src_c/extern_sm/!Шпаргалка.txt
 *.png
 *.qm
 *.bat
+*.generation_light_biotics
+*.generation_light_ownFW

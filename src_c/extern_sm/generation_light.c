@@ -156,6 +156,7 @@ static QState Biotics_charged(Biotics * const me, QEvt const * const e) {
             }
             me->Timer = 3 + 1;
             vibro(30);
+            RGB_blink_stop();
             status_ = Q_HANDLED();
             break;
         }

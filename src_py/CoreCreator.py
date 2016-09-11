@@ -28,7 +28,8 @@ PRESETS = {'alphabet': ['a', 'b', 'c', 'd', 'e', 'g', 'h'],
                        #  'g', 'h', 'k', 'l', 'o', 'r', 's'],
            'generation': ['charge', 'throw', 'punch', 'lift',
                           'warp', 'barrier', 'cleanse', 'singular',
-                          'song', 'release', 'pwr_release']}
+                          'song', 'release', 'pwr_release'],
+           'todmay': ['I', 'II', 'III', 'IV']}
 
 
 def make_core(letters, points):
@@ -326,6 +327,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('../raw/source', PRESETS['alphabet'])
+    cc = CoreCreator('../raw/source', PRESETS['generation'])
     cc.show()
     sys.exit(app.exec_())

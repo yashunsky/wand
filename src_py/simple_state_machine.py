@@ -38,6 +38,7 @@ class StateMachine(object):
         pass
 
     def choose_best(self, strokes, accessible):
+        print ', '.join([stroke[0] for stroke in strokes])
         result = strokes[0][0]
         if (strokes[0][1] != 0 and
            strokes[1][1] / strokes[0][1] < self.compare_limit):

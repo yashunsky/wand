@@ -51,7 +51,9 @@ GYROSCOPE_DIVIATION = 16
 class IMU(object):
     def __init__(self, magnet_boundaries):
         self.magnet_boundaries = map(np.array, magnet_boundaries)
+        self.reset_calibration()
 
+    def reset_calibration(self):
         self.gyroscope_readings_offset = np.zeros(3, dtype=D_TYPE)
         self.accelerometer_readings_offset = np.zeros(3, dtype=D_TYPE)
 
@@ -96,10 +98,19 @@ class IMU(object):
         else:
             self.main_loop(delay, sensors)
 
+        heading = headings[axis]()
+
+        if np.isnan(np.sum(heading)):
+            self.reset_calibration()
+            return {'in_calibration': self.in_calibration,
+                    'accel': np.array([0, 0, 0], dtype=D_TYPE),
+                    'gyro': np.array([0, 0, 0], dtype=D_TYPE),
+                    'heading': np.array([0, 0, 1], dtype=D_TYPE)}
+
         return {'in_calibration': self.in_calibration,
                 'accel': self.get_global_acceleration(),
                 'gyro': self.gyro / GYRO_GAIN,
-                'heading': headings[axis]()}
+                'heading': heading}
 
     def recalibration(self, sensors):
         '''Recalibrate the device if it wasn't significatly moving

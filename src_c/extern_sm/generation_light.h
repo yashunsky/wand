@@ -25,8 +25,6 @@ extern "C" {
 
 #define BSP_TICKS_PER_SEC 100
 
-extern int DebugSM;
-
 enum PlayerSignals {
     TICK_SEC_SIG  = Q_USER_SIG,
 

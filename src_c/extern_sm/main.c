@@ -32,7 +32,7 @@
 * mailto:info@state-machine.com
 *****************************************************************************/
 
-//int DebugSM = 1;                // Printing states  
+//#define DEBUG_SM                // Printing states  
 
 //#include "qep_port.h"
 //#include "qassert.h"
@@ -40,6 +40,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+
 
 #include "RGB_desktop.h"
 #include "generation_light.h"
@@ -51,6 +53,9 @@
 int main() {
     uint8_t     i;                                      // Universal counter
     printf("GENERATION Light State Machines\n");
+    #ifdef DEBUG_SM
+        printf("DEBUG_SM enabled\n\r");
+    #endif
     for (i = 0; i < ARRAY_SIZE(KeyStrokes) - 1;i++)     // Exluding ESC
         printf("%18s - '%c'\n\r", KeyStrokes[i].Alias, KeyStrokes[i].Key);
     printf("Press ESC to quit...\n");

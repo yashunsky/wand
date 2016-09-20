@@ -28,8 +28,6 @@
 
 //Q_DEFINE_THIS_FILE
 
-int DebugSM = 1;
-
 /*${SMs::Biotics} ..........................................................*/
 typedef struct {
 /* protected: */
@@ -102,9 +100,9 @@ static QState Biotics_active(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("Hand active;");
-            }
+            #endif
 
             status_ = Q_HANDLED();
             break;
@@ -112,9 +110,9 @@ static QState Biotics_active(Biotics * const me, QEvt const * const e) {
         /* ${SMs::Biotics::SM::active::TICK_SEC} */
         case TICK_SEC_SIG: {
             if (me->Timer > 0) {
-                if (DebugSM) {
+                #ifdef DEBUG_SM
                     printf("%us", me->Timer-1);
-                }
+                #endif
                 me->Timer--;
             }
             /* ${SMs::Biotics::SM::active::TICK_SEC::[me->Timer==1]} */
@@ -151,9 +149,9 @@ static QState Biotics_charged(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::charged} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("charged;");
-            }
+            #endif
             me->Timer = 3 + 1;
             vibro(30);
             RGB_blink_stop();
@@ -260,9 +258,9 @@ static QState Biotics_song(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::song} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("song;");
-            }
+            #endif
             me->Timer = 5 + 1;
             vibro(100);
             RGB_blink_fast(ORANGE);
@@ -282,9 +280,9 @@ static QState Biotics_ready(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::ready} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("Biotics ready;");
-            }
+            #endif
             vibro(OFF);
             RGB_blink_stop();
             me->Color = BLANK;
@@ -309,9 +307,9 @@ static QState Biotics_cast_direct(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::cast_direct} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("cast_direct;");
-            }
+            #endif
             me->Timer = 3 + 1;
             vibro(60);
             status_ = Q_HANDLED();
@@ -346,9 +344,9 @@ static QState Biotics_release(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::release} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("released;");
-            }
+            #endif
             me->Timer = 5 + 1;
             vibro(100);
             me->Color = BIO_AbilitiesColors[me->Signal-FIRST_ABILITY];
@@ -369,9 +367,9 @@ static QState Biotics_singularity(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::singularity} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("singularity;");
-            }
+            #endif
             me->Timer = 5 + 1;
             RGB_blink_fast(WHITE);
             vibro(100);
@@ -391,9 +389,9 @@ static QState Biotics_barrier(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::barrier} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("barrier;");
-            }
+            #endif
             me->Timer = 5 + 1;
             vibro(100);
             RGB_blink_slow(GREEN);
@@ -413,9 +411,9 @@ static QState Biotics_pwr_release(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::pwr_release} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("pwr_released;");
-            }
+            #endif
             me->Timer = 5 + 1;
             vibro(100);
             me->Color = BIO_AbilitiesColors[me->Signal - FIRST_ABILITY];
@@ -436,9 +434,9 @@ static QState Biotics_throw(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::throw} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("throw;");
-            }
+            #endif
             me->Timer = 3 + 1;
             vibro(60);
 
@@ -469,9 +467,9 @@ static QState Biotics_cleanse(Biotics * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Biotics::SM::active::cleanse} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) {
+            #ifdef DEBUG_SM
                 printf("cleanse;");
-            }
+            #endif
             me->Timer = 3 + 1;
             vibro(60);
 
@@ -531,7 +529,9 @@ static QState Hand_able(Hand * const me, QEvt const * const e) {
     switch (e->sig) {
         /* ${SMs::Hand::SM::able} */
         case Q_ENTRY_SIG: {
-            if (DebugSM) printf("Hand able;");
+            #ifdef DEBUG_SM
+                printf("Hand able;");
+            #endif
             status_ = Q_HANDLED();
             break;
         }

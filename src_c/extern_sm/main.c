@@ -42,7 +42,7 @@
 #include <unistd.h>
 
 
-
+#include "bsp.h"
 #include "RGB_desktop.h"
 #include "generation_light.h"
 #include "service.h"
@@ -56,7 +56,11 @@ int main() {
     #ifdef DEBUG_SM
         printf("DEBUG_SM enabled\n\r");
     #endif
-    for (i = 0; i < ARRAY_SIZE(KeyStrokes) - 1;i++)     // Exluding ESC
+    #ifdef DESKTOP
+        printf("Desktop version\n\r");
+    #endif
+    //for (i = 0; i < ARRAY_SIZE(KeyStrokes) - 1;i++)     // Exluding ESC
+    for (i = 0; i < (TERMINATE_SIG - Q_USER_SIG) - 1;i++)     // Exluding ESC
         printf("%18s - '%c'\n\r", KeyStrokes[i].Alias, KeyStrokes[i].Key);
     printf("Press ESC to quit...\n");
 
@@ -79,7 +83,8 @@ int main() {
         if (kbhit()) {
             c = (uint8_t)_getch();     /* read one character from the console */
             printf("%c: ", c);
-            for (i = 0; i < ARRAY_SIZE(KeyStrokes);i++) {
+            //for (i = 0; i < ARRAY_SIZE(KeyStrokes);i++) {
+            for (i = 0; i < (TERMINATE_SIG - Q_USER_SIG); i++) {
                 if (c ==    KeyStrokes[i].Key) {
                     e.sig = KeyStrokes[i].Com;
                     msg = c;

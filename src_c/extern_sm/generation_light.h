@@ -15,8 +15,8 @@
 * for more details.
 *****************************************************************************/
 /*${.::generation_light.h} .................................................*/
-#ifndef generation_h
-#define generation_h
+#ifndef generation_light_h
+#define generation_light_h
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,8 +55,7 @@ enum PlayerSignals {
     DEFAULT_PILL_SIG,
     MAX_PILL_SIG,
 
-
-    TERMINATE_SIG /* terminate the application */
+    LAST_USER_SIG = MAX_PILL_SIG
 };
 
 extern QHsm * const the_biotics; /* opaque pointer to the biotics HSM */
@@ -74,4 +73,4 @@ void Hand_ctor(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /* generation_h */
+#endif /* generation_light_h */

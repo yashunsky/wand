@@ -88,7 +88,10 @@ C_SRCS := \
 	main.c \
 	generation_light.c \
 	biotics.c \
-	RGB_desktop.c
+	RGB_desktop.c \
+	vibro_desktop.c  \
+	service.c
+
 # C++ source files...
 CPP_SRCS :=	
 
@@ -101,7 +104,7 @@ LIBS      :=
 # defines...
 # QP_API_VERSION controls the QP API compatibility; 9999 means the latest API
 DEFINES   := -DQP_API_VERSION=9999 \
-		-DDEBUG_SM
+		-DDEBUG_SM \
 
 #-----------------------------------------------------------------------------
 # MinGW toolset (NOTE: assumed to be on your PATH)

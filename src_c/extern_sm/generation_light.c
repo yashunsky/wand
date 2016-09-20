@@ -17,9 +17,10 @@
 /*${.::generation_light.c} .................................................*/
 #include "qpc.h"
 #include "generation_light.h"
+#include "bsp.h"                   // Change this file for different platforms
 #include "service.h"
 #include "biotics.h"
-#include "bsp.h"                   // Change for different platforms
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +56,11 @@ static QState Biotics_barrier(Biotics * const me, QEvt const * const e);
 static QState Biotics_pwr_release(Biotics * const me, QEvt const * const e);
 static QState Biotics_throw(Biotics * const me, QEvt const * const e);
 static QState Biotics_cleanse(Biotics * const me, QEvt const * const e);
+
+#ifdef DESKTOP
 static QState Biotics_final(Biotics * const me, QEvt const * const e);
+#endif /* def DESKTOP */
+
 
 
 static Biotics biotics; /* the only instance of the Biotics class */
@@ -126,11 +131,15 @@ static QState Biotics_active(Biotics * const me, QEvt const * const e) {
             }
             break;
         }
+
+#ifdef DESKTOP
         /* ${SMs::Biotics::SM::active::TERMINATE} */
         case TERMINATE_SIG: {
             status_ = Q_TRAN(&Biotics_final);
             break;
         }
+#endif /* def DESKTOP */
+
         /* ${SMs::Biotics::SM::active::CHARGE} */
         case CHARGE_SIG: {
             status_ = Q_TRAN(&Biotics_charged);
@@ -488,6 +497,8 @@ static QState Biotics_cleanse(Biotics * const me, QEvt const * const e) {
     }
     return status_;
 }
+
+#ifdef DESKTOP
 /*${SMs::Biotics::SM::final} ...............................................*/
 static QState Biotics_final(Biotics * const me, QEvt const * const e) {
     QState status_;
@@ -506,6 +517,8 @@ static QState Biotics_final(Biotics * const me, QEvt const * const e) {
     }
     return status_;
 }
+#endif /* def DESKTOP */
+
 
 
 /*${SMs::Hand_ctor} ........................................................*/

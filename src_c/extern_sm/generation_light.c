@@ -161,7 +161,7 @@ static QState Biotics_charged(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("charged;");
             #endif
-            me->Timer = 3 + 1;
+            BIO_SET_TO(Short);
             vibro(30);
             RGB_blink_stop();
             status_ = Q_HANDLED();
@@ -270,7 +270,7 @@ static QState Biotics_song(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("song;");
             #endif
-            me->Timer = 5 + 1;
+            BIO_SET_TO(Long);
             vibro(100);
             RGB_blink_fast(ORANGE);
             status_ = Q_HANDLED();
@@ -319,7 +319,7 @@ static QState Biotics_cast_direct(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("cast_direct;");
             #endif
-            me->Timer = 3 + 1;
+            BIO_SET_TO(Short);
             vibro(60);
             status_ = Q_HANDLED();
             break;
@@ -356,7 +356,7 @@ static QState Biotics_release(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("released;");
             #endif
-            me->Timer = 5 + 1;
+            BIO_SET_TO(Long);
             vibro(100);
             me->Color = BIO_AbilitiesColors[me->Signal-FIRST_ABILITY];
             RGB_blink_slow(me->Color);
@@ -379,7 +379,7 @@ static QState Biotics_singularity(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("singularity;");
             #endif
-            me->Timer = 5 + 1;
+            BIO_SET_TO(Long);
             RGB_blink_fast(WHITE);
             vibro(100);
             status_ = Q_HANDLED();
@@ -401,7 +401,7 @@ static QState Biotics_barrier(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("barrier;");
             #endif
-            me->Timer = 5 + 1;
+            BIO_SET_TO(Long);
             vibro(100);
             RGB_blink_slow(GREEN);
             status_ = Q_HANDLED();
@@ -423,7 +423,7 @@ static QState Biotics_pwr_release(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("pwr_released;");
             #endif
-            me->Timer = 5 + 1;
+            BIO_SET_TO(Long);
             vibro(100);
             me->Color = BIO_AbilitiesColors[me->Signal - FIRST_ABILITY];
             RGB_blink_fast(me->Color);
@@ -446,7 +446,7 @@ static QState Biotics_throw(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("throw;");
             #endif
-            me->Timer = 3 + 1;
+            BIO_SET_TO(Short);
             vibro(60);
 
             status_ = Q_HANDLED();
@@ -479,7 +479,7 @@ static QState Biotics_cleanse(Biotics * const me, QEvt const * const e) {
             #ifdef DEBUG_SM
                 printf("cleanse;");
             #endif
-            me->Timer = 3 + 1;
+            BIO_SET_TO(Short);
             vibro(60);
 
             status_ = Q_HANDLED();

@@ -74,13 +74,19 @@ void adjustVecT(float vr[DIMENTION], const float v[DIMENTION], const float m[DIM
 }
 
 void multiply(float mr[DIMENTION][DIMENTION], const float m1[DIMENTION][DIMENTION], const float m2[DIMENTION][DIMENTION]) {
+    float tmp[DIMENTION][DIMENTION]
     for (int i=0; i<DIMENTION; i++) {
         for (int j=0; j<DIMENTION; j++) {
             float sum = 0;
             for (int k=0; k<DIMENTION; k++) {
                 sum += m1[i][k] * m2[k][j];
             }
-            mr[i][j] = sum;
+            tmp[i][j] = sum;
         }
     }
+    for (int i=0; i<DIMENTION; i++) {
+        for (int j=0; j<DIMENTION; j++) {
+            mr[i][j] = tmp[i][j];
+        }
+    }    
 }

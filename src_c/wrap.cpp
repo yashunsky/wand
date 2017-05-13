@@ -10,15 +10,19 @@
 
 #include "full_state_machine.h"
 
-static Splitter splitter = Splitter();
-static IMU imu = IMU();
-static StateMachine SM1 = StateMachine(0);
-static StateMachine SM2 = StateMachine(0);
-static StateMachine SMZ = StateMachine(2);
+#include "orientation.h"
 
-static FullStateMachine FSM = FullStateMachine(0);
+// static Splitter splitter = Splitter();
+// static IMU imu = IMU();
+// static StateMachine SM1 = StateMachine(0);
+// static StateMachine SM2 = StateMachine(0);
+// static StateMachine SMZ = StateMachine(2);
 
-static void PyListToArray(PyObject * source, float *dest, int width, int height) {
+//static FullStateMachine FSM = FullStateMachine(0);
+
+static Orientation O = Orientation();
+
+/*static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
     int j;
     PyObject* row;
@@ -258,9 +262,28 @@ static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
 
     return result;     
 }
+*/
+
+static PyObject* py_mahony(PyObject* self, PyObject* args) {
+    float kp, ki, dt, gx, gy, gz, ax, ay, az, mx, my, mz;
+
+    PyArg_ParseTuple(args, "ffffffffffff", &kp, &ki, &dt, &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz);
+
+    O.update(kp, ki, dt, Vector(ax, ay, az), Vector(gx, gy, gz), Vector(mx, my, mz));
+
+    Quaternion q = O.quaternion();
+
+    PyObject * result = PyTuple_New(4);
+    PyTuple_SET_ITEM(result, 0, PyFloat_FromDouble(q.a));
+    PyTuple_SET_ITEM(result, 1, PyFloat_FromDouble(q.b));
+    PyTuple_SET_ITEM(result, 2, PyFloat_FromDouble(q.c));
+    PyTuple_SET_ITEM(result, 3, PyFloat_FromDouble(q.d));
+
+    return result;
+}
 
 static PyMethodDef c_methods[] = {    
-    {"get_segmentation", py_getSegmantation, METH_VARARGS},
+/*    {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
     {"get_dist", py_getDist, METH_VARARGS},
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
@@ -272,17 +295,20 @@ static PyMethodDef c_methods[] = {
     {"set_fsm_data", py_setFSMData, METH_VARARGS},    
     {"set_signal", py_setSignal, METH_VARARGS},
     {"get_q_user_sig", py_getQ_USER_SIG, METH_VARARGS},
+*/  {"mahony", py_mahony, METH_VARARGS},
+
+
+
     {NULL, NULL}
 };
 
 extern "C" {
     PyMODINIT_FUNC initc_wrap(void) {
-        DebugSM = 0;
-        QEvt e;
+/*        QEvt e;
 
         e.sig = MAX_PILL_SIG;
         QMSM_DISPATCH(the_hand, &e);        
-        
+*/        
         (void) Py_InitModule("c_wrap", c_methods);
     }
 }

@@ -24,9 +24,7 @@ const KeyStroke KeyStrokes[]= {
 {    SINGULARITY_PILL_SIG,       "SINGULARITY_PILL",         'S'    },
 {    SONG_PILL_SIG,              "SONG_PILL",                's'    },
 {    DEFAULT_PILL_SIG,           "DEFAULT_PILL",             'd'    },
-{    MAX_PILL_SIG,               "MAX_PILL",                 'M'    },
+{    MAX_PILL_SIG,               "MAX_PILL",                 'M'    }
 
-                
-{    TERMINATE_SIG,          "TERMINATE",            0x1B   }
 
 };

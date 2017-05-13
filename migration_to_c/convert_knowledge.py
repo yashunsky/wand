@@ -50,8 +50,16 @@ def convert_knowledge(knowledge):
 
     h_text += format_define_to_c('STROKE_MAX_LENGTH', 256)
 
-    h_text += format_define_to_c('SEGMENTATION', knowledge['segmentation'])
+    h_text += format_define_to_c('KP_INIT', knowledge['kp_init'])
+    h_text += format_define_to_c('KI_INIT', knowledge['ki_init'])
+    h_text += format_define_to_c('KP_WORK', knowledge['kp_work'])
+    h_text += format_define_to_c('KI_WORK', knowledge['ki_work'])
+    h_text += format_define_to_c('INIT_EDGE', knowledge['init_edge'])
 
+    h_text += format_define_to_c('SEGMENTATION', knowledge['segmentation'])
+    h_text += format_define_to_c('GYRO_SCALE', knowledge['gyro_scale'])
+    h_text += format_define_to_c('ACC_SCALE', knowledge['acc_scale'])
+    h_text += format_define_to_c('G_CONST', knowledge['g_const'])
     h_text += format_define_to_c('STROKES_COUNT', len(strokes))
 
     h_text += format_define_to_c('MIN_DIMENTION', knowledge['splitting']['min_dimention'])
@@ -82,14 +90,8 @@ const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION] = {{
     h_text += header + '\n'
 
     h_text += 'extern const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION];\n'
-    h_text += 'extern const float MAGNETS_BOUNDARIES[2][DIMENTION];\n'
 
     c_text += formated_strokes
-
-    c_text += '''
-const float MAGNETS_BOUNDARIES[2][DIMENTION] =
-{formated_strokes}
-;'''.format(formated_strokes=format_formated_strokes_to_c(knowledge['magnet_boundaries']))
 
     c_text += '\n'
 

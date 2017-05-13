@@ -15,6 +15,5 @@ public:
     StateMachine(int axis);
     int setData(const float delta, 
         const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION]);
-    void resetCalibration();
 };
 #endif

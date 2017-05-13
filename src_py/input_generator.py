@@ -17,11 +17,12 @@ TIME_STAMP_RANGE = 2 ** 32
 
 class InputGenerator(object):
     def __init__(self, serial_port=SERIAL_PORT, dual=False,
-                 gyro_remap=lambda x: x):
+                 gyro_remap=lambda x: x, baude_rate=BAUDE_RATE):
         super(InputGenerator, self).__init__()
         self.serial_port = serial_port
         self.dual = dual
         self.gyro_remap = gyro_remap
+        self.baude_rate = baude_rate
 
         self.in_loop = False
         self.is_running = False
@@ -51,7 +52,7 @@ class InputGenerator(object):
                 yield self.parse_line(line)
 
     def parse_line(self, line):
-        data = [float(value) for value in line.replace(";", "").split()]
+        data = [float(value) for value in line.split(';')]
 
         if self.dual:
             device_id = int(data[0])
@@ -82,7 +83,7 @@ class InputGenerator(object):
 
         if from_uart:
             self.serial = serial.Serial(self.serial_port,
-                                        BAUDE_RATE, timeout=0)
+                                        self.baude_rate, timeout=0)
 
             self.data_buffer = ''
 

@@ -1,6 +1,7 @@
 #include "state_machine.h"
+#include "ahrsmath.h"
 
-StateMachine::StateMachine(int axis) {
+StateMachine::StateMachine(int axis) : imu(Vector(), Vector(), Vector()){
     this->axis = axis;
 }
 
@@ -20,8 +21,4 @@ int StateMachine::setData(const float delta,
     }
 
     return splitter.setIMUData(delta, gyro, acc, heading) + STATES_OFFSET;
-}
-
-void StateMachine::resetCalibration() {
-    imu.resetCalibration();
 }

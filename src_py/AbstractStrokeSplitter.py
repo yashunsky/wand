@@ -85,7 +85,7 @@ class AbstractStrokeSplitter(object):
                                                np.min(data, axis=0))
 
                 if self.data.size / 3 > self.min_length:
-                    stroke = self.data
+                    stroke = self.data  # self.data[:-self.gyro_time_out, :]
                     too_short = False
                     self.on_stroke_done(self.data, dimention)
                 else:

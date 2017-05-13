@@ -24,12 +24,13 @@ CORE_NAME = '../generation.json'
 
 
 PRESETS = {'alphabet': ['a', 'b', 'c', 'd', 'e', 'g', 'h'],
-                       # ['a', 'b', 'c', 'd', 'e', 'f',
-                       #  'g', 'h', 'k', 'l', 'o', 'r', 's'],
+                      # ['a', 'b', 'c', 'd', 'e', 'f',
+                      #  'g', 'h', 'k', 'l', 'o', 'r', 's'],
            'generation': ['charge', 'throw', 'punch', 'lift',
                           'warp', 'barrier', 'cleanse', 'singular',
                           'song', 'release', 'pwr_release'],
-           'todmay': ['I', 'II', 'III', 'IV']}
+           'todmay': ['I', 'II', 'III', 'IV'],
+           'new': ['new', 'charge']}
 
 
 def make_core(letters, points):
@@ -327,6 +328,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('../raw/source', PRESETS['generation'])
+    cc = CoreCreator('../raw/source', PRESETS['new'])
     cc.show()
     sys.exit(app.exec_())

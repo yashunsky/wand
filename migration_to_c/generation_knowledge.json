@@ -1,17 +1,22 @@
 {
+ "states": {
+  "done_warp": 6, 
+  "done_singular": 9, 
+  "done_throw": 3, 
+  "calibration": 0, 
+  "done_pwr_release": 12, 
+  "idle": 1, 
+  "done_punch": 4, 
+  "done_barrier": 7, 
+  "done_lift": 5, 
+  "done_cleanse": 8, 
+  "done_charge": 2, 
+  "done_song": 10, 
+  "done_release": 11
+ }, 
  "segmentation": 128, 
- "magnet_boundaries": [
-  [
-   744, 
-   -499, 
-   -491
-  ], 
-  [
-   1857, 
-   530, 
-   426
-  ]
- ], 
+ "kp_init": 10, 
+ "ki_init": 0, 
  "strokes_order": [
   "charge", 
   "throw", 
@@ -7107,19 +7112,10 @@
   "gyro_min": 1000
  }, 
  "count_down": 10, 
- "states": {
-  "done_warp": 6, 
-  "done_singular": 9, 
-  "done_throw": 3, 
-  "calibration": 0, 
-  "done_pwr_release": 12, 
-  "idle": 1, 
-  "done_punch": 4, 
-  "done_barrier": 7, 
-  "done_lift": 5, 
-  "done_cleanse": 8, 
-  "done_charge": 2, 
-  "done_song": 10, 
-  "done_release": 11
- }
+ "g_const": 9.81, 
+ "acc_scale": 0.00239501953125, 
+ "gyro_scale": 0.0010652644360316951, 
+ "ki_work": 0.025, 
+ "kp_work": 1.25, 
+ "init_edge": 5
 }

@@ -3,6 +3,8 @@
 
 import json
 
+from math import pi
+
 OUTPUT = 'migration_to_c/generation_knowledge.json'
 
 STROKES = 'generation.json'
@@ -15,11 +17,25 @@ GYRO_MIN = 1000
 GYRO_TIMEOUT = 20
 MIN_STROKE_LENGTH = 20
 
+GYRO_SCALE = 2000.0 / 32768 / 180 * pi
+
+G_CONST = 9.81
+
+ACC_SCALE = G_CONST / 4096
+
 MIN_DIMENTION = 1.0  # conventional units
 
 COMPARE_LIMIT = 1.5
 
 COUNT_DOWN = 10
+
+KP_INIT = 10
+KI_INIT = 0
+
+KP_WORK = 1.25
+KI_WORK = 0.025
+
+INIT_EDGE = 5
 
 if __name__ == '__main__':
 
@@ -31,8 +47,17 @@ if __name__ == '__main__':
     data['strokes'] = strokes['letters']
     data['segmentation'] = strokes['segmentation']
     data['strokes_order'] = strokes['order']
-    data['magnet_boundaries'] = MAGNET_BOUNDERIES
+    data['gyro_scale'] = GYRO_SCALE
     data['count_down'] = COUNT_DOWN
+
+    data['g_const'] = G_CONST
+    data['acc_scale'] = ACC_SCALE
+
+    data['kp_init'] = KP_INIT
+    data['kp_work'] = KP_WORK
+    data['ki_init'] = KI_INIT
+    data['ki_work'] = KI_WORK
+    data['init_edge'] = INIT_EDGE
 
     def add_state(state_name, state_dict):
         state_dict[state_name] = len(state_dict)

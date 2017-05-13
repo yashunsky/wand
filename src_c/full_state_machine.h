@@ -31,7 +31,5 @@ public:
     FullStateMachine(int axis);
     bool setData(const float delta, 
         const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION]);
-
-    void resetCalibration();
 };
 #endif

@@ -5,7 +5,7 @@ from uuid import uuid1
 
 import numpy as np
 
-from imu import IMU
+from c_wrap import set_sensor_data
 from splitter import PipeSplitter
 
 from unify_definition import get_letter as get_stroke
@@ -14,6 +14,8 @@ OUTPUT_MAIN = 0
 OUTPUT_WIDGET = 1
 OUTPUT_TEST = 2
 
+X_AXIS = 0
+
 
 class StateMachine(object):
     def __init__(self, knowledge):
@@ -21,7 +23,6 @@ class StateMachine(object):
 
         self.knowledge = knowledge
 
-        self.imu = IMU(self.knowledge['magnet_boundaries'])
         self.splitter = PipeSplitter(self.knowledge['splitting'])
         self.compare_limit = self.knowledge['splitting']['compare_limit']
 
@@ -47,7 +48,16 @@ class StateMachine(object):
         return result if result in accessible else None
 
     def __call__(self, sensor_data, known, output=OUTPUT_MAIN):
-        imu_state = self.imu.calc(sensor_data, 'x')
+        imu_state_c = set_sensor_data(sensor_data['delta'],
+                                      sensor_data['acc'],
+                                      sensor_data['gyro'],
+                                      sensor_data['mag'],
+                                      X_AXIS)
+
+        in_calibration, gyro, accel, heading = imu_state_c
+
+        accel = np.array(accel)
+        heading = np.array(heading)
 
         splitter_state = {"state": None, "stroke": None}
         strokes = None
@@ -56,14 +66,14 @@ class StateMachine(object):
 
         split_state = None
 
-        if not imu_state['in_calibration']:
+        if not in_calibration:
             if self.state == self.knowledge['states']['calibration']:
                 next_state = self.state = self.knowledge['states']['idle']
 
             splitter_state = self.splitter.set_data(sensor_data['delta'],
-                                                    imu_state['gyro'],
-                                                    imu_state['accel'],
-                                                    imu_state['heading'])
+                                                    gyro,
+                                                    accel,
+                                                    heading)
 
             if (splitter_state['state'] ==
                self.knowledge['splitting']['states']['stroke_done']):
@@ -96,7 +106,7 @@ class StateMachine(object):
         elif output == OUTPUT_WIDGET:
             return (next_state, split_state)
         elif output == OUTPUT_TEST:
-            return {'imu': imu_state, 'splitter': splitter_state,
+            return {'imu': imu_state_c, 'splitter': splitter_state,
                     'strokes': strokes, 'choice': choice,
                     'count_down': self.count_down, 'state': next_state,
                     'split_state': split_state}

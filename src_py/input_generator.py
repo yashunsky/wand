@@ -89,21 +89,9 @@ class InputGenerator(object):
 
             self.prev_timestamp = [None, None]
 
-            min_max_mag = [float('Inf')] * 3 + [-float('Inf')] * 3
-
             while self.in_loop:
                 for data in self.get_data():
-                    mag = data['mag']
-                    if mag:
-                        for i in xrange(3):
-                            if mag[i] < min_max_mag[i]:
-                                min_max_mag[i] = mag[i]
-                            if mag[i] > min_max_mag[i + 3]:
-                                min_max_mag[i + 3] = mag[i]
-                        # print min_max_mag
-                        if not self.dual:
-                            del data['device_id']
-                        yield data
+                    yield data
                 sleep(0.05)
             self.serial.close()
             self.is_running = False

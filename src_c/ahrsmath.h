@@ -18,13 +18,6 @@ class Vector
     {
     }
 
-    Vector(float vec[3]) :
-      x(vec[0]),
-      y(vec[1]),
-      z(vec[2])      
-    { 
-    }
-
     Vector(const Vector &arg) :
       x(arg.x),
       y(arg.y),

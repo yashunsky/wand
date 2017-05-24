@@ -49,10 +49,15 @@ class InputGenerator(object):
             if self.first_line:
                 self.first_line = False
             elif line:
-                yield self.parse_line(line)
+                result = self.parse_line(line)
+                if result is not None:
+                    yield result
 
     def parse_line(self, line):
-        data = [float(value) for value in line.split(';')]
+        try:
+            data = [float(value) for value in line.split(';')]
+        except ValueError:
+            return None
 
         if self.dual:
             device_id = int(data[0])

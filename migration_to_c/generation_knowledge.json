@@ -15,8 +15,8 @@
   "done_release": 11
  }, 
  "segmentation": 128, 
- "kp_init": 10, 
- "ki_init": 0, 
+ "kp_init": 10.0, 
+ "ki_init": 0.0, 
  "strokes_order": [
   "charge", 
   "throw", 
@@ -7096,8 +7096,8 @@
  }, 
  "splitting": {
   "min_length": 20, 
-  "gyro_timeout": 20, 
-  "min_dimention": 1.0, 
+  "gyro_timeout": 100, 
+  "min_dimention": 3.0, 
   "acceleration_time_const": 0.2, 
   "compare_limit": 1.5, 
   "states": {
@@ -7109,7 +7109,7 @@
    "in_action": 0, 
    "too_small": 4
   }, 
-  "gyro_min": 1000
+  "gyro_min": 1
  }, 
  "count_down": 10, 
  "g_const": 9.81, 
@@ -7117,5 +7117,5 @@
  "gyro_scale": 0.0010652644360316951, 
  "ki_work": 0.025, 
  "kp_work": 1.25, 
- "init_edge": 5
+ "init_edge": 5.0
 }

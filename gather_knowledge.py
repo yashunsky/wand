@@ -13,8 +13,8 @@ STROKES = 'generation.json'
 MAGNET_BOUNDERIES = ((744, -499, -491), (1857, 530, 426))
 ACCELERATION_TIME_CONST = 0.2  # s
 
-GYRO_MIN = 1000
-GYRO_TIMEOUT = 20
+GYRO_MIN = 1
+GYRO_TIMEOUT = 100
 MIN_STROKE_LENGTH = 20
 
 GYRO_SCALE = 2000.0 / 32768 / 180 * pi
@@ -23,19 +23,19 @@ G_CONST = 9.81
 
 ACC_SCALE = G_CONST / 4096
 
-MIN_DIMENTION = 1.0  # conventional units
+MIN_DIMENTION = 3.0  # conventional units
 
 COMPARE_LIMIT = 1.5
 
 COUNT_DOWN = 10
 
-KP_INIT = 10
-KI_INIT = 0
+KP_INIT = 10.0
+KI_INIT = 0.0
 
 KP_WORK = 1.25
 KI_WORK = 0.025
 
-INIT_EDGE = 5
+INIT_EDGE = 5.0
 
 if __name__ == '__main__':
 

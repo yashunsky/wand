@@ -3,7 +3,7 @@
 
 import serial
 
-from time import sleep
+from time import sleep, time
 
 SERIAL_PORT = '/dev/tty.usbmodem1411'
 
@@ -120,3 +120,13 @@ class InputGenerator(object):
     def set_feedback(self, device_id, r, g, b, blink_on, blink_off, vibro):
         self.serial.write('set %d %d,%d,%d,%d,%d,%d\r' %
                           (device_id, r, g, b, blink_on, blink_off, vibro))
+
+if __name__ == '__main__':
+    now = time()
+    generator = InputGenerator(serial_port='/dev/tty.usbserial-A9IX9R77',
+                               dual=False, baude_rate=256000)
+    with open('raw_log.txt', 'w') as f:
+        for data in generator(True, '', True):
+            f.write(str(data) + '\n')
+            if time() - now > 20:
+                break

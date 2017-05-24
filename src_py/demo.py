@@ -1,136 +1,104 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import argparse
+import Tkinter as tk
 
-import sys
-
-from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QThread
+from gui import Widget
 
 import json
 
-from generation_widget import GenerationWidget
-from state_machine import GenerationStateMachine
-from state_machine import MODE_RUN, MODE_DEMO, MODE_TRAIN, OUTPUT_WIDGET
+from multiprocessing import Process, Pipe
+
+from simple_state_machine import StateMachine, OUTPUT_WIDGET
 from input_generator import InputGenerator
 
+PORT = '/dev/tty.usbserial-A9IX9R77'
 
-INPUT_LOG = '../migration_to_c/test_input.log'
-KNOWLEDGE = '../migration_to_c/test_knowledge.json'
+KNOWLEDGE = '../migration_to_c/generation_knowledge.json'
 
 POPUP_COUNT_DOWN = 2
 
-STEP_NAMES = {0: u'первый жест', 1: u'второй жест'}
+
+def start_gui(pipe_in, pipe_out):
+    Widget(pipe_in, pipe_out)
+    tk.mainloop()
 
 
-class DemoWidget(GenerationWidget):
-    def __init__(self, mode, from_uart=True):
-        super(DemoWidget, self).__init__()
+def start_uart(pipe_in, pipe_out):
+    with open(KNOWLEDGE, 'r') as f:
+        knowledge = json.load(f)
 
-        self.from_uart = from_uart
+    all_strokes = knowledge['strokes'].keys()
 
-        with open(KNOWLEDGE, 'r') as f:
-            self.knowledge = json.load(f)
+    states = {value: key for key, value in knowledge['states'].items()}
 
-        self.states = {value: key for key, value
-                       in self.knowledge['states'].items()}
+    split_states = {value: key for key, value
+                    in knowledge['splitting']['states'].items()}
 
-        self.split_states = {value: key for key, value
-                             in self.knowledge['splitting']['states'].items()}
+    input_generator = InputGenerator(serial_port=PORT, baude_rate=256000)
+    state_machine = StateMachine(knowledge)
 
-        self.mode = mode
+    old_display_state = ('idle', '')
+    new_display_state = ('idle', '')
 
-        self.state = None
-        self.split_state = None
+    popup_countdown = 0
 
-        self.popup_state = None
+    def get_subtitle(split_state):
+        if split_state == 'stroke_done':
+            return u'сделан'
+        elif split_state == 'too_small':
+            return u'слишком маленький'
+        elif split_state == 'too_short':
+            return u'слишком короткий'
+        elif split_state == 'strange':
+            return u'какой-то странный'
 
-        self.popup_count_down = 0
+    for input_data in input_generator(True, '', True):
 
-        self.input_generator = InputGenerator()
+        state, split_state = state_machine(input_data,
+                                           all_strokes,
+                                           OUTPUT_WIDGET)
 
-        self.listener = QThread()
+        state = states[state]
 
-        self.state_machine = GenerationStateMachine(self.knowledge, MODE_DEMO)
+        split_state = (None if split_state is None
+                       else split_states[split_state])
 
-        self.listener.run = self.listener_thread
+        if state == 'calibration':
+            new_display_state = ('calibration', '')
+        else:
+            subtitle = get_subtitle(split_state)
+            if subtitle is not None:
+                popup_countdown = 1
+                new_display_state = ('splitting', subtitle)
 
-        self.listener.start()
-
-        self.next_stroke()
-
-    def next_stroke(self):
-        self.state_machine.next_stroke()
-
-    def process(self):
-        if self.popup_state is not None:
-            self.set_state(*self.popup_state)
-        elif self.state is not None:
-            if 'in_progress' in self.state:
-                step_name = STEP_NAMES[int(self.state[12:])]
-                self.set_state('in_progress', step_name)
-                self.popup_count_down = 0
-            elif 'done_sequence' in self.state:
-                seq_name = (self.knowledge['sequences_names']
-                            [int(self.state[14:])])
-                self.set_state('done_sequence', seq_name)
-                self.popup_count_down = 0
-            elif 'idle' in self.state:
-                if self.split_state == 'in_action':
-                    self.set_state('splitting', u'выполняется')
+            elif popup_countdown == 0:
+                if split_state == 'in_action':
+                    new_display_state = ('splitting', u'выполняется')
                 else:
-                    self.set_state(self.state)
-            else:
-                self.set_state(self.state)
+                    new_display_state = ('idle', u'')
 
-    def set_popup(self, state, subtitle, count_down=POPUP_COUNT_DOWN):
-        self.popup_state = (state, subtitle)
-        self.popup_count_down = count_down
+        popup_countdown -= input_data['delta']
 
-    def listener_thread(self):
-        for input_data in self.input_generator(self.from_uart,
-                                               INPUT_LOG, True):
-            state, split_state = self.state_machine(input_data, OUTPUT_WIDGET)
-            self.state = self.states[state]
+        if popup_countdown < 0:
+            popup_countdown = 0
 
-            self.split_state = (None if split_state is None
-                                else self.split_states[split_state])
+        if new_display_state != old_display_state:
+            pipe_out.send(new_display_state)
+            old_display_state = new_display_state
 
-            if self.state != 'calibration':
-                if self.split_state == 'too_small':
-                    self.set_popup('splitting', u'слишком маленький', 1)
-                elif self.split_state == 'too_short':
-                    self.set_popup('splitting', u'слишком короткий', 1)
-                elif self.split_state == 'strange':
-                    self.set_popup('splitting', u'какой-то странный', 1)
-                elif self.split_state == 'unsupported':
-                    self.set_popup('splitting', u'какой-то не отсюда', 1)
-
-            if 'demo' in self.state:
-                stroke_name = self.knowledge['stroke_names'][self.state[5:]]
-                self.set_popup('demo', stroke_name)
-
-            if self.popup_count_down > 0:
-                self.popup_count_down -= input_data['delta']
-            else:
-                self.popup_state = None
-
-        self.state = 'idle'
-
+        if pipe_in.poll():
+            message = pipe_in.recv()
+            if message == 'next':
+                state_machine.next_stroke()
+            elif message == 'exit':
+                input_generator.in_loop = False
 
 if __name__ == '__main__':
+    from_gui_parent, from_gui_child = Pipe()
+    to_gui_parent, to_gui_child = Pipe()
 
-    parser = argparse.ArgumentParser(description='strokes processing')
-    parser.add_argument('mode', choices=['train', 'demo', 'run'])
-    parser.add_argument('-v', '--virtual', action='store_true')
-
-    args = parser.parse_args()
-
-    modes = {'demo': MODE_DEMO, 'train': MODE_TRAIN, 'run': MODE_RUN}
-
-    app = QApplication(sys.argv)
-    widget = DemoWidget(modes[args.mode], not args.virtual)
-    widget.show()
-    app.exec_()
-    widget.input_generator.stop()
+    p = Process(target=start_uart, args=(from_gui_child, to_gui_parent))
+    p.start()
+    start_gui(to_gui_child, from_gui_parent)
+    p.join()

@@ -12,17 +12,21 @@
 
 #include "orientation.h"
 
-// static Splitter splitter = Splitter();
-// static IMU imu = IMU();
-// static StateMachine SM1 = StateMachine(0);
-// static StateMachine SM2 = StateMachine(0);
-// static StateMachine SMZ = StateMachine(2);
+#define G_OFFSET Vector(-4698.0, -4965.0, 4972.0)
+#define A_OFFSET Vector(99.0, 123.0, -763.0)
+#define M_OFFSET Vector(46.0, 46.0, -6.0)
 
-//static FullStateMachine FSM = FullStateMachine(0);
+static Splitter splitter = Splitter();
+static IMU imu = IMU(A_OFFSET, G_OFFSET, M_OFFSET);
+static StateMachine SM1 = StateMachine(0);
+static StateMachine SM2 = StateMachine(0);
+static StateMachine SMZ = StateMachine(2);
+
+static FullStateMachine FSM = FullStateMachine(0);
 
 static Orientation O = Orientation();
 
-/*static void PyListToArray(PyObject * source, float *dest, int width, int height) {
+static void PyListToArray(PyObject * source, float *dest, int width, int height) {
     int i;
     int j;
     PyObject* row;
@@ -149,6 +153,7 @@ static PyObject* py_setIMUData(PyObject* self, PyObject* args) {
 }
 
 static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
+
     float delta;
     float acc[DIMENTION];
     float gyro[DIMENTION];
@@ -262,7 +267,7 @@ static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
 
     return result;     
 }
-*/
+
 
 static PyObject* py_mahony(PyObject* self, PyObject* args) {
     float kp, ki, dt, gx, gy, gz, ax, ay, az, mx, my, mz;
@@ -283,7 +288,7 @@ static PyObject* py_mahony(PyObject* self, PyObject* args) {
 }
 
 static PyMethodDef c_methods[] = {    
-/*    {"get_segmentation", py_getSegmantation, METH_VARARGS},
+    {"get_segmentation", py_getSegmantation, METH_VARARGS},
     {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
     {"get_dist", py_getDist, METH_VARARGS},
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
@@ -295,7 +300,7 @@ static PyMethodDef c_methods[] = {
     {"set_fsm_data", py_setFSMData, METH_VARARGS},    
     {"set_signal", py_setSignal, METH_VARARGS},
     {"get_q_user_sig", py_getQ_USER_SIG, METH_VARARGS},
-*/  {"mahony", py_mahony, METH_VARARGS},
+    {"mahony", py_mahony, METH_VARARGS},
 
 
 

@@ -15,18 +15,18 @@ bool IMU::calc(const float dt,
                int axis,
                float * gyroOut, float accOut[DIMENTION], float headingOut[DIMENTION])
 {
-    Vector aIn = (Vector(*accIn) - aOffset);
-    Vector gIn = (Vector(*gyroIn) - gOffset) * GYRO_SCALE;
-    Vector mIn = (Vector(*magIn) - mOffset) * ACC_SCALE;
+    Vector aIn = (Vector(accIn[0], accIn[1], accIn[2]) - aOffset) * ACC_SCALE;
+    Vector gIn = (Vector(gyroIn[0], gyroIn[1], gyroIn[2]) - gOffset) * GYRO_SCALE;
+    Vector mIn = (Vector(magIn[0], magIn[1], magIn[2]) - mOffset);
 
     *gyroOut = gIn.norm();
 
     time += dt;
 
-    bool inCalibration = time > INIT_EDGE;
+    bool inCalibration = time < INIT_EDGE;
 
-    float kp = inCalibration ? KP_WORK : KP_INIT;
-    float ki = inCalibration ? KI_WORK : KI_INIT;
+    float kp = inCalibration ? KP_INIT : KP_WORK;
+    float ki = inCalibration ? KI_INIT : KI_WORK;
 
     orientation.update(kp, ki, dt, aIn, gIn, mIn);
 
@@ -34,7 +34,7 @@ bool IMU::calc(const float dt,
 
     Vector heading = M.T()[axis];
 
-    Vector aOut = aIn * M - Vector(0.0, G_CONST, 0.0);
+    Vector aOut = aIn * M - Vector(0.0, 0.0, G_CONST);
 
     headingOut[0] = heading.x;
     headingOut[1] = heading.y;

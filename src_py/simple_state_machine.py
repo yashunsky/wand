@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 from os import makedirs, path
 from uuid import uuid1
@@ -112,3 +112,38 @@ class StateMachine(object):
                     'split_state': split_state}
 
             raise ValueError('Unknown ouptup mode %d' % output)
+
+if __name__ == '__main__':
+    from input_generator import InputGenerator
+    import json
+
+    PORT = '/dev/tty.usbserial-A9IX9R77'
+    KNOWLEDGE = '../migration_to_c/generation_knowledge.json'
+
+    with open(KNOWLEDGE, 'r') as f:
+        knowledge = json.load(f)
+
+    all_strokes = knowledge['strokes'].keys()
+
+    states = {value: key for key, value in knowledge['states'].items()}
+
+    split_states = {value: key for key, value
+                    in knowledge['splitting']['states'].items()}
+
+    input_generator = InputGenerator(serial_port=PORT, baude_rate=256000)
+    state_machine = StateMachine(knowledge)
+
+    prev_split_state = None
+
+    try:
+        for input_data in input_generator(True, '', True):
+            state, split_state = state_machine(input_data,
+                                               all_strokes,
+                                               OUTPUT_WIDGET)
+            if prev_split_state != split_state:
+                prev_split_state = split_state
+                print (None if split_state is None
+                       else split_states[split_state])
+
+    except KeyboardInterrupt:
+        input_generator.in_loop = False

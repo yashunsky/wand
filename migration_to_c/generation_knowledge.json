@@ -7097,7 +7097,7 @@
  "splitting": {
   "min_length": 20, 
   "gyro_timeout": 100, 
-  "min_dimention": 3.0, 
+  "min_dimention": 1.0, 
   "acceleration_time_const": 0.2, 
   "compare_limit": 1.5, 
   "states": {

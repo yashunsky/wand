@@ -5,8 +5,9 @@
 
 import json
 import sys
-from os.path import join, basename
-from os import rename, walk
+from os.path import join
+from os import rename
+from core_creator import make_core, get_letters
 
 from PyQt4.QtCore import QAbstractListModel
 from PyQt4.QtCore import Qt
@@ -15,63 +16,11 @@ from PyQt4.QtGui import QPushButton, QLineEdit, QListView
 
 import numpy as np
 import pyqtgraph as pg
-from unify_definition import unify_stroke
 
 
 SEGMENTATION = 128
 
 CORE_NAME = '../generation.json'
-
-
-PRESETS = {'alphabet': ['a', 'b', 'c', 'd', 'e', 'g', 'h'],
-                      # ['a', 'b', 'c', 'd', 'e', 'f',
-                      #  'g', 'h', 'k', 'l', 'o', 'r', 's'],
-           'generation': ['charge', 'throw', 'punch', 'lift',
-                          'warp', 'barrier', 'cleanse', 'singular',
-                          'song', 'release', 'pwr_release'],
-           'todmay': ['I', 'II', 'III', 'IV'],
-           'new': ['new', 'charge']}
-
-
-def make_core(letters, points):
-    core = {}
-    for key, letters_group in letters.items():
-        unified = np.array([unify_stroke(letter, points)
-                            for letter in letters_group])
-        centers = np.mean(unified, axis=0)
-
-        n = np.linalg.norm(centers, axis=1)
-
-        norms = np.vstack((n, n, n)).T
-
-        centers = centers / norms
-
-        core[key] = centers
-    return core
-
-
-def get_letters(path, strokes_set):
-    '''Read stroke files from given folder
-    and arange them into a dict of lists by key-letter'''
-
-    letters = {}
-
-    for (dirpath, dirnames, filenames) in walk(path):
-        if dirpath == path:
-            continue
-        for f in sorted(filenames):
-            try:
-                data = np.loadtxt(join(dirpath, f))
-            except ValueError:
-                continue
-            filename = basename(f)
-            key = dirpath.split('/')[-1].split('-')[0]
-            if key not in strokes_set:
-                continue
-            if key not in letters:
-                letters[key] = []
-            letters[key].append({'filename': filename, 'data': data})
-    return letters
 
 
 def stereographic(x, y, z):
@@ -247,15 +196,15 @@ class StrokeList(QAbstractListModel):
         self.keys_model.set_keys(self.strokes.keys())
 
 
-class CoreCreator(QWidget):
+class StrokesWatcher(QWidget):
     """Main module's widget"""
-    def __init__(self, path, strokes_set):
-        super(CoreCreator, self).__init__()
+    def __init__(self, path):
+        super(StrokesWatcher, self).__init__()
         self.path = path
-        self.strokes_order = strokes_set
+        self.strokes_order, letters = get_letters(path)
         self.setup_ui()
-        self.stroke_list = StrokeList(get_letters(path, strokes_set),
-                                      strokes_set,
+        self.stroke_list = StrokeList(letters,
+                                      self.strokes_order,
                                       self.display)
 
         self.letter_selector.setModel(self.stroke_list.keys_model)
@@ -263,8 +212,6 @@ class CoreCreator(QWidget):
         self.list_view.setModel(self.stroke_list)
 
         self.letter_selector.currentIndexChanged.connect(self.select_letter)
-
-        self.create_core_btn.clicked.connect(self.create_core)
 
         self.set_letter_btn.clicked.connect(self.change_letter)
 
@@ -276,17 +223,6 @@ class CoreCreator(QWidget):
         if new_key and indexes:
             new_key = new_key[0]
             self.stroke_list.change_stroke_key(indexes[0], new_key, self.path)
-
-    def create_core(self):
-        segmentation = SEGMENTATION
-        letters = self.stroke_list.make_dict(all_letters=True)
-        core = make_core(letters, segmentation)
-        dump_data = {'segmentation': segmentation}
-        dump_data['order'] = self.strokes_order
-        dump_data['letters'] = {key: val.tolist()
-                                for key, val in core.items() if key != '_'}
-        with open(CORE_NAME, 'w') as f:
-            json.dump(dump_data, f, indent=1)
 
     def select_letter(self):
         # set stroke_list key_letter to the one
@@ -314,10 +250,6 @@ class CoreCreator(QWidget):
         self.letter_selector = QComboBox(self)
         self.grid.addWidget(self.letter_selector, 1, 2, 1, 2)
 
-        self.create_core_btn = QPushButton(self)
-        self.create_core_btn.setText('Create core')
-        self.grid.addWidget(self.create_core_btn, 2, 1, 1, 1)
-
         self.letter_edt = QLineEdit(self)
         self.grid.addWidget(self.letter_edt, 2, 2, 1, 1)
 
@@ -328,6 +260,6 @@ class CoreCreator(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    cc = CoreCreator('../raw/source', PRESETS['new'])
+    cc = StrokesWatcher('../raw/source')
     cc.show()
     sys.exit(app.exec_())

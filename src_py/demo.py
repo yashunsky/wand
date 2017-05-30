@@ -44,9 +44,7 @@ def start_uart(pipe_in, pipe_out):
     popup_countdown = 0
 
     def get_subtitle(split_state):
-        if split_state == 'stroke_done':
-            return u'сделан'
-        elif split_state == 'too_small':
+        if split_state == 'too_small':
             return u'слишком маленький'
         elif split_state == 'too_short':
             return u'слишком короткий'
@@ -61,22 +59,26 @@ def start_uart(pipe_in, pipe_out):
 
         state = states[state]
 
-        split_state = (None if split_state is None
-                       else split_states[split_state])
-
-        if state == 'calibration':
-            new_display_state = ('calibration', '')
+        if 'done_' in state:
+            popup_countdown = 1
+            new_display_state = ('splitting', state[5:])
         else:
-            subtitle = get_subtitle(split_state)
-            if subtitle is not None:
-                popup_countdown = 1
-                new_display_state = ('splitting', subtitle)
+            split_state = (None if split_state is None
+                           else split_states[split_state])
 
-            elif popup_countdown == 0:
-                if split_state == 'in_action':
-                    new_display_state = ('splitting', u'выполняется')
-                else:
-                    new_display_state = ('idle', u'')
+            if state == 'calibration':
+                new_display_state = ('calibration', '')
+            else:
+                subtitle = get_subtitle(split_state)
+                if subtitle is not None:
+                    popup_countdown = 1
+                    new_display_state = ('splitting', subtitle)
+
+                elif popup_countdown == 0:
+                    if split_state == 'in_action':
+                        new_display_state = ('splitting', u'выполняется')
+                    else:
+                        new_display_state = ('idle', u'')
 
         popup_countdown -= input_data['delta']
 

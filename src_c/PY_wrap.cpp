@@ -6,18 +6,16 @@
 #include "state_machine.h"
 
 #include <stdint.h>
-#include "extern_sm/generation_light.h"
+#include "generation_light.h"
 
 #include "full_state_machine.h"
 
 #include "orientation.h"
 
-#define G_OFFSET Vector(-4698.0, -4965.0, 4972.0)
-#define A_OFFSET Vector(99.0, 123.0, -763.0)
-#define M_OFFSET Vector(46.0, 46.0, -6.0)
+#include "calibration.h"
 
 static Splitter splitter = Splitter();
-static IMU imu = IMU(A_OFFSET, G_OFFSET, M_OFFSET);
+static IMU imu = IMU(getAOffset(), getGOffset(), getMOffset());
 static StateMachine SM1 = StateMachine(0);
 static StateMachine SM2 = StateMachine(0);
 static StateMachine SMZ = StateMachine(2);

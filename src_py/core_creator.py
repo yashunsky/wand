@@ -59,8 +59,7 @@ def make_dict(strokes):
             for key, elements_list in strokes.items()}
 
 
-def save_core(strokes, core_path,
-              source_path=SOURCE_PATH, segmentation=SEGMENTATION):
+def get_core(strokes, source_path=SOURCE_PATH, segmentation=SEGMENTATION):
     _, letters = get_letters(source_path, {s for s in strokes})
     core = make_core(make_dict(letters), segmentation)
     dump_data = {
@@ -70,9 +69,7 @@ def save_core(strokes, core_path,
                     for key, val in core.items() if key != '_'}
     }
 
-    with open(core_path, 'w') as f:
-        json.dump(dump_data, f, indent=1)
-
+    return dump_data
 
 if __name__ == '__main__':
     strokes = ['charge', 'throw', 'punch', 'lift',
@@ -80,4 +77,7 @@ if __name__ == '__main__':
                'song', 'release', 'pwr_release']
     core_path = '../generation.json'
 
-    save_core(strokes, core_path)
+    core = get_core(strokes)
+
+    with open(core_path, 'w') as f:
+        json.dump(core, f, indent=1)

@@ -9,8 +9,6 @@ OUTPUT = 'migration_to_c/generation_knowledge.json'
 
 STROKES = 'generation.json'
 
-# MAGNET_BOUNDERIES = ((-519, -542, -698), (546, 453, 408))
-MAGNET_BOUNDERIES = ((744, -499, -491), (1857, 530, 426))
 ACCELERATION_TIME_CONST = 0.2  # s
 
 GYRO_MIN = 1

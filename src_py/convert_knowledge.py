@@ -2,8 +2,9 @@
 
 PREFIX = 'stroke'
 
-STROKE_MAX_LENGTH = 1024
 FILENAME = 'knowledge'
+
+STROKE_MAX_LENGTH = 4096
 
 
 def stroke_const_name(key):

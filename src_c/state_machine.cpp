@@ -1,7 +1,8 @@
 #include "state_machine.h"
 #include "ahrsmath.h"
+#include "calibration.h"
 
-StateMachine::StateMachine(int axis) : imu(Vector(), Vector(), Vector()){
+StateMachine::StateMachine(int axis) : imu(getAOffset(), getGOffset(), getGOffset()){
     this->axis = axis;
 }
 

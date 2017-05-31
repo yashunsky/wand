@@ -1,8 +1,7 @@
 #include "full_state_machine.h"
-#include "extern_sm/service.h"
-#include "extern_sm/generation_light.h"
+#include "service.h"
+#include "generation_light.h"
 #include "knowledge.h"
-#include <stdio.h>
 
 FullStateMachine::FullStateMachine(int axis) : innerMachine(axis) {
     innerTimer = 0;    

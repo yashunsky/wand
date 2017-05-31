@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "state_machine.h"
-#include "extern_sm/generation_light.h"
+#include "generation_light.h"
 
 #define EXTERN_TICK_MS 1000
 

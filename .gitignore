@@ -1,6 +1,6 @@
 *.pyc
 *.log
-
+/output
 /raw/*
 *.gch
 *.so

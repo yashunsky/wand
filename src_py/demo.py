@@ -9,7 +9,12 @@ import json
 
 from multiprocessing import Process, Pipe
 
-from simple_state_machine import StateMachine, OUTPUT_WIDGET
+from os import makedirs, path
+from uuid import uuid1
+
+import numpy as np
+
+from c_wrap import set_sm_data
 from input_generator import InputGenerator
 
 PORT = '/dev/tty.usbserial-A9IX9R77'
@@ -28,20 +33,19 @@ def start_uart(pipe_in, pipe_out):
     with open(KNOWLEDGE, 'r') as f:
         knowledge = json.load(f)
 
-    all_strokes = knowledge['strokes'].keys()
-
     states = {value: key for key, value in knowledge['states'].items()}
 
     split_states = {value: key for key, value
                     in knowledge['splitting']['states'].items()}
 
     input_generator = InputGenerator(serial_port=PORT, baude_rate=256000)
-    state_machine = StateMachine(knowledge)
 
     old_display_state = ('idle', '')
     new_display_state = ('idle', '')
 
     popup_countdown = 0
+
+    prefix = uuid1()
 
     def get_subtitle(split_state):
         if split_state == 'too_small':
@@ -53,9 +57,16 @@ def start_uart(pipe_in, pipe_out):
 
     for input_data in input_generator(True, '', True):
 
-        state, split_state = state_machine(input_data,
-                                           all_strokes,
-                                           OUTPUT_WIDGET)
+        state, split_state, stroke = set_sm_data(input_data['delta'],
+                                                 input_data['acc'],
+                                                 input_data['gyro'],
+                                                 input_data['mag'])
+
+        if stroke != 0:
+            folder = '../raw/simple/%s' % prefix
+            if not path.exists(folder):
+                makedirs(folder)
+            np.savetxt('%s/%s.txt' % (folder, uuid1()), stroke)
 
         state = states[state]
 
@@ -64,7 +75,7 @@ def start_uart(pipe_in, pipe_out):
             new_display_state = ('splitting', state[5:])
         else:
             split_state = (None if split_state is None
-                           else split_states[split_state])
+                           else split_states.get(split_state))
 
             if state == 'calibration':
                 new_display_state = ('calibration', '')
@@ -92,7 +103,7 @@ def start_uart(pipe_in, pipe_out):
         if pipe_in.poll():
             message = pipe_in.recv()
             if message == 'next':
-                state_machine.next_stroke()
+                prefix = uuid1()
             elif message == 'exit':
                 input_generator.in_loop = False
 

@@ -73,6 +73,7 @@ def gather_knowledge(strokes):
     add_state('not_in_action', s)
     add_state('stroke_done', s)
     add_state('too_short', s)
+    add_state('too_long', s)
     add_state('too_small', s)
     add_state('unsupported', s)
     add_state('strange', s)
@@ -126,7 +127,7 @@ def main(preset, fw=False):
     sm = preset['state_machine']
 
     copy_c_sources(C_SOURCES, OUTPUT, fw, is_c_file)
-    copy_c_sources(join(SMS_SOURCE_PATH, sm), OUTPUT, 
+    copy_c_sources(join(SMS_SOURCE_PATH, sm), OUTPUT,
                    fw, is_non_desctop_c_file)
 
 if __name__ == '__main__':

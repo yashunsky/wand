@@ -2,6 +2,7 @@
 #include <math.h>
 #include "matrix.h"
 #include "unify_definition.h"
+#include "stroke_export.h"
 
 float getDist(const float a[DIMENTION], const float b[DIMENTION]) {
     float delta = 0;
@@ -79,6 +80,9 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description
 int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length) {
     float unifiedStroke[SEGMENTATION][DIMENTION];
     unifyStroke(stroke, unifiedStroke, length);
+
+    exportStroke(unifiedStroke);
+
     int i;
     float error;
     float min_error = -1;

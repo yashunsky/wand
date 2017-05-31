@@ -2,7 +2,11 @@
 #include "matrix.h"
 #include "filter.h"
 #include "unify_definition.h"
+#include "stroke_export.h"
+#include "split_state_export.h"
+
 #include <stdio.h>
+
 
 Splitter::Splitter() {
     strokeLength = -1;
@@ -54,6 +58,7 @@ int Splitter::setIMUData(const float delta, const float gyro, const float accel[
     processSize(filter.setInput(accel, delta), delta);
 
     if (gyro > GYRO_MIN) {
+        exportSplitState(IN_ACTION);
         timer = GYRO_TIMEOUT;
         if (strokeLength == 0) {
             y[0] = heading[0];
@@ -94,11 +99,21 @@ int Splitter::setIMUData(const float delta, const float gyro, const float accel[
             subVec(dimentionVec, positionsRange[1], positionsRange[0]);
             dimention = norm(dimentionVec);  
 
-            if ((MIN_STROKE_LENGTH < strokeLength) && (strokeLength <= STROKE_MAX_LENGTH) && (dimention > MIN_DIMENTION)) {
-                result = getStroke(buffer, strokeLength);
+            printf("%f\n", dimention);
+
+            if (MIN_STROKE_LENGTH > strokeLength) {
+                exportSplitState(TOO_SHORT);
+            } else if (strokeLength >= STROKE_MAX_LENGTH) {
+                exportSplitState(TOO_LONG);
+            } else if (dimention < MIN_DIMENTION) {
+                exportSplitState(TOO_SMALL);
+            } else {
+                result = getStroke(buffer, strokeLength);              
             }
+
             strokeLength = 0;
         } else if (timer < 0) {
+            exportSplitState(NOT_IN_ACTION);
             timer = -1;
         }
     }

@@ -10,7 +10,7 @@ OUTPUT = '../src_c/knowledge'
 
 PREFIX = 'stroke'
 
-STROKE_MAX_LENGTH = 256
+STROKE_MAX_LENGTH = 1024
 
 
 def stroke_const_name(key):
@@ -74,6 +74,9 @@ def convert_knowledge(knowledge):
     h_text += format_define_to_c('IDLE', knowledge['states']['idle'])
     h_text += format_define_to_c('STATES_OFFSET', knowledge['states']['idle'] + 1)
 
+    for key, value in knowledge['splitting']['states'].items():
+        h_text += format_define_to_c(key.upper(), value)
+
     header = ''
 
     formated_strokes = []
@@ -98,15 +101,3 @@ const float STROKES[STROKES_COUNT][SEGMENTATION][DIMENTION] = {{
     h_text += '\n\n#endif\n'
 
     return h_text, c_text
-
-if __name__ == '__main__':
-    with open(KNOWLEDGE, 'r') as f:
-        knowledge = json.load(f)
-
-    h_text, c_text = convert_knowledge(knowledge)
-
-    with open(OUTPUT + '.h', 'w') as f:
-        f.write(h_text)
-
-    with open(OUTPUT + '.cpp', 'w') as f:
-        f.write(c_text)

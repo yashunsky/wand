@@ -17,7 +17,7 @@ G_CONST = 9.81
 
 ACC_SCALE = G_CONST / 4096
 
-MIN_DIMENTION = 1.0  # conventional units
+MIN_DIMENTION = 3.0  # conventional units
 
 COMPARE_LIMIT = 1.5
 

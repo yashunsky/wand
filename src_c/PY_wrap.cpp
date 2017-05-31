@@ -13,52 +13,26 @@
 #include "orientation.h"
 
 #include "calibration.h"
+#include "stroke_export.h"
+#include "split_state_export.h"
+#include "wrap_utils.h"
+#include "state_keeper.h"
 
 static Splitter splitter = Splitter();
 static IMU imu = IMU(getAOffset(), getGOffset(), getMOffset());
-static StateMachine SM1 = StateMachine(0);
-static StateMachine SM2 = StateMachine(0);
-static StateMachine SMZ = StateMachine(2);
+static StateMachine SM = StateMachine(0);
+static StateKeeper SK = StateKeeper();
 
 static FullStateMachine FSM = FullStateMachine(0);
 
 static Orientation O = Orientation();
 
-static void PyListToArray(PyObject * source, float *dest, int width, int height) {
-    int i;
-    int j;
-    PyObject* row;
-    for (i = 0; i < width; i++) {
-        if (height == 1) {
-            dest[i] = (float) PyFloat_AsDouble(PyList_GetItem(source, (Py_ssize_t) i));
-        } else {
-            row = PyList_GetItem(source, (Py_ssize_t) i);
-            for (j = 0; j < height; j++) {
-                dest[i * height + j] = PyFloat_AsDouble(PyList_GetItem(row, (Py_ssize_t) j));
-            }
-        }
-    }
+void exportStroke(float stroke[SEGMENTATION][DIMENTION]) {
+    SK.setStroke(stroke);
 }
 
-
-static PyObject * arrayToPyList(const float * source, int width, int height) {
-    int i, j;
-    PyObject * row;
-    PyObject * newListObj = PyTuple_New(width);
-
-    for (i = 0; i < width; i++) {
-        if (height == 1) {
-            PyTuple_SET_ITEM(newListObj, i, PyFloat_FromDouble(source[i]));
-        } else {
-            row = PyTuple_New(height);
-            for (j = 0; j < height; j++) {
-                PyTuple_SET_ITEM(row, j, PyFloat_FromDouble(source[i * height +j]));
-            }
-            PyTuple_SET_ITEM(newListObj, i, row);
-        }
-    }
-
-    return newListObj;    
+void exportSplitState(int state) {
+    SK.setSplitterState(state);        
 }
 
 static PyObject* py_getSegmantation(PyObject* self, PyObject* args) {
@@ -193,27 +167,31 @@ static PyObject* py_setSMData(PyObject* self, PyObject* args) {
     float acc[DIMENTION];
     float gyro[DIMENTION];
     float mag[DIMENTION];
-    int dest;
 
     PyObject * accObj;
     PyObject * gyroObj;
     PyObject * magObj;   
 
-    PyArg_ParseTuple(args, "ifO!O!O!", &dest, &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
+    PyArg_ParseTuple(args, "fO!O!O!", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
 
     PyListToArray(accObj, &acc[0], DIMENTION, 1);
     PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
     PyListToArray(magObj, &mag[0], DIMENTION, 1);
 
-    StateMachine * sm;
+    SK.clearStroke();
 
-    switch (dest) {
-        case 0: sm = &SM1; break;
-        case 1: sm = &SM2; break;
-        default: sm = &SMZ; break;
+    PyObject * result = PyTuple_New(3);
+    PyTuple_SET_ITEM(result, 0, PyInt_FromLong(SM.setData(delta, acc, gyro, mag)));
+
+    PyTuple_SET_ITEM(result, 1, PyInt_FromLong(SK.getSplitterState()));
+    
+    if (SK.getStroke() != NULL) {
+        PyTuple_SET_ITEM(result, 2, SK.getStroke());
+    } else {
+        PyTuple_SET_ITEM(result, 2, PyInt_FromLong(0));
     }
 
-    return PyInt_FromLong(sm->setData(delta, acc, gyro, mag));
+    return result;
 }
 
 static PyObject* py_setSignal(PyObject* self, PyObject* args) {

@@ -185,7 +185,7 @@ static PyObject* py_setSMData(PyObject* self, PyObject* args) {
 
     PyTuple_SET_ITEM(result, 1, PyInt_FromLong(SK.getSplitterState()));
     
-    if (SK.getStroke() != NULL) {
+    if (SK.isStrokeSet() != 0) {
         PyTuple_SET_ITEM(result, 2, SK.getStroke());
     } else {
         PyTuple_SET_ITEM(result, 2, PyInt_FromLong(0));

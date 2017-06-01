@@ -7,7 +7,8 @@
 class StateKeeper {
 private:
     int splitterState;
-    PyObject * stroke;
+    float stroke[SEGMENTATION][DIMENTION];
+    int strokeSet;
 
 public:
     StateKeeper();
@@ -16,5 +17,6 @@ public:
     void setStroke(float inputStroke[SEGMENTATION][DIMENTION]);
     PyObject * getStroke();
     void clearStroke();
+    int isStrokeSet();
 };
 #endif

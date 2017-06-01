@@ -44,7 +44,7 @@ void Orientation::update(float proportionalCoefficient,
     halfOfMeasuredError += crossProduct(measuredAcceleration,
                                         halfOfEstimatedAcceleration);
   }
-
+/*
   if ((magneticField.x != 0.0f) ||
       (magneticField.y != 0.0f) ||
       (magneticField.z != 0.0f)) {
@@ -66,7 +66,7 @@ void Orientation::update(float proportionalCoefficient,
     halfOfMeasuredError += crossProduct(measuredMagneticField,
                                         halfOfEstimatedMagneticField);
   }
-
+*/
   Vector correctedAngularVelocity = angularVelocity;
 
   correctedAngularVelocity += halfOfMeasuredError *

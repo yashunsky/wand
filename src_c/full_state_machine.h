@@ -5,22 +5,9 @@
 
 #include "state_machine.h"
 #include "generation_light.h"
+#include "sigmap.h"
 
 #define EXTERN_TICK_MS 1000
-
-const uint8_t SIG_MAP[STROKES_COUNT] =  {
-    CHARGE_SIG,
-    THROW_SIG,
-    PUNCH_SIG,
-    LIFT_SIG,
-    WARP_SIG,
-    BARRIER_SIG,
-    CLEANSE_SIG,
-    SINGULAR_SIG,
-    SONG_SIG,
-    RELEASE_SIG,
-    PWR_RELEASE_SIG
-};
 
 class FullStateMachine {
 private:

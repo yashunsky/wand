@@ -30,6 +30,10 @@ PRESETS = {
                     'warp', 'barrier', 'cleanse', 'singular',
                     'song', 'release', 'pwr_release'],
         'state_machine': 'generation'
+    },
+    'Anjey': {
+        'strokes': ['enervate', 'rectusempra', 'defendo'],
+        'state_machine': 'generation'
     }
 }
 

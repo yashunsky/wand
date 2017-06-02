@@ -257,11 +257,16 @@ static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
     PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
     PyListToArray(magObj, &mag[0], DIMENTION, 1);
 
-    bool inClaibration = FSM.setData(delta, acc, gyro, mag);
+    bool active = FSM.setData(delta, acc, gyro, mag);
 
-    PyObject * result = PyBool_FromLong(inClaibration ? 1 : 0);
+    PyObject * result = PyTuple_New(4);
 
-    return result;     
+    PyTuple_SET_ITEM(result, 0, PyBool_FromLong(active));
+    PyTuple_SET_ITEM(result, 1, PyInt_FromLong(SK.getColor()));
+    PyTuple_SET_ITEM(result, 2, PyInt_FromLong(SK.getBlinkSpeed()));
+    PyTuple_SET_ITEM(result, 3, PyInt_FromLong(SK.getVibro()));
+
+   return result;     
 }
 
 

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
+
 import Tkinter as tk
 
 from gui import Widget
@@ -14,7 +16,7 @@ from uuid import uuid1
 
 import numpy as np
 
-from c_wrap import set_sm_data
+from c_wrap import set_sm_data, set_fsm_data
 from input_generator import InputGenerator
 
 PORT = '/dev/tty.usbserial-A9IX9R77'
@@ -23,13 +25,15 @@ KNOWLEDGE = '../knowledge.json'
 
 POPUP_COUNT_DOWN = 2
 
+FSM_TEMPLATE = 'Active: %s\nColor: %s\nBlink: %s\nVibro: %s'
+
 
 def start_gui(pipe_in, pipe_out):
     Widget(pipe_in, pipe_out)
     tk.mainloop()
 
 
-def start_uart(pipe_in, pipe_out):
+def start_uart(pipe_in, pipe_out, fsm=False):
     with open(KNOWLEDGE, 'r') as f:
         knowledge = json.load(f)
 
@@ -57,44 +61,53 @@ def start_uart(pipe_in, pipe_out):
 
     for input_data in input_generator(True, '', True):
 
-        state, split_state, stroke = set_sm_data(input_data['delta'],
-                                                 input_data['acc'],
-                                                 input_data['gyro'],
-                                                 input_data['mag'])
+        if fsm:
+            data = set_fsm_data(input_data['delta'],
+                                input_data['acc'],
+                                input_data['gyro'],
+                                input_data['mag'])
 
-        if stroke != 0:
-            folder = '../raw/simple/%s' % prefix
-            if not path.exists(folder):
-                makedirs(folder)
-            np.savetxt('%s/%s.txt' % (folder, uuid1()), stroke)
-
-        state = states[state]
-
-        if 'done_' in state:
-            popup_countdown = 1
-            new_display_state = ('splitting', state[5:])
+            new_display_state = (FSM_TEMPLATE % data, '')
         else:
-            split_state = (None if split_state is None
-                           else split_states.get(split_state))
 
-            if state == 'calibration':
-                new_display_state = ('calibration', '')
+            state, split_state, stroke = set_sm_data(input_data['delta'],
+                                                     input_data['acc'],
+                                                     input_data['gyro'],
+                                                     input_data['mag'])
+
+            if stroke != 0:
+                folder = '../raw/simple/%s' % prefix
+                if not path.exists(folder):
+                    makedirs(folder)
+                np.savetxt('%s/%s.txt' % (folder, uuid1()), stroke)
+
+            state = states[state]
+
+            if 'done_' in state:
+                popup_countdown = 1
+                new_display_state = ('splitting', state[5:])
             else:
-                subtitle = get_subtitle(split_state)
-                if subtitle is not None:
-                    popup_countdown = 1
-                    new_display_state = ('splitting', subtitle)
+                split_state = (None if split_state is None
+                               else split_states.get(split_state))
 
-                elif popup_countdown == 0:
-                    if split_state == 'in_action':
-                        new_display_state = ('splitting', u'выполняется')
-                    else:
-                        new_display_state = ('idle', u'')
+                if state == 'calibration':
+                    new_display_state = ('calibration', '')
+                else:
+                    subtitle = get_subtitle(split_state)
+                    if subtitle is not None:
+                        popup_countdown = 1
+                        new_display_state = ('splitting', subtitle)
 
-        popup_countdown -= input_data['delta']
+                    elif popup_countdown == 0:
+                        if split_state == 'in_action':
+                            new_display_state = ('splitting', u'выполняется')
+                        else:
+                            new_display_state = ('idle', u'')
 
-        if popup_countdown < 0:
-            popup_countdown = 0
+            popup_countdown -= input_data['delta']
+
+            if popup_countdown < 0:
+                popup_countdown = 0
 
         if new_display_state != old_display_state:
             pipe_out.send(new_display_state)
@@ -111,7 +124,9 @@ if __name__ == '__main__':
     from_gui_parent, from_gui_child = Pipe()
     to_gui_parent, to_gui_child = Pipe()
 
-    p = Process(target=start_uart, args=(from_gui_child, to_gui_parent))
+    fsm = len(sys.argv) > 1 and sys.argv[1] == '-f'
+
+    p = Process(target=start_uart, args=(from_gui_child, to_gui_parent, fsm))
     p.start()
     start_gui(to_gui_child, from_gui_parent)
     p.join()

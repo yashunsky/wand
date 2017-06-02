@@ -61,13 +61,13 @@ class Widget(object):
         self.window.destroy()
 
     def set_state(self, new_display_state, subtitle=''):
-        if new_display_state not in DISPLAY_STATES:
-            return
-
         self.display_state = new_display_state
 
-        display_state = DISPLAY_STATES[self.display_state]
-        self.label.set(display_state + '\n' + subtitle)
+        if self.display_state in DISPLAY_STATES:
+            display_state = DISPLAY_STATES[self.display_state]
+            self.label.set(display_state + '\n' + subtitle)
+        else:
+            self.label.set(self.display_state)
 
     def refresh_thread(self):
         while self.in_loop:

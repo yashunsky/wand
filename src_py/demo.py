@@ -50,6 +50,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
     popup_countdown = 0
 
     prefix = uuid1()
+    log = []
 
     def get_subtitle(split_state):
         if split_state == 'too_small':
@@ -60,6 +61,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
             return u'какой-то странный'
 
     for input_data in input_generator(True, '', True):
+        log = log + [input_data]
 
         if fsm:
             data = set_fsm_data(input_data['delta'],
@@ -119,6 +121,9 @@ def start_uart(pipe_in, pipe_out, fsm=False):
                 prefix = uuid1()
             elif message == 'exit':
                 input_generator.in_loop = False
+
+    with open('../raw/log/%s.log' % uuid1(), 'w') as f:
+        f.write('\n'.join([json.dumps(l) for l in log]))
 
 if __name__ == '__main__':
     from_gui_parent, from_gui_child = Pipe()

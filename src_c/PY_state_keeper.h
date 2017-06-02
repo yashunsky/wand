@@ -9,6 +9,9 @@ private:
     int splitterState;
     float stroke[SEGMENTATION][DIMENTION];
     int strokeSet;
+    int color;
+    int blinkSpeed;
+    int vibro;
 
 public:
     StateKeeper();
@@ -18,5 +21,12 @@ public:
     PyObject * getStroke();
     void clearStroke();
     int isStrokeSet();
+
+    void setColor(int color);
+    int getColor();
+    void setBlinkSpeed(int speed);
+    int getBlinkSpeed();
+    void setVibro(int vibro);
+    int getVibro();
 };
 #endif

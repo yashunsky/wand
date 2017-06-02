@@ -8,6 +8,9 @@ StateKeeper::StateKeeper() {
             stroke[i][j] = 0.0;
         }
     }
+    color = 0;
+    blinkSpeed = 0;
+    vibro = 0;
 }
 
 void StateKeeper::setSplitterState(int state) {
@@ -35,4 +38,28 @@ void StateKeeper::clearStroke() {
 
 int StateKeeper::isStrokeSet() {
     return strokeSet;
+}
+
+void StateKeeper::setColor(int color) {
+    this->color = color;
+}
+
+int StateKeeper::getColor() {
+    return color;
+}
+
+void StateKeeper::setBlinkSpeed(int speed) {
+    blinkSpeed = speed;
+}
+
+int StateKeeper::getBlinkSpeed() {
+    return blinkSpeed;
+}
+
+void StateKeeper::setVibro(int vibro) {
+    this->vibro = vibro;
+}
+
+int StateKeeper::getVibro() {
+    return vibro;
 }

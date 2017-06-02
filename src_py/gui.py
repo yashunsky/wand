@@ -3,7 +3,7 @@
 
 import Tkinter as tk
 
-from time import sleep
+from time import sleep, time
 from threading import Thread
 
 
@@ -21,7 +21,30 @@ class DumpPipe(object):
         pass
 
     def poll(self):
-        pass
+        return True
+
+    def recv(self):
+        return ({'active': True,
+                 'color': '#FFEE00',
+                 'blink': 1,
+                 'vibro': 30}, '')
+
+COLORS = [
+    '#000000',
+    '#FFFFFF',
+    '#FF0000',
+    '#FF8800',
+    '#FFFF00',
+    '#00FF00',
+    '#0000FF',
+    '#FF00FF'
+]
+
+
+def decode_vibro(vibro):
+    if vibro == 0:
+        return ''
+    return u'б' + u'ж' * int((vibro / 100.0) * 5 + 1)
 
 
 class Widget(object):
@@ -36,18 +59,21 @@ class Widget(object):
 
         self.window.resizable(width=False, height=False)
 
-        self.label = tk.StringVar()
+        self.label_str = tk.StringVar()
 
-        self.label.set(u'Ready')
+        self.label_str.set(u'Ready')
 
-        tk.Label(self.window, textvariable=self.label,
-                 font=("Helvetica", 64),
-                 width=30, height=5).pack()
+        self.label = tk.Label(self.window, textvariable=self.label_str,
+                              font=("Helvetica", 64),
+                              width=30, height=5)
+
+        self.label.pack()
 
         self.button = tk.Button(self.window, text=u'следующий жест',
                                 command=self.callback)
         self.button.pack()
         self.in_loop = True
+        self.state = None
         self.refresh = Thread(target=self.refresh_thread)
         self.refresh.start()
 
@@ -63,18 +89,36 @@ class Widget(object):
     def set_state(self, new_display_state, subtitle=''):
         self.display_state = new_display_state
 
-        if self.display_state in DISPLAY_STATES:
+        if isinstance(self.display_state, dict):
+            s = self.display_state
+            if not s['active']:
+                text = u'Идёт калибровка'
+                bg = 'black'
+                fg = 'white'
+            else:
+                if s['blink'] == 0:
+                    bg = 'black'
+                else:
+                    blink = ((time() * 4) // (3 - s['blink'])) % 2
+                    bg = COLORS[s['color']] if blink else 'black'
+                fg = 'white' if bg == 'black' else 'black'
+
+                text = decode_vibro(s['vibro'])
+            self.label.configure(background=bg)
+            self.label.configure(fg=fg)
+            self.label_str.set(text)
+
+        elif self.display_state in DISPLAY_STATES:
             display_state = DISPLAY_STATES[self.display_state]
             self.label.set(display_state + '\n' + subtitle)
-        else:
-            self.label.set(self.display_state)
 
     def refresh_thread(self):
         while self.in_loop:
             if self.pipe_in.poll():
-                display_state, subtitle = self.pipe_in.recv()
-                self.set_state(display_state, subtitle)
-            sleep(0.01)
+                self.state = self.pipe_in.recv()
+            if self.state is not None:
+                self.set_state(*self.state)
+            sleep(0.05)
 
 
 if __name__ == '__main__':

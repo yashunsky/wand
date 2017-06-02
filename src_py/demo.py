@@ -25,7 +25,7 @@ KNOWLEDGE = '../knowledge.json'
 
 POPUP_COUNT_DOWN = 2
 
-FSM_TEMPLATE = 'Active: %s\nColor: %s\nBlink: %s\nVibro: %s'
+FSM_KEYS = ('active', 'color', 'blink', 'vibro')
 
 
 def start_gui(pipe_in, pipe_out):
@@ -69,7 +69,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
                                 input_data['gyro'],
                                 input_data['mag'])
 
-            new_display_state = (FSM_TEMPLATE % data, '')
+            new_display_state = (dict(zip(FSM_KEYS, data)), '')
         else:
 
             state, split_state, stroke = set_sm_data(input_data['delta'],

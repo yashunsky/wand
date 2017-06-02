@@ -17,6 +17,7 @@
 #include "split_state_export.h"
 #include "wrap_utils.h"
 #include "state_keeper.h"
+#include "bsp.h"
 
 static Splitter splitter = Splitter();
 static IMU imu = IMU(getAOffset(), getGOffset(), getMOffset());
@@ -26,6 +27,25 @@ static StateKeeper SK = StateKeeper();
 static FullStateMachine FSM = FullStateMachine(0);
 
 static Orientation O = Orientation();
+
+void RGB_blink_slow(uint8_t Color) {
+    SK.setColor((int) Color);
+    SK.setBlinkSpeed(1);
+}
+
+void RGB_blink_fast(uint8_t Color) {
+    SK.setColor((int) Color);
+    SK.setBlinkSpeed(2);
+}
+
+void RGB_blink_stop() {
+    SK.setBlinkSpeed(0);
+}
+
+void vibro(uint8_t Power) {
+    SK.setVibro((int) Power);
+}
+
 
 void exportStroke(float stroke[SEGMENTATION][DIMENTION]) {
     SK.setStroke(stroke);

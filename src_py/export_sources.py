@@ -2,6 +2,7 @@
 # -*- coding: utf8 -*-
 
 import sys
+import json
 
 from os import makedirs, listdir
 from os.path import exists, join
@@ -11,6 +12,8 @@ import shutil
 from core_creator import get_core
 import consts as c
 from convert_knowledge import convert_knowledge
+
+KNOWLEDGE = 'knowledge.json'
 
 STROKES_SOURCE_PATH = 'raw/source'
 SMS_SOURCE_PATH = 'sms'
@@ -113,6 +116,10 @@ def main(preset, fw=False):
     stroke_names = preset['strokes']
     strokes = get_core(stroke_names, STROKES_SOURCE_PATH, c.SEGMENTATION)
     knowledge = gather_knowledge(strokes)
+
+    with open(KNOWLEDGE, 'w') as f:
+        json.dump(knowledge, f)
+
     h_text, c_text = convert_knowledge(knowledge)
 
     if not exists(OUTPUT):

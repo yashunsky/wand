@@ -19,7 +19,7 @@ from input_generator import InputGenerator
 
 PORT = '/dev/tty.usbserial-A9IX9R77'
 
-KNOWLEDGE = '../migration_to_c/generation_knowledge.json'
+KNOWLEDGE = '../knowledge.json'
 
 POPUP_COUNT_DOWN = 2
 

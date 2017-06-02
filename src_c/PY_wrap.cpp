@@ -305,11 +305,21 @@ static PyMethodDef c_methods[] = {
 
 extern "C" {
     PyMODINIT_FUNC initc_wrap(void) {
-/*        QEvt e;
+        Biotics_ctor();
+        QMSM_INIT(the_biotics, (QEvt *)0);
+        Hand_ctor();
+        QMSM_INIT(the_hand, (QEvt *)0);
+
+        QEvt e;
 
         e.sig = MAX_PILL_SIG;
-        QMSM_DISPATCH(the_hand, &e);        
-*/        
+
+        QMSM_DISPATCH(the_hand, &e);
+
+        e.sig = MAX_PILL_SIG;
+
+        QMSM_DISPATCH(the_hand, &e);             
+       
         (void) Py_InitModule("c_wrap", c_methods);
     }
 }

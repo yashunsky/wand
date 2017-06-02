@@ -16,15 +16,17 @@ bool FullStateMachine::setData(const float delta,
         return false;
     } else {
         QEvt e;
-        if (innerState > IDLE) {
+        if (innerState > IDLE) {           
             e.sig = SIG_MAP[innerState - STATES_OFFSET];
             QMSM_DISPATCH(the_hand, &e);
+            QMSM_DISPATCH(the_biotics, &e);
         }
 
         innerTimer += (uint16_t) (delta * 1000);
         if (innerTimer > EXTERN_TICK_MS) {
             e.sig = TICK_SEC_SIG;
             QMSM_DISPATCH(the_hand, &e);
+            QMSM_DISPATCH(the_biotics, &e);
         }
 
         innerTimer %= EXTERN_TICK_MS;    

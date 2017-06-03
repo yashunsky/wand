@@ -4,6 +4,7 @@
 
 StateMachine::StateMachine(int axis) {
     this->axis = axis;
+    calibrationDone = 0;
 }
 
 void StateMachine::init() {
@@ -18,6 +19,9 @@ int StateMachine::setData(const float dt, const Vector acc, const Vector gyro, c
     if (!answer.active) {
         return CALIBRATION;
     }
-    onCalibrationDone();
+    if (calibrationDone == 0) {
+        onCalibrationDone();
+        calibrationDone = 1;
+    }
     return splitter.setIMUData(dt, answer) + STATES_OFFSET;
 }

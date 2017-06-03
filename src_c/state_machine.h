@@ -10,6 +10,7 @@ private:
     int axis;
     IMU imu;
     Splitter splitter;
+    int calibrationDone;
 
 public:
     StateMachine(int axis);

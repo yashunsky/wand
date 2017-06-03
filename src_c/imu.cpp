@@ -1,7 +1,5 @@
 #include "imu.h"
-#include "matrix.h"
 #include <math.h>
-#include <stdio.h>
 
 ImuAnswer::ImuAnswer (bool active, float gyro, Vector acc, Vector heading) {
     this->active = active;

@@ -1,5 +1,4 @@
 #include "filter.h"
-#include "matrix.h"
 
 Filter::Filter() {
     output = Vector();

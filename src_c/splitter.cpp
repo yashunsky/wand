@@ -1,5 +1,4 @@
 #include "splitter.h"
-#include "matrix.h"
 #include "filter.h"
 #include "unify_definition.h"
 #include "stroke_export.h"

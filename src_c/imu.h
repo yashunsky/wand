@@ -4,6 +4,16 @@
 #include "orientation.h"
 #include "ahrsmath.h"
 
+class ImuAnswer
+{
+public:
+    bool active;
+    float gyro;
+    Vector acc;
+    Vector heading;
+    ImuAnswer(bool active, float gyro, Vector acc, Vector heading);
+};
+
 class IMU {
 private:
     Vector aOffset;
@@ -15,10 +25,8 @@ private:
     Orientation orientation;
 public:
     IMU(const Vector aOffset, const Vector gOffset, const Vector mOffset);
-    bool calc(const float dt, 
-              const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION],
-              int axis,
-              float * gyroOut, float accOut[DIMENTION], float headingOut[DIMENTION]);
+    ImuAnswer calc(const float dt, const Vector acc, const Vector gyro, const Vector mag, int axis);
 
 };
+
 #endif

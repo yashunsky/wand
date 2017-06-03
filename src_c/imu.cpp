@@ -3,6 +3,13 @@
 #include <math.h>
 #include <stdio.h>
 
+ImuAnswer::ImuAnswer (bool active, float gyro, Vector acc, Vector heading) {
+    this->active = active;
+    this->gyro = gyro;
+    this->acc = acc;
+    this->heading = heading;
+}
+
 IMU::IMU(const Vector aOffset, const Vector gOffset, const Vector mOffset) {
     this->aOffset = aOffset;
     this->gOffset = gOffset;
@@ -10,16 +17,11 @@ IMU::IMU(const Vector aOffset, const Vector gOffset, const Vector mOffset) {
     this->time = 0;  
 }
 
-bool IMU::calc(const float dt, 
-               const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION],
-               int axis,
-               float * gyroOut, float accOut[DIMENTION], float headingOut[DIMENTION])
+ImuAnswer IMU::calc(const float dt, const Vector acc, const Vector gyro, const Vector mag, int axis)
 {
-    Vector aIn = (Vector(accIn[0], accIn[1], accIn[2]) - aOffset) * ACC_SCALE;
-    Vector gIn = (Vector(gyroIn[0], gyroIn[1], gyroIn[2]) - gOffset) * GYRO_SCALE;
-    Vector mIn = (Vector(magIn[0], magIn[1], magIn[2]) - mOffset);
-
-    *gyroOut = gIn.norm();
+    Vector aIn = (acc- aOffset) * ACC_SCALE;
+    Vector gIn = (gyro - gOffset) * GYRO_SCALE;
+    Vector mIn = (mag - mOffset);
 
     time += dt;
 
@@ -36,13 +38,15 @@ bool IMU::calc(const float dt,
 
     Vector aOut = aIn * M - Vector(0.0, 0.0, G_CONST);
 
-    headingOut[0] = heading.x;
-    headingOut[1] = heading.y;
-    headingOut[2] = heading.z;
+    return ImuAnswer(!inCalibration, gIn.norm(), aOut, heading);
 
-    accOut[0] = aOut.x;
-    accOut[1] = aOut.y;
-    accOut[2] = aOut.z;
+    // headingOut[0] = heading.x;
+    // headingOut[1] = heading.y;
+    // headingOut[2] = heading.z;
 
-    return inCalibration;
+    // accOut[0] = aOut.x;
+    // accOut[1] = aOut.y;
+    // accOut[2] = aOut.z;
+
+//    return inCalibration;
 }

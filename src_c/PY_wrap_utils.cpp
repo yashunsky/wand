@@ -37,3 +37,19 @@ PyObject * arrayToPyList(const float * source, int width, int height) {
 
     return newListObj;    
 }
+
+float getItem(PyObject * source, short i) {
+    return (float) PyFloat_AsDouble(PyList_GetItem(source, (Py_ssize_t) i)); 
+}
+
+Vector PyListToVector(PyObject * source) {
+    return Vector(getItem(source, 0), getItem(source, 1), getItem(source, 2));
+}
+
+PyObject * vectorToPyList(Vector v) {
+    PyObject * newResultObj = PyTuple_New(3); 
+    PyTuple_SET_ITEM(newResultObj, 0, PyFloat_FromDouble(v.x));   
+    PyTuple_SET_ITEM(newResultObj, 1, PyFloat_FromDouble(v.y));   
+    PyTuple_SET_ITEM(newResultObj, 2, PyFloat_FromDouble(v.z));   
+    return newResultObj;
+}

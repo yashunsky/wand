@@ -156,24 +156,27 @@ static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
     PyObject * gyroObj;
     PyObject * magObj;
 
-    bool outInClaibration;
     float outGyro;
     float outAcc[DIMENTION];
     float outHeading[DIMENTION];    
 
     PyArg_ParseTuple(args, "fO!O!O!i", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj, &axis);
 
-    PyListToArray(accObj, &acc[0], DIMENTION, 1);
-    PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
-    PyListToArray(magObj, &mag[0], DIMENTION, 1);
+    Vector a = PyListToVector(accObj);
+    Vector g = PyListToVector(gyroObj);
+    Vector m = PyListToVector(magObj);
 
-    outInClaibration = imu.calc(delta, acc, gyro, mag, axis, &outGyro, outAcc, outHeading);
+    ImuAnswer answer = imu.calc(delta, a, g, m, axis);
 
-    PyObject * outAccObj = arrayToPyList(outAcc, DIMENTION, 1);
-    PyObject * outHeadingObj = arrayToPyList(outHeading, DIMENTION, 1);
+    int inactive = answer.active ? 0 : 1;
+
+    outGyro = answer.gyro;
+
+    PyObject * outAccObj = vectorToPyList(answer.acc);
+    PyObject * outHeadingObj = vectorToPyList(answer.heading);
     
     PyObject * result = PyTuple_New(4);
-    PyTuple_SET_ITEM(result, 0, PyBool_FromLong(outInClaibration ? 1 : 0));
+    PyTuple_SET_ITEM(result, 0, PyBool_FromLong(inactive));
     PyTuple_SET_ITEM(result, 1, PyFloat_FromDouble(outGyro));
     PyTuple_SET_ITEM(result, 2, outAccObj);
     PyTuple_SET_ITEM(result, 3, outHeadingObj);

@@ -58,6 +58,8 @@ int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
     float z[DIMENTION];
     float yNorm;
 
+    Vector x_, y_, z_;
+
     int result = -1;
 
     processSize(filter.setInput(accel, delta), delta);
@@ -74,13 +76,22 @@ int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
             z[1] = 0;
             z[2] = 1;
 
+            y_ = Vector(answer.heading.x, answer.heading.y, 0);
+            z_ = Vector(0.0, 0.0, 1.0);
+
             yNorm = norm(y);
 
             if (yNorm != 0) {
                 scaleVec(y, y, 1 / yNorm);
+                y_.normalize2();
             } else {
                 return -1;
             }
+
+            x_ = crossProduct(y_, z_);
+            x_.normalize2();
+
+            M_ = Matrix(x_, y_, z_);
 
             cross(x, y, z);
             normInplace(x);
@@ -93,6 +104,10 @@ int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
         }
 
         adjustVec(newPoint, M, heading);
+        printf("old %f %f %f\n", x[0], x[1], x[2]);
+        Vector newPoint_ = answer.heading * M;
+        printf("new %f %f %f\n", newPoint_.x, newPoint_.y, newPoint_.z);
+
         copyPoint(newPoint, buffer[strokeLength]);
         strokeLength += 1;
         if (strokeLength > STROKE_MAX_LENGTH) {

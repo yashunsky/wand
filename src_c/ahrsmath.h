@@ -1,6 +1,5 @@
 #ifndef TagunilAHRS_h
 #define TagunilAHRS_h
-
 class Vector
 {
   public:
@@ -99,8 +98,10 @@ class Vector
     }
 
     void normalize();
+    void normalize2();
 
     float norm();
+    float norm2();
 
   public:
     float x;

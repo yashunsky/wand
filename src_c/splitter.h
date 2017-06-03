@@ -4,10 +4,12 @@
 #include "knowledge.h"
 #include "filter.h"
 #include "imu.h"
+#include "ahrsmath.h"
 
 class Splitter {
 private:
     int strokeLength;
+    Matrix M_;
     float M[DIMENTION][DIMENTION];
     float positionsRange[2][DIMENTION];
     float position[DIMENTION];

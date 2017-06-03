@@ -1,4 +1,5 @@
 #include "ahrsmath.h"
+#include <math.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -18,6 +19,11 @@ static inline float inverseSquareRoot(float x)
   return x;
 }
 
+static inline float inverseSquareRoot2(float x)
+{
+  return 1/sqrt(x);
+}
+
 void Vector::normalize()
 {
   float norm = inverseSquareRoot(x * x + y * y + z * z);
@@ -28,6 +34,18 @@ void Vector::normalize()
 float Vector::norm()
 {
   return 1 / inverseSquareRoot(x * x + y * y + z * z);
+}
+
+void Vector::normalize2()
+{
+  float norm = inverseSquareRoot2(x * x + y * y + z * z);
+
+  *this *= norm;
+}
+
+float Vector::norm2()
+{
+  return 1 / inverseSquareRoot2(x * x + y * y + z * z);
 }
 
 Vector Matrix::c0()

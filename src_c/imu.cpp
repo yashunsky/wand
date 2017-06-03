@@ -45,14 +45,4 @@ ImuAnswer IMU::calc(const float dt, const Vector acc, const Vector gyro, const V
     Vector aOut = aIn * M - Vector(0.0, 0.0, G_CONST);
 
     return ImuAnswer(!inCalibration, gIn.norm(), aOut, heading);
-
-    // headingOut[0] = heading.x;
-    // headingOut[1] = heading.y;
-    // headingOut[2] = heading.z;
-
-    // accOut[0] = aOut.x;
-    // accOut[1] = aOut.y;
-    // accOut[2] = aOut.z;
-
-//    return inCalibration;
 }

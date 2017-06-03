@@ -4,8 +4,6 @@ PREFIX = 'stroke'
 
 FILENAME = 'knowledge'
 
-STROKE_MAX_LENGTH = 4096
-
 
 def stroke_const_name(key):
     return '{prefix}_{key}'.format(prefix=PREFIX.upper(), key=key.upper())
@@ -42,7 +40,7 @@ def convert_knowledge(knowledge):
 
     h_text += format_define_to_c('DIMENTION', 3)
 
-    h_text += format_define_to_c('STROKE_MAX_LENGTH', 256)
+    h_text += format_define_to_c('STROKE_MAX_LENGTH', knowledge['splitting']['max_length'])
 
     h_text += format_define_to_c('KP_INIT', knowledge['kp_init'])
     h_text += format_define_to_c('KI_INIT', knowledge['ki_init'])

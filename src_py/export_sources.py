@@ -72,6 +72,7 @@ def gather_knowledge(strokes):
     data['splitting']['gyro_min'] = c.GYRO_MIN
     data['splitting']['gyro_timeout'] = c.GYRO_TIMEOUT
     data['splitting']['min_length'] = c.MIN_STROKE_LENGTH
+    data['splitting']['max_length'] = c.MAX_STROKE_LENGTH
     data['splitting']['compare_limit'] = c.COMPARE_LIMIT
 
     s = data['splitting']['states'] = {}

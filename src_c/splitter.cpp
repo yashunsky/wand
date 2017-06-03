@@ -99,7 +99,7 @@ int Splitter::setIMUData(const float delta, const float gyro, const float accel[
             subVec(dimentionVec, positionsRange[1], positionsRange[0]);
             dimention = norm(dimentionVec);  
 
-            printf("%f\n", dimention);
+            //printf("%f\n", dimention);
 
             if (MIN_STROKE_LENGTH > strokeLength) {
                 exportSplitState(TOO_SHORT);

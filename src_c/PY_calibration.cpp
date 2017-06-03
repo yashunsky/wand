@@ -11,3 +11,7 @@ Vector getAOffset() {
 Vector getMOffset() {
     return Vector(46.0, 46.0, -6.0);
 }
+
+void onCalibrationDone() {
+    
+}

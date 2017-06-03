@@ -6,5 +6,6 @@
 Vector getGOffset();
 Vector getAOffset();
 Vector getMOffset();
+void onCalibrationDone();
 
 #endif

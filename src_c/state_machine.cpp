@@ -14,6 +14,6 @@ int StateMachine::setData(const float dt, const Vector acc, const Vector gyro, c
     if (!answer.active) {
         return CALIBRATION;
     }
-
+    onCalibrationDone();
     return splitter.setIMUData(dt, answer) + STATES_OFFSET;
 }

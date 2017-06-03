@@ -44,7 +44,12 @@ void Splitter::processSize(const float accel[DIMENTION], const float delta) {
     adjustRange(positionsRange, position);    
 }
 
-int Splitter::setIMUData(const float delta, const float gyro, const float accel[DIMENTION], const float heading[DIMENTION]) {
+int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
+    float gyro = answer.gyro;
+    float heading[3] = {answer.heading.x, answer.heading.y, answer.heading.z};
+    float accel[3] = {answer.acc.x, answer.acc.y, answer.acc.z};
+
+
     float dimention;
     float dimentionVec[DIMENTION];
     float newPoint[DIMENTION];

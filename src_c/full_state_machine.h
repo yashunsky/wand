@@ -16,7 +16,6 @@ private:
 public:
 
     FullStateMachine(int axis);
-    bool setData(const float delta, 
-        const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION]);
+    bool setData(const float dt, const Vector acc, const Vector gyro, const Vector mag);
 };
 #endif

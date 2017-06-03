@@ -3,6 +3,7 @@
 
 #include "knowledge.h"
 #include "filter.h"
+#include "imu.h"
 
 class Splitter {
 private:
@@ -21,7 +22,7 @@ public:
     float buffer[STROKE_MAX_LENGTH][DIMENTION];
 
     Splitter();
-    int setIMUData(const float delta, const float gyro, const float accel[DIMENTION], const float heading[DIMENTION]);
+    int setIMUData(const float delta, const ImuAnswer imuAnswer);
 
 };
 #endif

@@ -122,28 +122,6 @@ static PyObject* py_getStroke(PyObject* self, PyObject* args) {
     return PyInt_FromLong(getStroke(stroke, length));
 }
 
-
-static PyObject* py_setIMUData(PyObject* self, PyObject* args) {
-    int result;
-    float delta;
-    float gyro;
-    float accel[DIMENTION];
-    float heading[DIMENTION];
-
-    PyObject * accelObj;
-    PyObject * headingObj;
-
-    PyArg_ParseTuple(args, "ffO!O!", &delta, &gyro, &PyList_Type, &accelObj, &PyList_Type, &headingObj);
-
-    PyListToArray(accelObj, &accel[0], DIMENTION, 1);
-
-    PyListToArray(headingObj, &heading[0], DIMENTION, 1);
-
-    result = splitter.setIMUData(delta, gyro, accel, heading);
-
-    return PyInt_FromLong(result);
-}
-
 static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
 
     float delta;
@@ -187,9 +165,6 @@ static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
 
 static PyObject* py_setSMData(PyObject* self, PyObject* args) {
     float delta;
-    float acc[DIMENTION];
-    float gyro[DIMENTION];
-    float mag[DIMENTION];
 
     PyObject * accObj;
     PyObject * gyroObj;
@@ -197,14 +172,14 @@ static PyObject* py_setSMData(PyObject* self, PyObject* args) {
 
     PyArg_ParseTuple(args, "fO!O!O!", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
 
-    PyListToArray(accObj, &acc[0], DIMENTION, 1);
-    PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
-    PyListToArray(magObj, &mag[0], DIMENTION, 1);
+    Vector a = PyListToVector(accObj);
+    Vector g = PyListToVector(gyroObj);
+    Vector m = PyListToVector(magObj);
 
     SK.clearStroke();
 
     PyObject * result = PyTuple_New(3);
-    PyTuple_SET_ITEM(result, 0, PyInt_FromLong(SM.setData(delta, acc, gyro, mag)));
+    PyTuple_SET_ITEM(result, 0, PyInt_FromLong(SM.setData(delta, a, g, m)));
 
     PyTuple_SET_ITEM(result, 1, PyInt_FromLong(SK.getSplitterState()));
     
@@ -246,9 +221,6 @@ static PyObject* py_getQ_USER_SIG(PyObject* self, PyObject* args) {
 
 static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
     float delta;
-    float acc[DIMENTION];
-    float gyro[DIMENTION];
-    float mag[DIMENTION];
 
     PyObject * accObj;
     PyObject * gyroObj;
@@ -256,11 +228,11 @@ static PyObject* py_setFSMData(PyObject* self, PyObject* args) {
 
     PyArg_ParseTuple(args, "fO!O!O!", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
 
-    PyListToArray(accObj, &acc[0], DIMENTION, 1);
-    PyListToArray(gyroObj, &gyro[0], DIMENTION, 1);
-    PyListToArray(magObj, &mag[0], DIMENTION, 1);
+    Vector a = PyListToVector(accObj);
+    Vector g = PyListToVector(gyroObj);
+    Vector m = PyListToVector(magObj);
 
-    bool active = FSM.setData(delta, acc, gyro, mag);
+    bool active = FSM.setData(delta, a, g, m);
 
     PyObject * result = PyTuple_New(4);
 
@@ -298,7 +270,6 @@ static PyMethodDef c_methods[] = {
     {"unify_stroke", py_unifyStroke, METH_VARARGS},
     {"check_stroke", py_checkStroke, METH_VARARGS},
     {"get_stroke", py_getStroke, METH_VARARGS},
-    {"set_imu_data", py_setIMUData, METH_VARARGS},
     {"set_sensor_data", py_setSensorData, METH_VARARGS},
     {"set_sm_data", py_setSMData, METH_VARARGS},
     {"set_fsm_data", py_setFSMData, METH_VARARGS},    

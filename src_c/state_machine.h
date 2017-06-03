@@ -13,7 +13,6 @@ private:
 
 public:
     StateMachine(int axis);
-    int setData(const float delta, 
-        const float accIn[DIMENTION], const float gyroIn[DIMENTION], const float magIn[DIMENTION]);
+    int setData(const float dt, const Vector acc, const Vector gyro, const Vector mag);
 };
 #endif

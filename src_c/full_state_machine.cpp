@@ -7,10 +7,9 @@ FullStateMachine::FullStateMachine(int axis) : innerMachine(axis) {
     innerTimer = 0;    
 }
 
-bool FullStateMachine::setData(const float delta,
-    const float acc[DIMENTION], const float gyro[DIMENTION], const float mag[DIMENTION])
+bool FullStateMachine::setData(const float dt, const Vector acc, const Vector gyro, const Vector mag)
 {
-    int innerState = innerMachine.setData(delta, acc, gyro, mag);
+    int innerState = innerMachine.setData(dt, acc, gyro, mag);
 
     if (innerState == CALIBRATION) {
         return false;
@@ -22,7 +21,7 @@ bool FullStateMachine::setData(const float delta,
             QMSM_DISPATCH(the_biotics, &e);
         }
 
-        innerTimer += (uint16_t) (delta * 1000);
+        innerTimer += (uint16_t) (dt * 1000);
         if (innerTimer > EXTERN_TICK_MS) {
             e.sig = TICK_SEC_SIG;
             QMSM_DISPATCH(the_hand, &e);

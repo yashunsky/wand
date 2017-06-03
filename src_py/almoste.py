@@ -3,7 +3,7 @@
 
 from numpy import ndarray
 
-EPSILON = 0.0001
+EPSILON = 0.001
 
 
 def almoste_equal(a, b, absolute=False):
@@ -12,7 +12,9 @@ def almoste_equal(a, b, absolute=False):
     if absolute:
         result = abs(a - b) < EPSILON
     else:
-        result = a == b == 0 or almoste_zero(1 - (a / b) if b != 0 else (b / a))
+        result = ((a == 0 and almoste_zero(b)) or
+                  (b == 0 and almoste_zero(a)) or
+                  almoste_zero(1 - (a / b) if b != 0 else (b / a)))
 
     if not result:
         print a, b, absolute

@@ -20,9 +20,7 @@ private:
     void processSize(const Vector accel, const float delta);
 
 public:
-    float buffer[STROKE_MAX_LENGTH][DIMENTION];
-
-    Vector buffer_[STROKE_MAX_LENGTH];
+    Vector buffer[STROKE_MAX_LENGTH];
 
     Splitter();
     int setIMUData(const float delta, const ImuAnswer imuAnswer);

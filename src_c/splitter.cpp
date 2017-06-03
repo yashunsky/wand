@@ -55,7 +55,6 @@ int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
     float dimention;
     float yNorm;
 
-    Vector newPoint;
     Vector x;
     Vector y;
     Vector z;
@@ -87,9 +86,7 @@ int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
             resetSize();
         }
 
-        newPoint = answer.heading * M;
-
-        buffer_[strokeLength] = newPoint;
+        buffer[strokeLength] = answer.heading * M;
 
         strokeLength += 1;
         if (strokeLength > STROKE_MAX_LENGTH) {
@@ -110,13 +107,6 @@ int Splitter::setIMUData(const float delta, const ImuAnswer answer) {
             } else if (dimention < MIN_DIMENTION) {
                 exportSplitState(TOO_SMALL);
             } else {
-                int i;
-                for (i=0; i<STROKE_MAX_LENGTH; i++) {
-                    buffer[i][0] = buffer_[i].x;
-                    buffer[i][1] = buffer_[i].y;
-                    buffer[i][2] = buffer_[i].z;
-                }
-
                 result = getStroke(buffer, strokeLength);              
             }
 

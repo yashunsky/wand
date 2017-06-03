@@ -62,7 +62,7 @@ void unifyStroke(Vector stroke[STROKE_MAX_LENGTH], Vector newStroke[SEGMENTATION
 
 
 
-float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description[SEGMENTATION][DIMENTION]) {
+float checkStroke(Vector stroke[SEGMENTATION], const Vector description[SEGMENTATION]) {
     float errors[SEGMENTATION];
     float mean = 0;
     float result = 0;
@@ -83,30 +83,15 @@ float checkStroke(float stroke[SEGMENTATION][DIMENTION], const float description
     return sqrtf(result / SEGMENTATION);
 }
 
-int getStroke(float stroke[STROKE_MAX_LENGTH][DIMENTION], int length) {
-    float unifiedStroke[SEGMENTATION][DIMENTION];
+int getStroke(Vector stroke[STROKE_MAX_LENGTH], int length) {
 
-    Vector stroke_[STROKE_MAX_LENGTH];
-    Vector unifiedStroke_[SEGMENTATION];
+    Vector unifiedStroke[SEGMENTATION];
+
+    unifyStroke(stroke, unifiedStroke, length);
+
+    exportStroke(unifiedStroke);
 
     int i;
-
-    for (i=0; i<STROKE_MAX_LENGTH; i++) {
-        stroke_[i].x = stroke[i][0];
-        stroke_[i].y = stroke[i][1];
-        stroke_[i].z = stroke[i][2];
-    }
-
-    unifyStroke(stroke_, unifiedStroke_, length);
-
-    for (i=0; i<SEGMENTATION; i++) {
-        unifiedStroke[i][0] = unifiedStroke_[i].x;
-        unifiedStroke[i][1] = unifiedStroke_[i].y;
-        unifiedStroke[i][2] = unifiedStroke_[i].z;
-    }
-
-    exportStroke(unifiedStroke_);
-
     float error;
     float min_error = -1;
     float second = -1;

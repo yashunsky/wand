@@ -63,20 +63,6 @@ static PyObject* py_getStrokeMaxLength(PyObject* self, PyObject* args) {
     return PyInt_FromLong(STROKE_MAX_LENGTH);
 }
 
-static PyObject* py_getDist(PyObject* self, PyObject* args) {
-    float a[DIMENTION];
-    float b[DIMENTION];
-
-    PyObject * aObj;
-    PyObject * bObj;
-    PyArg_ParseTuple(args, "O!O!", &PyList_Type, &aObj, &PyList_Type, &bObj);
-
-    PyListToArray(aObj, &a[0], DIMENTION, 1);
-    PyListToArray(bObj, &b[0], DIMENTION, 1);
-
-    return PyFloat_FromDouble((double) getDist(a, b));
-}
-
 static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
 
     float delta;

@@ -20,7 +20,7 @@
 #include "bsp.h"
 
 static Splitter splitter = Splitter();
-static IMU imu = IMU(getAOffset(), getGOffset(), getMOffset());
+static IMU imu = IMU();
 static StateMachine SM = StateMachine(0);
 static StateKeeper SK = StateKeeper();
 
@@ -219,6 +219,11 @@ static PyMethodDef c_methods[] = {
 
 extern "C" {
     PyMODINIT_FUNC initc_wrap(void) {
+
+        imu.init();
+        SM.init();
+        FSM.init();
+
         Biotics_ctor();
         QMSM_INIT(the_biotics, (QEvt *)0);
         Hand_ctor();

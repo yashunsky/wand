@@ -7,6 +7,10 @@ FullStateMachine::FullStateMachine(int axis) : innerMachine(axis) {
     innerTimer = 0;    
 }
 
+void FullStateMachine::init() {
+    innerMachine.init();
+}
+
 bool FullStateMachine::setData(const float dt, const Vector acc, const Vector gyro, const Vector mag)
 {
     int innerState = innerMachine.setData(dt, acc, gyro, mag);

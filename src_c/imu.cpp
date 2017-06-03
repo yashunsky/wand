@@ -1,4 +1,5 @@
 #include "imu.h"
+#include "calibration.h"
 #include <math.h>
 
 ImuAnswer::ImuAnswer (bool active, float gyro, Vector acc, Vector heading) {
@@ -8,16 +9,23 @@ ImuAnswer::ImuAnswer (bool active, float gyro, Vector acc, Vector heading) {
     this->heading = heading;
 }
 
-IMU::IMU(const Vector aOffset, const Vector gOffset, const Vector mOffset) {
-    this->aOffset = aOffset;
-    this->gOffset = gOffset;
-    this->mOffset = mOffset; 
-    this->time = 0;  
+IMU::IMU() {
+    aOffset = Vector();
+    gOffset = Vector();
+    mOffset = Vector(); 
+    time = 0;  
+}
+
+void IMU::init() {
+    this->aOffset = getAOffset();
+    this->gOffset = getGOffset();
+    this->mOffset = getMOffset(); 
+    this->time = 0;     
 }
 
 ImuAnswer IMU::calc(const float dt, const Vector acc, const Vector gyro, const Vector mag, int axis)
 {
-    Vector aIn = (acc- aOffset) * ACC_SCALE;
+    Vector aIn = (acc - aOffset) * ACC_SCALE;
     Vector gIn = (gyro - gOffset) * GYRO_SCALE;
     Vector mIn = (mag - mOffset);
 

@@ -24,7 +24,8 @@ private:
 
     Orientation orientation;
 public:
-    IMU(const Vector aOffset, const Vector gOffset, const Vector mOffset);
+    IMU();
+    void init();
     ImuAnswer calc(const float dt, const Vector acc, const Vector gyro, const Vector mag, int axis);
 
 };

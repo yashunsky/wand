@@ -2,8 +2,12 @@
 #include "ahrsmath.h"
 #include "calibration.h"
 
-StateMachine::StateMachine(int axis) : imu(getAOffset(), getGOffset(), getGOffset()){
+StateMachine::StateMachine(int axis) {
     this->axis = axis;
+}
+
+void StateMachine::init() {
+   imu.init(); 
 }
 
 

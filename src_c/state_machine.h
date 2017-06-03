@@ -13,6 +13,7 @@ private:
 
 public:
     StateMachine(int axis);
+    void init();
     int setData(const float dt, const Vector acc, const Vector gyro, const Vector mag);
 };
 #endif

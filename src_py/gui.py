@@ -110,7 +110,7 @@ class Widget(object):
 
         elif self.display_state in DISPLAY_STATES:
             display_state = DISPLAY_STATES[self.display_state]
-            self.label.set(display_state + '\n' + subtitle)
+            self.label_str.set(display_state + '\n' + subtitle)
 
     def refresh_thread(self):
         while self.in_loop:

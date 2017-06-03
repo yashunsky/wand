@@ -7,6 +7,8 @@ EPSILON = 0.0001
 
 
 def almoste_equal(a, b, absolute=False):
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a == b
     if absolute:
         result = abs(a - b) < EPSILON
     else:

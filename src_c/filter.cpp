@@ -2,16 +2,10 @@
 #include "matrix.h"
 
 Filter::Filter() {
-    int i;
-    for (i=0; i<DIMENTION; i++) {
-        output[i] = 0;
-    }
+    output = Vector();
 }
 
-float* Filter::setInput(const float value[DIMENTION], const float delta) {
-    int i;
-    for (i=0; i<DIMENTION; i++) {
-        output[i] = output[i] + (value[i] - output[i]) * delta / ACCELERATION_TIME_CONST;
-    }
+Vector Filter::setInput(const Vector value, const float delta) {
+    output += (value - output) * (delta / ACCELERATION_TIME_CONST);
     return output;    
 }

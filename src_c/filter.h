@@ -2,13 +2,14 @@
 #define Filter_h
 
 #include "knowledge.h"
+#include "ahrsmath.h"
 
 class Filter {
-  float output[DIMENTION];
+  Vector output;
 
 public:
   Filter();
-  float* setInput(const float value[DIMENTION], const float delta);
+  Vector setInput(const Vector value, const float delta);
 };
 
 #endif

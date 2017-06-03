@@ -9,19 +9,20 @@
 class Splitter {
 private:
     int strokeLength;
-    Matrix M_;
-    float M[DIMENTION][DIMENTION];
-    float positionsRange[2][DIMENTION];
-    float position[DIMENTION];
-    float speed[DIMENTION];
+    Matrix M;
+    Vector positionsRange[2];
+    Vector position;
+    Vector speed;
     int timer;
     Filter filter;
 
     void resetSize();
-    void processSize(const float accel[DIMENTION], const float delta);
+    void processSize(const Vector accel, const float delta);
 
 public:
     float buffer[STROKE_MAX_LENGTH][DIMENTION];
+
+    Vector buffer_[STROKE_MAX_LENGTH];
 
     Splitter();
     int setIMUData(const float delta, const ImuAnswer imuAnswer);

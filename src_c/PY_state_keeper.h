@@ -3,11 +3,12 @@
 
 #include "wrap_utils.h"
 #include "knowledge.h"
+#include "ahrsmath.h"
 
 class StateKeeper {
 private:
     int splitterState;
-    float stroke[SEGMENTATION][DIMENTION];
+    Vector stroke[SEGMENTATION];
     int strokeSet;
     int color;
     int blinkSpeed;
@@ -17,7 +18,7 @@ public:
     StateKeeper();
     void setSplitterState(int state);
     int getSplitterState();
-    void setStroke(float inputStroke[SEGMENTATION][DIMENTION]);
+    void setStroke(Vector inputStroke[SEGMENTATION]);
     PyObject * getStroke();
     void clearStroke();
     int isStrokeSet();

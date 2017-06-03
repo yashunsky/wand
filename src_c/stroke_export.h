@@ -1,7 +1,8 @@
 #ifndef StrokesExport_h
 #define StrokesExport_h
 #include "knowledge.h"
+#include "ahrsmath.h"
 
-void exportStroke(float stroke[SEGMENTATION][DIMENTION]);
+void exportStroke(Vector stroke[SEGMENTATION]);
 
 #endif

@@ -4,9 +4,7 @@ StateKeeper::StateKeeper() {
     splitterState = NOT_IN_ACTION;
     strokeSet = 0;
     for (int i=0; i<SEGMENTATION; i++) {
-        for (int j=0; j<DIMENTION; j++) {
-            stroke[i][j] = 0.0;
-        }
+        stroke[i] = Vector();
     }
     color = 0;
     blinkSpeed = 0;
@@ -19,17 +17,19 @@ void StateKeeper::setSplitterState(int state) {
 int StateKeeper::getSplitterState() {
     return splitterState;
 }
-void StateKeeper::setStroke(float inputStroke[SEGMENTATION][DIMENTION]) {
+void StateKeeper::setStroke(Vector inputStroke[SEGMENTATION]) {
     strokeSet = 1;
     for (int i=0; i<SEGMENTATION; i++) {
-        for (int j=0; j<DIMENTION; j++) {
-            stroke[i][j] = inputStroke[i][j];
-        }
+        stroke[i] = inputStroke[i];
     } 
 }
 
 PyObject * StateKeeper::getStroke() {
-    return arrayToPyList(&stroke[0][0], SEGMENTATION, DIMENTION);
+    PyObject * newListObj = PyTuple_New(SEGMENTATION);
+    for (int i=0; i<SEGMENTATION; i++) {
+        PyTuple_SET_ITEM(newListObj, i, vectorToPyList(stroke[i]));
+    }
+    return newListObj;
 }
 
 void StateKeeper::clearStroke() {

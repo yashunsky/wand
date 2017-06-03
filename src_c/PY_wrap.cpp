@@ -47,7 +47,7 @@ void vibro(uint8_t Power) {
 }
 
 
-void exportStroke(float stroke[SEGMENTATION][DIMENTION]) {
+void exportStroke(Vector stroke[SEGMENTATION]) {
     SK.setStroke(stroke);
 }
 
@@ -75,51 +75,6 @@ static PyObject* py_getDist(PyObject* self, PyObject* args) {
     PyListToArray(bObj, &b[0], DIMENTION, 1);
 
     return PyFloat_FromDouble((double) getDist(a, b));
-}
-
-static PyObject* py_unifyStroke(PyObject* self, PyObject* args) {
-    float stroke[STROKE_MAX_LENGTH][DIMENTION];
-    float newStroke[SEGMENTATION][DIMENTION];
-    int length;
-    
-    PyObject * strokeObj;
-
-    PyArg_ParseTuple(args, "O!i", &PyList_Type, &strokeObj, &length);
-
-    PyListToArray(strokeObj, &stroke[0][0], STROKE_MAX_LENGTH, DIMENTION);
-
-    unifyStroke(stroke, newStroke, length);
-
-    return arrayToPyList(&newStroke[0][0], SEGMENTATION, DIMENTION);
-}
-
-static PyObject* py_checkStroke(PyObject* self, PyObject* args) {
-    float stroke[SEGMENTATION][DIMENTION];
-    float description[SEGMENTATION][DIMENTION];
-    
-    PyObject * strokeObj;
-    PyObject * descriptionObj;
-
-    PyArg_ParseTuple(args, "O!O!", &PyList_Type, &strokeObj, &PyList_Type, &descriptionObj);
-
-    PyListToArray(strokeObj, &stroke[0][0], SEGMENTATION, DIMENTION);
-    PyListToArray(descriptionObj, &description[0][0], SEGMENTATION, DIMENTION);
-
-    return PyFloat_FromDouble((double) checkStroke(stroke, description));
-}
-
-static PyObject* py_getStroke(PyObject* self, PyObject* args) {
-    float stroke[STROKE_MAX_LENGTH][DIMENTION];
-    int length;    
-    unsigned long access;
-
-    PyObject * strokeObj;
-
-    PyArg_ParseTuple(args, "O!i", &PyList_Type, &strokeObj, &length);
-
-    PyListToArray(strokeObj, &stroke[0][0], STROKE_MAX_LENGTH, DIMENTION);
-
-    return PyInt_FromLong(getStroke(stroke, length));
 }
 
 static PyObject* py_setSensorData(PyObject* self, PyObject* args) {
@@ -264,12 +219,6 @@ static PyObject* py_mahony(PyObject* self, PyObject* args) {
 }
 
 static PyMethodDef c_methods[] = {    
-    {"get_segmentation", py_getSegmantation, METH_VARARGS},
-    {"get_stroke_max_length", py_getStrokeMaxLength, METH_VARARGS},
-    {"get_dist", py_getDist, METH_VARARGS},
-    {"unify_stroke", py_unifyStroke, METH_VARARGS},
-    {"check_stroke", py_checkStroke, METH_VARARGS},
-    {"get_stroke", py_getStroke, METH_VARARGS},
     {"set_sensor_data", py_setSensorData, METH_VARARGS},
     {"set_sm_data", py_setSMData, METH_VARARGS},
     {"set_fsm_data", py_setFSMData, METH_VARARGS},    

@@ -1,5 +1,5 @@
 #include "stroke_export.h"
 
-void exportStroke(float stroke[SEGMENTATION][DIMENTION]) {
+void exportStroke(Vector stroke[SEGMENTATION]) {
     //do nothing
 }

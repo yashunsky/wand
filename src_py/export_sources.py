@@ -123,7 +123,7 @@ def main(preset, fw=False):
     knowledge = gather_knowledge(strokes)
 
     with open(KNOWLEDGE, 'w') as f:
-        json.dump(knowledge, f)
+        json.dump(knowledge, f, indent=2)
 
     h_text, c_text = convert_knowledge(knowledge)
 

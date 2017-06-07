@@ -18,6 +18,8 @@
 #include "wrap_utils.h"
 #include "state_keeper.h"
 #include "bsp.h"
+#include "lightsaber_out.h"
+#include "lightsaber.h"
 
 static Splitter splitter = Splitter();
 static IMU imu = IMU();
@@ -27,6 +29,17 @@ static StateKeeper SK = StateKeeper();
 static FullStateMachine FSM = FullStateMachine(0);
 
 static Orientation O = Orientation();
+
+static Lightsaber LS = Lightsaber();
+
+static int hum = 0;
+
+void boom(int level) {
+    printf("BOOM! %d\n", level);
+}
+void setHumLevel(int level) {
+    hum = level;
+}
 
 void RGB_blink_slow(uint8_t Color) {
     SK.setColor((int) Color);
@@ -204,6 +217,25 @@ static PyObject* py_mahony(PyObject* self, PyObject* args) {
     return result;
 }
 
+static PyObject* py_setLightsaberData(PyObject* self, PyObject* args) {
+    float delta;
+
+    PyObject * accObj;
+    PyObject * gyroObj;
+    PyObject * magObj;   
+
+    PyArg_ParseTuple(args, "fO!O!O!", &delta, &PyList_Type, &accObj, &PyList_Type, &gyroObj, &PyList_Type, &magObj);
+
+    Vector a = PyListToVector(accObj);
+    Vector g = PyListToVector(gyroObj);
+    Vector m = PyListToVector(magObj);
+
+    LS.setData(delta, a, g, m);
+
+    return PyInt_FromLong(hum);
+}
+
+
 static PyMethodDef c_methods[] = {    
     {"set_sensor_data", py_setSensorData, METH_VARARGS},
     {"set_sm_data", py_setSMData, METH_VARARGS},
@@ -211,9 +243,7 @@ static PyMethodDef c_methods[] = {
     {"set_signal", py_setSignal, METH_VARARGS},
     {"get_q_user_sig", py_getQ_USER_SIG, METH_VARARGS},
     {"mahony", py_mahony, METH_VARARGS},
-
-
-
+    {"set_lightsaber_data", py_setLightsaberData, METH_VARARGS},
     {NULL, NULL}
 };
 
@@ -223,6 +253,7 @@ extern "C" {
         imu.init();
         SM.init();
         FSM.init();
+        LS.init();
 
         Biotics_ctor();
         QMSM_INIT(the_biotics, (QEvt *)0);

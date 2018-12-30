@@ -11,34 +11,28 @@ from multiprocessing import Process, Pipe
 
 import numpy as np
 
-# from aperiodic import AperiodicFilter
-from input_generator import InputGenerator
+from stick_input_generator import StickInputGenerator as InputGenerator
 
 
-PORT = '/dev/tty.usbserial-A9IX9R77'
+PORT = '/dev/tty.usbmodem1411'
 
 POPUP_COUNT_DOWN = 2
 
-A_OFFSET = np.array([99.0, 123.0, -763.0])
-G_OFFSET = np.array([-4698.0 + 68, -4965.0 + 63, 4972.0 - 67])
+A_OFFSET = np.array([255, -7, 0])
+G_OFFSET = np.array([0, -67, -6])
+
+
 GYRO_SCALE = 2000.0 / 32768 / 180 * np.pi
 G_CONST = 9.81
 ACC_SCALE = G_CONST / 4096
-PITCH = np.array([-1, 0, 0])
-# ROLL = np.array([0, -1, 1])
-ROLL = np.array([0, 0, -1])
 
+PITCH = np.array([0, 1, 0])
+ROLL = np.array([0, 0, 1])
 
-ANGLES = {'A': 0.0, 'B': 0.25, 'C': 0.5, 'D': 0.75, 'E': 1}
 PRECISION = 0.1
 
 GYRO_FILTER_T = 0.01
-GYRO_EDGE = 0.1
-
-
-def start_gui(pipe_in, pipe_out):
-    Widget(pipe_in, pipe_out)
-    tk.mainloop()
+GYRO_EDGE = 0.2
 
 
 def angle_between(v1, v2):
@@ -50,53 +44,116 @@ def angle_between(v1, v2):
     return np.arccos(np.dot(v1 / n1, v2 / n2))
 
 
-def decode(angle):
-    for key, value in ANGLES.items():
-        error = np.abs(angle - value)
-        if error < PRECISION:
-            return (key, error)
+class Pitch(object):
+    def __init__(self, name, angle, roll=None):
+        self.name = name
+        self.angle = angle
+        self.roll = roll
+
+    def decode(self, acc):
+        pitch_angle = angle_between(acc, PITCH) / np.pi
+        roll_angle = angle_between(acc, ROLL) / np.pi
+
+        pitch_error = np.abs(pitch_angle - self.angle)
+
+        if pitch_error > PRECISION:
+            return
+
+        if self.roll is None:
+            return self.name, pitch_error
+
+        for key, value in self.roll.items():
+            roll_error = np.abs(roll_angle - value)
+            if roll_error < PRECISION:
+                return self.name + key, (pitch_error, roll_error)
+
+        return None
+
+PITCHES = [Pitch('A', 0.0),
+           Pitch('B', 0.25, {'u': 0.25, 's': 0.5, 'd': 0.75}),
+           Pitch('C', 0.5, {'u': 0.0, 's': 0.5, 'd': 1.0}),
+           Pitch('D', 0.75, {'u': 0.25, 's': 0.5, 'd': 0.75}),
+           Pitch('E', 1.0)]
+
+
+SPELLS = {'CuCs': 'Lumus',
+          'BdDsCu': 'Delirium tremens'}
+
+
+def start_gui(pipe_in, pipe_out):
+    Widget(pipe_in, pipe_out)
+    tk.mainloop()
+
+
+def decode(acc):
+    for pitch in PITCHES:
+        decoded = pitch.decode(acc)
+        if decoded is not None:
+            return decoded
     return None
+
+
+def possible(sequence):
+    str_sequence = ''.join(sequence)
+    return any(known.startswith(str_sequence) for known in SPELLS)
 
 
 def start_uart(pipe_in, pipe_out, fsm=False):
     input_generator = InputGenerator(serial_port=PORT, baude_rate=256000)
 
-    # gyro_filter = AperiodicFilter(GYRO_FILTER_T)
-
     old_display_state = None
     new_display_state = ('idle', '')
 
-    old_sign = None
-    new_sign = None
-
     popup_countdown = 0
+
+    sequence = []
+    button_pressed = False
+
+    vibro = 0
+    spell = None
 
     for input_data in input_generator(True, '', True):
 
         acc = (input_data['acc'] - A_OFFSET) * ACC_SCALE
         gyro = np.linalg.norm((input_data['gyro'] - G_OFFSET) * GYRO_SCALE)
+        button = input_data['button']
 
-        filtered_gyro = gyro  # gyro_filter.set_input(gyro, input_data['delta'])
-        # print filtered_gyro
+        if button_pressed and not button:
+            # cast
+            spell = SPELLS.get(''.join(sequence))
 
-        if filtered_gyro < GYRO_EDGE:
-            pitch_angle = angle_between(acc, PITCH) / np.pi
-            roll_angle = angle_between(acc, ROLL) / np.pi
+            if spell is not None:
+                new_display_state = ('splitting', spell)
+                popup_countdown = POPUP_COUNT_DOWN
 
-            # print 'stopped', pitch_angle, roll_angle
+            button_pressed = False
+            vibro = 0
+            sequence = []
+        elif not button_pressed and button:
+            sequence = []
+            button_pressed = True
+            spell = None
+            vibro = 0
 
-            p, r = decode(pitch_angle), decode(roll_angle)
+        if button_pressed:
+            sign = decode(acc)
+            if sign is not None and gyro < GYRO_EDGE:
+                sign_name = sign[0]
+                if sign_name not in sequence[-1:]:
+                    sequence.append(sign_name)
+                    if possible(sequence):
+                        vibro = len(sequence) * 20
+                    else:
+                        vibro = 0
+                    print sequence, possible(sequence)
 
-            if None not in (p, r):
-                new_sign = p[0] + r[0]
-                if new_sign != old_sign:
-                    old_sign = new_sign
-                    popup_countdown = 1
-                    new_display_state = ('splitting',
-                                         '%s%s\n[%1.2f:%1.2f]' %
-                                         (p[0], r[0], p[1], r[1]))
-
-        popup_countdown -= input_data['delta']
+            new_display_state = ({'active': True,
+                                  'blink': -1,
+                                  'color': 1,
+                                  'vibro': vibro}, ''.join(sequence))
+            popup_countdown = 1
+        else:
+            popup_countdown -= float(input_data['delta']) / 10
 
         if popup_countdown < 0:
             popup_countdown = 0
@@ -109,7 +166,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
         if pipe_in.poll():
             message = pipe_in.recv()
             if message == 'next':
-                old_sign = None
+                pass
             elif message == 'exit':
                 input_generator.in_loop = False
 

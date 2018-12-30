@@ -98,6 +98,8 @@ class Widget(object):
             else:
                 if s['blink'] == 0:
                     bg = 'black'
+                elif s['blink'] < 0:
+                    bg = COLORS[s['color']]
                 else:
                     blink = ((time() * 4) // (3 - s['blink'])) % 2
                     bg = COLORS[s['color']] if blink else 'black'
@@ -106,7 +108,7 @@ class Widget(object):
                 text = decode_vibro(s['vibro'])
             self.label.configure(background=bg)
             self.label.configure(fg=fg)
-            self.label_str.set(text)
+            self.label_str.set(text + '\n' + subtitle if subtitle else text)
 
         elif self.display_state in DISPLAY_STATES:
             display_state = DISPLAY_STATES[self.display_state]

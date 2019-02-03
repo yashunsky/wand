@@ -32,7 +32,9 @@ ROLL = np.array([0, 0, 1])
 PRECISION = 0.1
 
 GYRO_FILTER_T = 0.01
-GYRO_EDGE = 0.2
+GYRO_EDGE = 0.6
+
+GYRO_TIMEOUT = 0.1
 
 
 def angle_between(v1, v2):
@@ -130,11 +132,28 @@ def start_uart(pipe_in, pipe_out, fsm=False):
     vibro = 0
     spell = None
 
-    for input_data in input_generator(True, '', True):
+    gyro_timeout = GYRO_TIMEOUT
 
+    counter = 0
+
+    for input_data in input_generator(True, '', True):
         acc = (input_data['acc'] - A_OFFSET) * ACC_SCALE
         gyro = np.linalg.norm((input_data['gyro'] - G_OFFSET) * GYRO_SCALE)
         button = input_data['button']
+
+        if input_data['delta'] > 1000:
+            input_data['delta'] = 0
+
+        input_data['delta'] *= 0.1
+
+        counter += 1
+        if counter % 10 == 0:
+            pass
+
+        if gyro > GYRO_EDGE:
+            gyro_timeout = GYRO_TIMEOUT
+        else:
+            gyro_timeout -= input_data['delta']
 
         if button_pressed and not button:
             # cast
@@ -155,7 +174,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
 
         if button_pressed:
             sign = decode(acc)
-            if sign is not None and gyro < GYRO_EDGE:
+            if sign is not None and gyro_timeout < 0:
                 sign_name = sign[0]
                 if sign_name not in sequence[-1:]:
                     sequence.append(sign_name)
@@ -171,7 +190,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
                                   'vibro': vibro}, ''.join(sequence))
             popup_countdown = 1
         else:
-            popup_countdown -= float(input_data['delta']) / 10
+            popup_countdown -= input_data['delta']
 
         if popup_countdown < 0:
             popup_countdown = 0

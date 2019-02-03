@@ -33,8 +33,9 @@ PRECISION = 0.1
 
 GYRO_FILTER_T = 0.01
 GYRO_EDGE = 0.6
+ACC_EDGE = 0.5
 
-GYRO_TIMEOUT = 0.1
+STABLE_TIMEOUT = 0.05
 
 
 def angle_between(v1, v2):
@@ -132,7 +133,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
     vibro = 0
     spell = None
 
-    gyro_timeout = GYRO_TIMEOUT
+    stable_timeout = STABLE_TIMEOUT
 
     counter = 0
 
@@ -140,6 +141,8 @@ def start_uart(pipe_in, pipe_out, fsm=False):
         acc = (input_data['acc'] - A_OFFSET) * ACC_SCALE
         gyro = np.linalg.norm((input_data['gyro'] - G_OFFSET) * GYRO_SCALE)
         button = input_data['button']
+
+        acc_instab = abs(np.linalg.norm(acc) - G_CONST)
 
         if input_data['delta'] > 1000:
             input_data['delta'] = 0
@@ -150,10 +153,10 @@ def start_uart(pipe_in, pipe_out, fsm=False):
         if counter % 10 == 0:
             pass
 
-        if gyro > GYRO_EDGE:
-            gyro_timeout = GYRO_TIMEOUT
+        if gyro > GYRO_EDGE or acc_instab > ACC_EDGE:
+            stable_timeout = STABLE_TIMEOUT
         else:
-            gyro_timeout -= input_data['delta']
+            stable_timeout -= input_data['delta']
 
         if button_pressed and not button:
             # cast
@@ -174,7 +177,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
 
         if button_pressed:
             sign = decode(acc)
-            if sign is not None and gyro_timeout < 0:
+            if sign is not None and stable_timeout < 0:
                 sign_name = sign[0]
                 if sign_name not in sequence[-1:]:
                     sequence.append(sign_name)

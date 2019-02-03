@@ -69,15 +69,33 @@ class Pitch(object):
 
         return None
 
-PITCHES = [Pitch('A', 0.0),
-           Pitch('B', 0.25, {'u': 0.25, 's': 0.5, 'd': 0.75}),
-           Pitch('C', 0.5, {'u': 0.0, 's': 0.5, 'd': 1.0}),
-           Pitch('D', 0.75, {'u': 0.25, 's': 0.5, 'd': 0.75}),
-           Pitch('E', 1.0)]
+PITCHES = [Pitch('N', 0.0),
+           Pitch('D', 0.25, {'u': 0.25, 's': 0.5, 'd': 0.75}),
+           Pitch('H', 0.5, {'u': 0.0, 's': 0.5, 'd': 1.0}),
+           Pitch('A', 0.75, {'u': 0.25, 's': 0.5, 'd': 0.75}),
+           Pitch('Z', 1.0)]
 
 
-SPELLS = {'CuCs': 'Lumus',
-          'BdDsCu': 'Delirium tremens'}
+SPELLS = {'DuZDu': u'Щит Протего',
+          'DuAuDu': u'Импедимента',
+          'DuHuHs': u'Силенцио',
+          'DuHuZ': u'Режущее заклятие',
+          'HuZHu': u'Щит Диффендо',
+          'HuDuAu': u'Инкарцеро',
+          'HuAuDu': u'Риктусемпра',
+          'AuZAu': u'Щит Энервейт',
+          'AuDuDs': u'Ступефай',
+          'AuNHu': u'Конфундус',
+          'NAuDuHuZ': u'Отложенная смерть',
+          'HsNZ': u'Инсендио',
+          'HsZN': u'Делювиум',
+          'HsAsZAuDs': u'Экспеллиармус',
+          'DsAuDuAsHu': u'Табула Раса',
+          'NZ': u'Авада Кедавра',
+          'NHuHs': u'Круцио',
+          'NAuAs': u'Империо',
+          'ZAuAsAuZ': u'Экзорцио',
+          'DdDsDdDuDs': u'Чара, завершающая зельеварение'}
 
 
 def start_gui(pipe_in, pipe_out):

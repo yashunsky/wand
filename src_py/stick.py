@@ -29,13 +29,13 @@ ACC_SCALE = G_CONST / 4096
 PITCH = np.array([0, 1, 0])
 ROLL = np.array([0, 0, 1])
 
-PRECISION = 0.1
+PRECISION = 0.05
 
-GYRO_FILTER_T = 0.01
 GYRO_EDGE = 0.6
 ACC_EDGE = 0.5
+DELTA_ACC_EDGE = 0.5
 
-STABLE_TIMEOUT = 0.05
+STABLE_TIMEOUT = 0.01
 
 
 def angle_between(v1, v2):
@@ -137,12 +137,19 @@ def start_uart(pipe_in, pipe_out, fsm=False):
 
     counter = 0
 
+    spell_time = 0
+
+    prev_acc = np.array([0, 0, 0])
+
     for input_data in input_generator(True, '', True):
         acc = (input_data['acc'] - A_OFFSET) * ACC_SCALE
         gyro = np.linalg.norm((input_data['gyro'] - G_OFFSET) * GYRO_SCALE)
         button = input_data['button']
 
         acc_instab = abs(np.linalg.norm(acc) - G_CONST)
+
+        delta_acc = np.linalg.norm(acc - prev_acc)
+        prev_acc = acc
 
         if input_data['delta'] > 1000:
             input_data['delta'] = 0
@@ -153,7 +160,7 @@ def start_uart(pipe_in, pipe_out, fsm=False):
         if counter % 10 == 0:
             pass
 
-        if gyro > GYRO_EDGE or acc_instab > ACC_EDGE:
+        if gyro > GYRO_EDGE or acc_instab > ACC_EDGE or delta_acc > DELTA_ACC_EDGE:
             stable_timeout = STABLE_TIMEOUT
         else:
             stable_timeout -= input_data['delta']
@@ -163,17 +170,20 @@ def start_uart(pipe_in, pipe_out, fsm=False):
             spell = SPELLS.get(''.join(sequence))
 
             if spell is not None:
-                new_display_state = ('splitting', spell)
+                new_display_state = ('splitting', u'%s %2.2fс' % (spell, spell_time))
                 popup_countdown = POPUP_COUNT_DOWN
 
             button_pressed = False
             vibro = 0
             sequence = []
         elif not button_pressed and button:
+            spell_time = 0
             sequence = []
             button_pressed = True
             spell = None
             vibro = 0
+
+        spell_time += input_data['delta']
 
         if button_pressed:
             sign = decode(acc)

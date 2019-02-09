@@ -6,6 +6,7 @@ from setup import SHIELD_TIMEOUT
 
 class Duellist(object):
     def __init__(self, stick_id,
+                 on_defence_succeded=lambda a, d: None,
                  on_defence_failed=lambda s: None,
                  on_rule_of_3_failed=lambda s: None):
         super(Duellist, self).__init__()
@@ -15,6 +16,7 @@ class Duellist(object):
         self.timeout = SHIELD_TIMEOUT
         self.catched_spells = []
         self.adversary = None
+        self.on_defence_succeded = on_defence_succeded
         self.on_defence_failed = on_defence_failed
         self.on_rule_of_3_failed = on_rule_of_3_failed
         self.attacks_buffer = []
@@ -31,7 +33,9 @@ class Duellist(object):
 
     def cast_spell(self, spell):
         if self.catched_spells:
-            if spell in self.catched_spells[0].shields:
+            top_spell = self.catched_spells[0]
+            if spell in top_spell.shields:
+                self.on_defence_succeded(top_spell, spell)
                 self.remove_top_spell()
                 return
 

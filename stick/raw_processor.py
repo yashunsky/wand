@@ -69,7 +69,8 @@ class RawToSequence(object):
             self.button_pressed = False
             spell_done = True
 
-        result = {'spell_time': self.spell_time,
+        result = {'delta': data['delta'],
+                  'spell_time': self.spell_time,
                   'sequence': copy(self.sequence),
                   'done': spell_done}
 

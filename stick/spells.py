@@ -1,20 +1,32 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-
+from itertools import chain
 from position import decode_sequence
 
 
+def prefixes(sequence):
+    prefix = ''
+    for position in sequence:
+        prefix = prefix + position
+        yield prefix
+
+
 class Spell(object):
-    def __init__(self, sequence, name, shields=None):
+    def __init__(self, sequence, name, shields=None, is_attack=True):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
             shields = [shields]
 
         self.name = name
+        self.key = sequence
         self.sequence = decode_sequence(sequence)
         self.shields = [] if shields is None else shields
+        self.prefixes = set(prefixes(self.sequence))
+        self.shields_prefixes = set(chain(*[spell.prefixes
+                                            for spell in self.shields]))
+        self.is_attack = is_attack
 
     def __str__(self):
         return self.name
@@ -25,10 +37,10 @@ class Spell(object):
 
 def get_all_spells():
     # shields
-    protego = Spell('DuZDu', 'Протего')
-    diffendo = Spell('HuZHu', 'Диффендо')
-    enerveit = Spell('AuZAu', 'Щит Энервейт')
-    tabula_rasa = Spell('DsAuDuAsHu', 'Табула Раса')
+    protego = Spell('DuZDu', 'Протего', is_attack=False)
+    diffendo = Spell('HuZHu', 'Диффендо', is_attack=False)
+    enerveit = Spell('AuZAu', 'Щит Энервейт', is_attack=False)
+    tabula_rasa = Spell('DsAuDuAsHu', 'Табула Раса', is_attack=False)
 
     # cyclic linked spells
     insendio = Spell('HsNZ', 'Инсендио')
@@ -58,4 +70,8 @@ def get_all_spells():
             Spell('NHuHs', 'Круцио'),
             Spell('NAuAs', 'Империо'),
             Spell('ZAuAsAuZ', 'Экзорцио', tabula_rasa),
-            Spell('DdDsDdDuDs', 'Чара, завершающая зельеварение')]
+            Spell('DdDsDdDuDs', 'Чара, завершающая зельеварение',
+                  is_attack=False)]
+
+ALL_SPELLS = {spell.key: spell for spell in get_all_spells()}
+ALL_PREFIXES = set(chain(*[spell.prefixes for spell in ALL_SPELLS.values()]))

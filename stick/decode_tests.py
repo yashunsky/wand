@@ -7,7 +7,7 @@ import tiny_numpy as np
 from position import decode_acc, decode_sequence
 
 
-class StickFullTest(unittest.TestCase):
+class DecodeTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -43,6 +43,7 @@ class StickFullTest(unittest.TestCase):
 
     def test_decode_sequence(self):
         assert decode_sequence('NAuDuHuZ') == ['N', 'Au', 'Du', 'Hu', 'Z']
+
 
 if __name__ == '__main__':
     unittest.main()

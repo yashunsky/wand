@@ -25,6 +25,8 @@ class Pitch(object):
         pitch_angle = angle_between(acc, pitch_axis) / np.pi
         roll_angle = angle_between(acc, roll_axis) / np.pi
 
+        # print(pitch_angle, roll_angle)
+
         pitch_error = np.abs(pitch_angle - self.angle)
 
         if pitch_error > precision:

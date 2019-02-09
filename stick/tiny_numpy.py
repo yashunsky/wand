@@ -10,16 +10,19 @@ class Array(object):
         self.value = value
 
     def __sub__(self, other):
-        return [a - b for a, b in zip(self.value, other.value)]
+        return Array([a - b for a, b in zip(self.value, other.value)])
 
     def __add__(self, other):
-        return [a + b for a, b in zip(self.value, other.value)]
+        return Array([a + b for a, b in zip(self.value, other.value)])
 
     def __truediv__(self, scale):
-        return [a / scale for a in self.value]
+        return Array([a / scale for a in self.value])
 
     def __mul__(self, scale):
-        return [a * scale for a in self.value]
+        return Array([a * scale for a in self.value])
+
+    def __str__(self):
+        return str(self.value)
 
 
 class Linalg(object):
@@ -35,7 +38,7 @@ def array(value):
 
 
 def dot(a, b):
-    return sum([ax * bx for ax, bx in zip(a, b)])
+    return sum([ax * bx for ax, bx in zip(a.value, b.value)])
 
 
 true_abs = abs

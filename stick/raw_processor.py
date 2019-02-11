@@ -10,7 +10,8 @@ from setup import (G_CONST,
                    DELTA_ACC_EDGE,
                    STABLE_TIMEOUT,
                    PITCH_AXIS,
-                   ROLL_AXIS)
+                   ROLL_AXIS,
+                   ACTION_TIMEOUT)
 
 import tiny_numpy as np
 from position import decode_acc
@@ -34,6 +35,8 @@ class RawToSequence(object):
         self.length = 0
         self.spell_time = 0.0
         self.button_pressed = False
+        self.action_timeout = ACTION_TIMEOUT
+        self.failed = False
 
     def __call__(self, data):
         acc = (np.array(data['acc']) - self.a_offet) * ACC_SCALE
@@ -56,14 +59,24 @@ class RawToSequence(object):
         spell = ALL_SPELLS.get(self.sequence)
 
         if data['button']:
+            if not self.button_pressed:
+                self.failed = False
+                self.action_timeout = ACTION_TIMEOUT
+
+            self.action_timeout -= data['delta']
+            if self.action_timeout < 0.0:
+                self.reset()
+                self.failed = True
+
             self.button_pressed = True
             self.spell_time += data['delta']
 
-            if spell is None and self.stable_timeout < 0:
+            if spell is None and self.stable_timeout < 0 and not self.failed:
                 decoded = decode_acc(acc, PITCH_AXIS, ROLL_AXIS, PRECISION)
                 if decoded is not None:
                     position = decoded[0]
                     if not self.sequence.endswith(position):
+                        self.action_timeout = ACTION_TIMEOUT
                         self.length += 1
                         self.sequence += position
 
@@ -76,11 +89,16 @@ class RawToSequence(object):
                   'sequence': self.sequence,
                   'vibro': self.length if self.sequence in ALL_PREFIXES else 0,
                   'spell': spell,
-                  'done': spell_done}
+                  'done': spell_done,
+                  'failed': self.failed}
 
         if spell_done:
-            self.spell_time = 0.0
-            self.sequence = ''
-            self.length = 0
+            self.reset()
 
         return result
+
+    def reset(self):
+        self.spell_time = 0.0
+        self.sequence = ''
+        self.length = 0
+        self.action_timeout = 0.0

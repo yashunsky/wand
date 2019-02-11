@@ -55,7 +55,7 @@ if __name__ == '__main__':
         duellist.set_state(state['delta'], state['sequence'], state['vibro'],
                            state['spell'] if state['done'] else None)
 
-        if state['done'] or (state['sequence'] not in ('', prev_sequence)):
+        if state['done'] or state['sequence'] != prev_sequence:
             del state['delta']
             state['spell_time'] = '%2.1f' % state['spell_time']
             print(state)

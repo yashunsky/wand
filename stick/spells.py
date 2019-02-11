@@ -13,7 +13,9 @@ def prefixes(sequence):
 
 
 class Spell(object):
-    def __init__(self, sequence, name, shields=None, is_attack=True):
+    def __init__(self, sequence, name,
+                 shields=None, is_attack=True,
+                 ignore_rule_of_3=False):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
@@ -27,6 +29,7 @@ class Spell(object):
         self.shields_prefixes = set(chain(*[spell.prefixes
                                             for spell in self.shields]))
         self.is_attack = is_attack
+        self.ignore_rule_of_3 = ignore_rule_of_3
 
     def __str__(self):
         return self.name
@@ -66,7 +69,7 @@ def get_all_spells():
 
             Spell('HsAsZAuDs', 'Экспеллиармус', tabula_rasa),
             tabula_rasa,
-            Spell('NZ', 'Авада Кедавра'),
+            Spell('NZ', 'Авада Кедавра', ignore_rule_of_3=True),
             Spell('NHuHs', 'Круцио'),
             Spell('NAuAs', 'Империо'),
             Spell('ZAuAsAuZ', 'Экзорцио', tabula_rasa),

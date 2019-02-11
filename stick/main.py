@@ -4,21 +4,7 @@
 from uart_reader import UartReader
 from setup import PORT, OFFSETS
 from raw_processor import RawToSequence
-from spells import ALL_SPELLS, ALL_PREFIXES
 from duellist import Duellist
-
-
-def process_state(state):
-    str_sequence = ''.join(state['sequence'])
-    result = {'delta': state['delta'],
-              'spell_time': state['spell_time'],
-              'sequence': str_sequence}
-    if str_sequence in ALL_PREFIXES:
-        if state['done']:
-            result['spell'] = ALL_SPELLS.get(str_sequence)
-        else:
-            result['vibro'] = len(state['sequence'])
-    return result
 
 
 def on_defence_succeded(duellist_name, attack_spell, shield):
@@ -31,7 +17,8 @@ def on_defence_failed(duellist_name, spell):
 
 
 def on_rule_of_3_failed(duellist_name, spell):
-    print('Дуэлянт %s нарушил правило 3х скастовав %s' % (duellist_name, spell))
+    print('Дуэлянт %s нарушил правило 3х скастовав %s' %
+          (duellist_name, spell))
 
 if __name__ == '__main__':
     raw_stream = UartReader(serial_port=PORT)
@@ -63,12 +50,12 @@ if __name__ == '__main__':
         raw_to_sequence = raw_processors[raw_data['device_id']]
         duellist = duellists[raw_data['device_id']]
 
-        state = process_state(raw_to_sequence(raw_data))
+        state = raw_to_sequence(raw_data)
 
-        duellist.set_state(state['delta'], state['sequence'],
-                           state.get('vibro', 0), state.get('spell'))
+        duellist.set_state(state['delta'], state['sequence'], state['vibro'],
+                           state['spell'] if state['done'] else None)
 
-        if 'spell' in state or (state['sequence'] not in ('', prev_sequence)):
+        if state['done'] or (state['sequence'] not in ('', prev_sequence)):
             del state['delta']
             state['spell_time'] = '%2.1f' % state['spell_time']
             print(state)

@@ -1,8 +1,6 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-from copy import copy
-
 from setup import (G_CONST,
                    ACC_SCALE,
                    GYRO_SCALE,
@@ -16,6 +14,7 @@ from setup import (G_CONST,
 
 import tiny_numpy as np
 from position import decode_acc
+from spells import ALL_SPELLS, ALL_PREFIXES
 
 
 def is_instable(gyro, acc_instab, delta_acc):
@@ -31,7 +30,8 @@ class RawToSequence(object):
         self.g_offset = g_offset
         self.stable_timeout = STABLE_TIMEOUT
         self.prev_acc = np.array([0, 0, 0])
-        self.sequence = []
+        self.sequence = ''
+        self.length = 0
         self.spell_time = 0.0
         self.button_pressed = False
 
@@ -53,17 +53,19 @@ class RawToSequence(object):
                 self.stable_timeout = -1
 
         spell_done = False
+        spell = ALL_SPELLS.get(self.sequence)
 
         if data['button']:
             self.button_pressed = True
             self.spell_time += data['delta']
 
-            if self.stable_timeout < 0:
+            if spell is None and self.stable_timeout < 0:
                 decoded = decode_acc(acc, PITCH_AXIS, ROLL_AXIS, PRECISION)
                 if decoded is not None:
                     position = decoded[0]
-                    if not self.sequence or self.sequence[-1] != position:
-                        self.sequence.append(position)
+                    if not self.sequence.endswith(position):
+                        self.length += 1
+                        self.sequence += position
 
         elif self.button_pressed:
             self.button_pressed = False
@@ -71,11 +73,14 @@ class RawToSequence(object):
 
         result = {'delta': data['delta'],
                   'spell_time': self.spell_time,
-                  'sequence': copy(self.sequence),
+                  'sequence': self.sequence,
+                  'vibro': self.length if self.sequence in ALL_PREFIXES else 0,
+                  'spell': spell,
                   'done': spell_done}
 
         if spell_done:
             self.spell_time = 0.0
-            self.sequence = []
+            self.sequence = ''
+            self.length = 0
 
         return result

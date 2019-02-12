@@ -78,38 +78,24 @@ class UartReader(object):
                 'gyro': data[2:5],
                 'acc': data[5:8]}
 
-    def __call__(self, from_uart=True, path='', realtime=True):
+    def __call__(self):
         self.in_loop = True
         self.is_running = True
 
-        if from_uart:
-            self.data_buffer = ''
+        self.data_buffer = ''
 
-            self.prev_timestamp = [None, None]
+        self.prev_timestamp = [None, None]
 
-            try:
-                self.serial = serial.Serial(self.serial_port, timeout=0)
-                while self.in_loop:
-                    for data in self.get_data():
-                        yield data
-                    sleep(0.05)
-            finally:
-                self.serial.close()
+        try:
+            self.serial = serial.Serial(self.serial_port, timeout=0)
+            while self.in_loop:
+                for data in self.get_data():
+                    yield data
+                sleep(0.05)
+        finally:
+            self.serial.close()
 
-            self.is_running = False
-        else:
-            with open(path, 'r') as f:
-                for line in f:
-                    if not self.in_loop:
-                        raise GeneratorExit
-
-                    data = map(float, line.split())
-                    if realtime:
-                        sleep(data[0])
-                    yield {'delta': data[0],
-                           'acc': data[1:4],
-                           'mag': data[4:7],
-                           'gyro': data[7:10]}
+        self.is_running = False
 
     def stop(self):
         self.in_loop = False

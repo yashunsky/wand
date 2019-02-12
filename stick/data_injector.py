@@ -1,0 +1,79 @@
+#!/usr/local/bin/python3
+# -*- coding: utf-8 -*-
+
+from time import sleep
+
+import tiny_numpy as np
+
+from setup import OFFSETS, ACC_SCALE
+
+INJECTION_INTERVAL = 0.05
+
+PSEDO_POSITIONS = {
+    'Z': (0, -1, 0),
+    'Au': (0, -1, 1),
+    'As': (-1, -1, 0),
+    'Ad': (0, -1, -1),
+    'Hu': (0, 0, 1),
+    'Hs': (1, 0, 0),
+    'Hd': (0, 0, -1),
+    'Du': (0, 1, 1),
+    'Ds': (-1, 1, 0),
+    'Dd': (0, 1, -1),
+    'N': (0, 1, 0)
+}
+
+
+class Snapshot(object):
+    def __init__(self, device_id):
+        super(Snapshot, self).__init__()
+        self.device_id = device_id
+        self.acc = None
+        self.button_pressed = False
+        self.gyro = OFFSETS[self.device_id]['G']
+
+    def set_expected_position(self, position):
+        acc = np.array(PSEDO_POSITIONS[position])
+        acc /= (np.linalg.norm(acc) * ACC_SCALE)
+        acc += OFFSETS[self.device_id]['A']
+        self.acc = acc
+        self.button_pressed = True
+
+    def set_feedback(self, state):
+        if state['done']:
+            self.button_pressed = False
+
+    def get_sensor_data(self):
+        return {'device_id': self.device_id,
+                'button': int(self.button_pressed),
+                'gyro': self.gyro,
+                'acc': self.acc}
+
+
+class DataInjector(object):
+    def __init__(self, arg):
+        super(DataInjector, self).__init__()
+        self.arg = arg
+        self.snapshots = {}
+        self.in_loop = False
+
+    def get_snapshot(self, device_id):
+        if device_id not in self.snapshots:
+            self.snapshots[device_id] = Snapshot(device_id)
+        return self.snapshots[device_id]
+
+    def set_position(self, device_id, position):
+        self.get_snapshot(device_id).set_expected_position(position)
+
+    def set_feedback(self, device_id, state):
+        self.get_snapshot(device_id).set_feedback(state)
+
+    def __call__(self):
+        self.in_loop = True
+
+        while self.in_loop:
+            sleep(INJECTION_INTERVAL)
+            for snapshot in self.snapshots:
+                data = snapshot.get_sensor_data()
+                data['delta'] = INJECTION_INTERVAL
+                yield data

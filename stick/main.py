@@ -1,8 +1,11 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
+import sys
+
 from uart_reader import UartReader
-from setup import PORT, OFFSETS
+from data_injector import DataInjector
+from setup import OFFSETS
 from raw_processor import RawToSequence
 from duellist import Duellist
 
@@ -21,7 +24,9 @@ def on_rule_of_3_failed(duellist_name, spell):
           (duellist_name, spell))
 
 if __name__ == '__main__':
-    raw_stream = UartReader(serial_port=PORT)
+    keyboard_input = sys.argv[-1:] == ['-k']
+
+    raw_stream = DataInjector() if keyboard_input else UartReader()
 
     raw_processors = {device_id: RawToSequence(offsets['A'], offsets['G'])
                       for device_id, offsets in OFFSETS.items()}
@@ -51,6 +56,9 @@ if __name__ == '__main__':
         duellist = duellists[raw_data['device_id']]
 
         state = raw_to_sequence(raw_data)
+
+        if keyboard_input:
+            raw_stream.set_feedback(state)
 
         duellist.set_state(state['delta'], state['sequence'], state['vibro'],
                            state['spell'] if state['done'] else None)

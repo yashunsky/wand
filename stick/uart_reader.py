@@ -5,7 +5,7 @@ import serial
 
 from time import sleep
 
-SERIAL_PORT = '/dev/tty.usbmodem1411'
+from setup import PORT
 
 BAUDE_RATE = 115200
 BUFFER_DELIMITER = '\r'
@@ -16,7 +16,7 @@ TIME_STAMP_RANGE = 2 ** 32
 
 
 class UartReader(object):
-    def __init__(self, serial_port=SERIAL_PORT, dual=False):
+    def __init__(self, serial_port=PORT, dual=False):
         super(UartReader, self).__init__()
         self.serial_port = serial_port
         self.dual = dual

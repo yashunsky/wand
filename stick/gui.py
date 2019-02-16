@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
-from time import sleep
+from time import time, sleep
 import tkinter as tk
 from tkinter.font import Font
 from threading import Thread
 
 from mages import Mage
+
+POPUP_TIMEOUT = 4
 
 KEYS = {
     'a': [0, 'Z'],
@@ -98,8 +100,13 @@ class DuellistFrame(tk.Frame):
     def __init__(self, parent, config):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
 
+        self.sex = config['sex']
+
         self.sequence = tk.StringVar()
         self.sequence.set('')
+
+        self.popup = tk.StringVar()
+        self.popup.set('')
 
         name = CapitalText(self, config['bg'],
                            config['fg'],
@@ -125,24 +132,64 @@ class DuellistFrame(tk.Frame):
                                   config['adversery_color'])
         self.spells.pack(side='top', expand=False)
 
+        tk.Label(self, textvariable=self.popup,
+                 bg=config['bg'],
+                 fg=config['fg'],
+                 font=config['fonts']['sequence']).pack(side='bottom',
+                                                        fill='x',
+                                                        expand=False)
+
         self.prev_sequence = None
         self.prev_timeout = None
         self.prev_spells = None
+        self.prev_popup = None
+
+        self.popup_time = 0
 
     def set_sequence(self, value):
         if value != self.prev_sequence:
             self.sequence.set(value)
-        self.prev_sequence = value
+            self.prev_sequence = value
 
     def set_timeout(self, value):
         if value != self.prev_timeout:
             self.timeout.set_value(value)
-        self.prev_timeout = value
+            self.prev_timeout = value
 
     def set_spells(self, spells):
         if spells != self.prev_spells:
             self.spells.set_text('\n'.join(spells))
-        self.prev_spells = spells
+            self.prev_spells = spells
+
+    def get_ending(self):
+        return '' if self.sex == 'M' else 'а'
+
+    def set_popup(self, data):
+        popup = None
+        if data['popup_type'] == 'defence_succeded':
+            args = (self.get_ending(), data['spells'][0], data['spells'][1])
+            popup = 'Отбил%s %s,\nскастовав %s' % args
+        elif data['popup_type'] == 'defence_failed':
+            args = (self.get_ending(), data['spells'])
+            popup = 'Не отбил%s %s' % args
+        elif data['popup_type'] == 'rule_of_3_failed':
+            args = (self.get_ending(), data['spells'])
+            popup = 'Нарушил%s правило 3х\nскастовав %s' % args
+        elif data['popup_type'] == 'death':
+            popup = 'Умерла' if self.get_ending() else 'Умер'
+
+        if popup is not None:
+            self.set_popup_text(popup)
+
+    def set_popup_text(self, popup):
+        if popup != self.prev_popup:
+            self.popup.set(popup)
+            self.popup_time = time()
+            self.prev_popup = popup
+
+    def check_popup(self):
+        if time() > self.popup_time + POPUP_TIMEOUT:
+            self.set_popup_text('')
 
 
 class Ring(object):
@@ -192,6 +239,7 @@ class Ring(object):
         result = copy(basic_config)
         result['name'] = duellist.value.name
         result['self_color'] = duellist.value.house.value
+        result['sex'] = duellist.value.sex
         return result
 
     def on_closing(self):
@@ -205,9 +253,15 @@ class Ring(object):
             if self.pipe_in.poll():
                 message = self.pipe_in.recv()
                 duellist = self.duellists[message['device_id']]
-                duellist.set_sequence(message['sequence'])
-                duellist.set_timeout(message['timeout'])
-                duellist.set_spells(message['spells'])
+                if 'popup_type' in message:
+                    duellist.set_popup(message)
+                else:
+                    duellist.set_sequence(message['sequence'])
+                    duellist.set_timeout(message['timeout'])
+                    duellist.set_spells(message['spells'])
+
+            self.duellists[0].check_popup()
+            self.duellists[1].check_popup()
             sleep(0.05)
 
     def on_key(self, event):

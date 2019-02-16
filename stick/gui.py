@@ -215,7 +215,7 @@ class Ring(object):
             }
 
         basic_config = {
-            'bg': '#fcf3cb',
+            'bg': '#ebcd89',
             'fg': '#64330c',
             'fonts': fonts,
             'max_timeout': 20

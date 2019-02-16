@@ -15,7 +15,8 @@ def prefixes(sequence):
 class Spell(object):
     def __init__(self, sequence, name,
                  shields=None, is_attack=True,
-                 ignore_rule_of_3=False):
+                 ignore_rule_of_3=False,
+                 breaks_rull_of_3=None):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
@@ -30,6 +31,8 @@ class Spell(object):
                                             for spell in self.shields]))
         self.is_attack = is_attack
         self.ignore_rule_of_3 = ignore_rule_of_3
+        self.breaks_rull_of_3 = (is_attack if breaks_rull_of_3 is None
+                                 else breaks_rull_of_3)
 
     def __str__(self):
         return self.name
@@ -43,7 +46,8 @@ def get_all_spells():
     protego = Spell('DuZDu', 'Протего', is_attack=False)
     diffendo = Spell('HuZHu', 'Диффендо', is_attack=False)
     enerveit = Spell('AuZAu', 'Щит Энервейт', is_attack=False)
-    tabula_rasa = Spell('DsAuDuAsHu', 'Табула Раса', is_attack=False)
+    tabula_rasa = Spell('DsAuDuAsHu', 'Табула Раса',
+                        is_attack=False, breaks_rull_of_3=True)
 
     # cyclic linked spells
     insendio = Spell('HsNZ', 'Инсендио')
@@ -70,9 +74,10 @@ def get_all_spells():
             Spell('HsAsZAuDs', 'Экспеллиармус', tabula_rasa),
             tabula_rasa,
             Spell('NZ', 'Авада Кедавра', ignore_rule_of_3=True),
-            Spell('NHuHs', 'Круцио'),
-            Spell('NAuAs', 'Империо'),
-            Spell('ZAuAsAuZ', 'Экзорцио', tabula_rasa),
+            Spell('NHuHs', 'Круцио', ignore_rule_of_3=True),
+            Spell('NAuAs', 'Империо', ignore_rule_of_3=True),
+            Spell('ZAuAsAuZ', 'Экзорцио', tabula_rasa,
+                  ignore_rule_of_3=True, breaks_rull_of_3=False),
             Spell('DdDsDdDuDs', 'Чара, завершающая зельеварение',
                   is_attack=False)]
 

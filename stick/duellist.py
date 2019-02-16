@@ -51,8 +51,9 @@ class Duellist(object):
 
         if spell.is_attack and self.adversary is not None:
             self.adversary.catch_spell(spell)
-            if not spell.ignore_rule_of_3:
-                if spell in self.attacks_buffer[-2:]:
+            if spell.breaks_rull_of_3:
+                if (spell in self.attacks_buffer[-2:] and
+                   not spell.ignore_rule_of_3):
                     self.on_rule_of_3_failed(spell)
                 self.attacks_buffer = (self.attacks_buffer + [spell])[-3:]
 

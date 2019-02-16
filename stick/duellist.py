@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-from setup import SHIELD_TIMEOUT
+from setup import SHIELD_TIMEOUT, ACTION_TIMEOUT
 
 
 class Duellist(object):
@@ -20,6 +20,8 @@ class Duellist(object):
         self.on_defence_failed = on_defence_failed
         self.on_rule_of_3_failed = on_rule_of_3_failed
         self.attacks_buffer = []
+
+        self.action_timeout = 0
 
     def set_adversary(self, adversary):
         self.adversary = adversary
@@ -46,9 +48,11 @@ class Duellist(object):
                     self.on_rule_of_3_failed(spell)
                 self.attacks_buffer = (self.attacks_buffer + [spell])[-3:]
 
-    def set_state(self, delta, sequence='', vibro=0, spell=None):
+    def set_state(self, delta, sequence='', vibro=0,
+                  spell=None, action_timeout=0):
         self.sequence = sequence
         self.vibro = vibro
+        self.action_timeout = action_timeout
         if spell is not None:
             self.cast_spell(spell)
 
@@ -59,3 +63,16 @@ class Duellist(object):
             if not is_defending and self.timeout < 0:
                 self.on_defence_failed(self.catched_spells[0])
                 self.remove_top_spell()
+
+    def for_gui(self):
+        if self.catched_spells:
+            timeout = int((float(max(self.timeout, 0)) * 20 / SHIELD_TIMEOUT))
+        else:
+            timeout = int((float(max(self.action_timeout, 0)) * 20 / ACTION_TIMEOUT))
+
+        return {
+            'device_id': self.stick_id,
+            'sequence': self.sequence,
+            'spells': [spell.name for spell in self.catched_spells],
+            'timeout': timeout
+        }

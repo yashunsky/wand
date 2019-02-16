@@ -80,9 +80,14 @@ class RawToSequence(object):
                         self.length += 1
                         self.sequence += position
 
+            spell = ALL_SPELLS.get(self.sequence)
+
         elif self.button_pressed:
             self.button_pressed = False
             spell_done = True
+
+        if not data['button']:
+            self.failed = False
 
         result = {'delta': data['delta'],
                   'spell_time': self.spell_time,
@@ -90,7 +95,8 @@ class RawToSequence(object):
                   'vibro': self.length if self.sequence in ALL_PREFIXES else 0,
                   'spell': spell,
                   'done': spell_done,
-                  'failed': self.failed}
+                  'failed': self.failed,
+                  'action_timeout': self.action_timeout}
 
         if spell_done:
             self.reset()

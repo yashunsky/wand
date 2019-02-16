@@ -7,7 +7,10 @@ from math import pi as math_pi, sqrt, acos
 class Array(object):
     def __init__(self, value):
         super(Array, self).__init__()
-        self.value = value
+        if isinstance(value, Array):
+            self.value = value.value
+        else:
+            self.value = value
 
     def __sub__(self, other):
         return Array([a - b for a, b in zip(self.value, other.value)])
@@ -22,6 +25,9 @@ class Array(object):
         return Array([a * scale for a in self.value])
 
     def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
         return str(self.value)
 
 

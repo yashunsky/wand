@@ -5,7 +5,7 @@ from time import sleep
 
 import tiny_numpy as np
 
-from setup import OFFSETS, ACC_SCALE
+from setup import OFFSETS, ACC_SCALE, G_CONST
 
 INJECTION_INTERVAL = 0.05
 
@@ -32,15 +32,18 @@ class Snapshot(object):
         self.button_pressed = False
         self.gyro = OFFSETS[self.device_id]['G']
 
-    def set_expected_position(self, position):
+        self.set_expected_position('Hs', button=False)
+
+    def set_expected_position(self, position, button=True):
         acc = np.array(PSEDO_POSITIONS[position])
-        acc /= (np.linalg.norm(acc) * ACC_SCALE)
+        acc /= (np.linalg.norm(acc) * ACC_SCALE / G_CONST)
         acc += OFFSETS[self.device_id]['A']
+
         self.acc = acc
-        self.button_pressed = True
+        self.button_pressed = button
 
     def set_feedback(self, state):
-        if state['done']:
+        if state['spell'] is not None or state['failed']:
             self.button_pressed = False
 
     def get_sensor_data(self):
@@ -51,11 +54,13 @@ class Snapshot(object):
 
 
 class DataInjector(object):
-    def __init__(self, arg):
+    def __init__(self):
         super(DataInjector, self).__init__()
-        self.arg = arg
         self.snapshots = {}
         self.in_loop = False
+
+    def init_device(self, device_id):
+        self.snapshots[device_id] = Snapshot(device_id)
 
     def get_snapshot(self, device_id):
         if device_id not in self.snapshots:
@@ -73,7 +78,17 @@ class DataInjector(object):
 
         while self.in_loop:
             sleep(INJECTION_INTERVAL)
-            for snapshot in self.snapshots:
+            for snapshot in self.snapshots.values():
                 data = snapshot.get_sensor_data()
                 data['delta'] = INJECTION_INTERVAL
                 yield data
+            else:
+                yield None
+
+    def process_action(self, message):
+        action = message['action']
+        if action == 'exit':
+            self.in_loop = False
+        elif action == 'position':
+            self.set_position(message['device_id'],
+                              message['position'])

@@ -2,29 +2,34 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
-from collections import namedtuple
-from enum import Enum
-
+from time import sleep
 import tkinter as tk
 from tkinter.font import Font
+from threading import Thread
 
-from spells import ALL_SPELLS
+from mages import Mage
 
-
-# class House(Enum):
-#     GRYFFINDOR = ('#c9000f', '#f69e34')
-#     HUFFLEPUFF = ('#fef24f', '#000000')
-#     RAVENCLAW = ('#0e0a9a', '#804733')
-#     SLYTHERIN = ('#00410e', '#dcdcdc')
-
-class House(Enum):
-    GRYFFINDOR = '#ff0000'
-    HUFFLEPUFF = '#fff300'
-    RAVENCLAW = '#0006f2'
-    SLYTHERIN = '#26ad06'
+KEYS = {
+    'a': [0, 'Z'],
+    's': [0, 'Au'],
+    'd': [0, 'Hu'],
+    'f': [0, 'Du'],
+    'g': [0, 'N']
+}
 
 
-Duellist = namedtuple('Duellist', ['name', 'house'])
+class DumpPipe(object):
+    def __init__(self):
+        super(DumpPipe, self).__init__()
+
+    def send(self, value):
+        pass
+
+    def poll(self):
+        return True
+
+    def recv(self):
+        return None
 
 
 class CapitalText(tk.Text):
@@ -74,7 +79,7 @@ class DuellistFrame(tk.Frame):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
 
         self.sequence = tk.StringVar()
-        self.sequence.set('Hs')
+        self.sequence.set('')
 
         name = CapitalText(self, config['bg'],
                            config['fg'],
@@ -100,21 +105,34 @@ class DuellistFrame(tk.Frame):
                                   config['adversery_color'])
         self.spells.pack(side='top', expand=False)
 
+        self.prev_sequence = None
+        self.prev_timeout = None
+        self.prev_spells = None
+
     def set_sequence(self, value):
-        self.sequence.set(value)
+        if value != self.prev_sequence:
+            self.sequence.set(value)
+        self.prev_sequence = value
 
     def set_timeout(self, value):
-        self.timeout.set_value(value)
+        if value != self.prev_timeout:
+            self.timeout.set_value(value)
+        self.prev_timeout = value
 
     def set_spells(self, spells):
-        self.spells.set_text('\n'.join(spells))
+        if spells != self.prev_spells:
+            self.spells.set_text('\n'.join(spells))
+        self.prev_spells = spells
 
 
 class Ring(object):
-    def __init__(self, duellists):
+    def __init__(self, duellists, pipe_in=DumpPipe(), pipe_out=DumpPipe()):
         super(Ring, self).__init__()
 
-        window = tk.Tk()
+        self.pipe_in = pipe_in
+        self.pipe_out = pipe_out
+
+        self.window = tk.Tk()
         family = 'Agatha-Modern'
 
         basic_config = {
@@ -134,39 +152,54 @@ class Ring(object):
         configs[0]['adversery_color'] = configs[1]['self_color']
         configs[1]['adversery_color'] = configs[0]['self_color']
 
-        self.duellists = {device_id: DuellistFrame(window, config)
+        self.duellists = {device_id: DuellistFrame(self.window, config)
                           for device_id, config in configs.items()}
 
         self.duellists[0].pack(side='left', fill='y', expand=True)
         self.duellists[1].pack(side='right', fill='y', expand=True)
 
-        window.configure(bg=basic_config['bg'])
-        window.title('Дуэльный клуб')
+        self.window.configure(bg=basic_config['bg'])
+        self.window.title('Дуэльный клуб')
 
-        window.bind("<Key>", self.on_key)
+        self.window.bind("<Key>", self.on_key)
+        self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-        self.casted = []
+        self.in_loop = True
+        self.refresh = Thread(target=self.refresh_thread)
+        self.refresh.start()
 
     def make_config(self, basic_config, duellist):
         result = copy(basic_config)
-        result['name'] = duellist.name
-        result['self_color'] = duellist.house.value
+        result['name'] = duellist.value.name
+        result['self_color'] = duellist.value.house.value
         return result
 
+    def on_closing(self):
+        self.in_loop = False
+        self.pipe_out.send({'action': 'exit'})
+        sleep(0.1)
+        self.window.destroy()
+
+    def refresh_thread(self):
+        while self.in_loop:
+            if self.pipe_in.poll():
+                message = self.pipe_in.recv()
+                duellist = self.duellists[message['device_id']]
+                duellist.set_sequence(message['sequence'])
+                duellist.set_timeout(message['timeout'])
+                duellist.set_spells(message['spells'])
+            sleep(0.05)
+
     def on_key(self, event):
-        self.casted.append(list(ALL_SPELLS.values())[len(self.casted)].name)
-        self.duellists[0].set_spells(self.casted)
+        position = KEYS.get(event.char)
+        if position is not None:
+            device_id, code = position
+            self.pipe_out.send({'action': 'position',
+                                'device_id': device_id,
+                                'position': code})
 
-        self.duellists[0].set_sequence(event.char)
-
-        try:
-            v = int(event.char) * 2
-            self.duellists[0].set_timeout(v)
-        except:
-            pass
 
 if __name__ == '__main__':
-    Ring([Duellist('Молли', House.GRYFFINDOR),
-          Duellist('Беллатриса', House.SLYTHERIN)])
+    Ring([Mage.MOLLY, Mage.BELLATRIX])
 
     tk.mainloop()

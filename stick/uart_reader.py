@@ -103,3 +103,6 @@ class UartReader(object):
     def set_feedback(self, device_id, r, g, b, blink_on, blink_off, vibro):
         self.serial.write('set %d %d,%d,%d,%d,%d,%d\r' %
                           (device_id, r, g, b, blink_on, blink_off, vibro))
+
+    def process_action(self, action):
+        pass

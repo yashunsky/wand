@@ -5,7 +5,10 @@ import tiny_numpy as np
 
 PORT = '/dev/tty.usbmodem1411'
 
-OFFSETS = {0: {'A': np.array([255, -7, 0]), 'G': np.array([0, -67, -6])}}
+OFFSETS = {
+    0: {'A': np.array([255, -7, 0]), 'G': np.array([0, -67, -6])},
+    1: {'A': np.array([255, -7, 0]), 'G': np.array([0, -67, -6])}
+}
 
 GYRO_SCALE = 2000.0 / 32768 / 180 * np.pi
 G_CONST = 9.81

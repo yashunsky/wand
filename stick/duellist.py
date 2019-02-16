@@ -76,8 +76,10 @@ class Duellist(object):
     def for_gui(self):
         if self.catched_spells and not self.is_defending:
             timeout = int((float(max(self.timeout, 0)) * 20 / SHIELD_TIMEOUT))
-        else:
+        elif self.vibro > 0:
             timeout = int((float(max(self.action_timeout, 0)) * 20 / ACTION_TIMEOUT))
+        else:
+            timeout = 0
 
         return {
             'device_id': self.stick_id,

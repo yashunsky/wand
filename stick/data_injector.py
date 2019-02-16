@@ -35,6 +35,10 @@ class Snapshot(object):
         self.set_expected_position('Hs', button=False)
 
     def set_expected_position(self, position, button=True):
+        if position == 'release':
+            self.button_pressed = False
+            return
+
         acc = np.array(PSEDO_POSITIONS[position])
         acc /= (np.linalg.norm(acc) * ACC_SCALE / G_CONST)
         acc += OFFSETS[self.device_id]['A']

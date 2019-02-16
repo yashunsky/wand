@@ -78,3 +78,5 @@ def get_all_spells():
 
 ALL_SPELLS = {spell.key: spell for spell in get_all_spells()}
 ALL_PREFIXES = set(chain(*[spell.prefixes for spell in ALL_SPELLS.values()]))
+
+AVADA = ALL_SPELLS['NZ']

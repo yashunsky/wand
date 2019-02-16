@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from setup import SHIELD_TIMEOUT, ACTION_TIMEOUT
+from spells import AVADA
 
 
 class Duellist(object):
     def __init__(self, stick_id,
                  on_defence_succeded=lambda a, d: None,
                  on_defence_failed=lambda s: None,
-                 on_rule_of_3_failed=lambda s: None):
+                 on_rule_of_3_failed=lambda s: None,
+                 on_death=lambda s: None):
         super(Duellist, self).__init__()
         self.stick_id = stick_id
         self.sequence = ''
@@ -19,15 +21,21 @@ class Duellist(object):
         self.on_defence_succeded = on_defence_succeded
         self.on_defence_failed = on_defence_failed
         self.on_rule_of_3_failed = on_rule_of_3_failed
+        self.on_death = on_death
         self.attacks_buffer = []
 
         self.action_timeout = 0
+
+        self.is_defending = False
 
     def set_adversary(self, adversary):
         self.adversary = adversary
 
     def catch_spell(self, spell):
-        self.catched_spells.append(spell)
+        if spell == AVADA:
+            self.on_death(spell)
+        else:
+            self.catched_spells.append(spell)
 
     def remove_top_spell(self):
         self.catched_spells = self.catched_spells[1:]

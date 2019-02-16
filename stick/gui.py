@@ -4,7 +4,7 @@
 from copy import copy
 from time import time, sleep
 import tkinter as tk
-from tkinter.font import Font
+import tkinter.font as font
 from threading import Thread
 
 from mages import Mage
@@ -193,23 +193,31 @@ class DuellistFrame(tk.Frame):
 
 
 class Ring(object):
-    def __init__(self, duellists, pipe_in=DumpPipe(), pipe_out=DumpPipe()):
+    def __init__(self, duellists, pipe_in, pipe_out, family=None):
         super(Ring, self).__init__()
 
         self.pipe_in = pipe_in
         self.pipe_out = pipe_out
 
         self.window = tk.Tk()
-        family = 'Agatha-Modern'
+
+        if family in font.families():
+            fonts = {
+                'name': font.Font(family=family, size=100),
+                'sequence': font.Font(family=family, size=50),
+                'to_parry': font.Font(family=family, size=50)
+            }
+        else:
+            fonts = {
+                'name': font.Font(size=100),
+                'sequence': font.Font(size=50),
+                'to_parry': font.Font(size=50)
+            }
 
         basic_config = {
             'bg': '#fcf3cb',
             'fg': '#64330c',
-            'fonts': {
-                'name': Font(family=family, size=100),
-                'sequence': Font(family=family, size=50),
-                'to_parry': Font(family=family, size=50)
-            },
+            'fonts': fonts,
             'max_timeout': 20
         }
 
@@ -274,6 +282,7 @@ class Ring(object):
 
 
 if __name__ == '__main__':
-    Ring([Mage.MOLLY, Mage.BELLATRIX])
-
+    Ring([Mage.GODRIC, Mage.SALAZAR], DumpPipe(), DumpPipe())
+    import tkinter.font as f
+    print(f.families())
     tk.mainloop()

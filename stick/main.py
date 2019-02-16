@@ -9,7 +9,6 @@ import tkinter as tk
 
 from gui import Ring
 from mages import Mage
-from uart_reader import UartReader
 from data_injector import DataInjector
 from setup import OFFSETS
 from raw_processor import RawToSequence
@@ -17,7 +16,7 @@ from duellist import Duellist
 
 
 def start_gui(duellists, pipe_in, pipe_out):
-    Ring(duellists, pipe_in, pipe_out)
+    Ring(duellists, pipe_in, pipe_out, 'Agatha-Modern')
     tk.mainloop()
 
 
@@ -85,7 +84,10 @@ if __name__ == '__main__':
     from_gui_parent, from_gui_child = Pipe(duplex=False)
     to_gui_parent, to_gui_child = Pipe(duplex=False)
 
-    keyboard_input = len(sys.argv) > 1 and sys.argv[1] == '-k'
+    keyboard_input = len(sys.argv) == 1 or sys.argv[1] != '-u'
+
+    if not keyboard_input:
+        from uart_reader import UartReader
 
     mages = list(Mage)
     shuffle(mages)

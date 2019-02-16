@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from multiprocessing import Process, Pipe
+from random import shuffle
 import sys
 import tkinter as tk
 
@@ -20,20 +21,6 @@ def start_gui(duellists, pipe_in, pipe_out):
     tk.mainloop()
 
 
-def on_defence_succeded(duellist_name, attack_spell, shield):
-    print('Дуэлянт %s отбил %s, скастовав %s' %
-          (duellist_name, attack_spell, shield))
-
-
-def on_defence_failed(duellist_name, spell):
-    print('Дуэлянт %s не отбил %s' % (duellist_name, spell))
-
-
-def on_rule_of_3_failed(duellist_name, spell):
-    print('Дуэлянт %s нарушил правило 3х скастовав %s' %
-          (duellist_name, spell))
-
-
 def start_main_thread(keyboard_input, pipe_in, pipe_out):
     raw_stream = DataInjector() if keyboard_input else UartReader()
 
@@ -44,15 +31,23 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
     raw_processors = {device_id: RawToSequence(offsets['A'], offsets['G'])
                       for device_id, offsets in OFFSETS.items()}
 
+    def send(device_id, popup_type, spells):
+        message_to_send = {'device_id': device_id,
+                           'popup_type': popup_type,
+                           'spells': spells}
+        pipe_out.send(message_to_send)
+
     a = Duellist(0,
-                 lambda a, d: on_defence_succeded('А', a, d),
-                 lambda s: on_defence_failed('А', s),
-                 lambda s: on_rule_of_3_failed('А', s))
+                 lambda a, d: send(0, 'defence_succeded', [a, d]),
+                 lambda s: send(0, 'defence_failed', s),
+                 lambda s: send(0, 'rule_of_3_failed', s),
+                 lambda s: send(0, 'death', s))
 
     b = Duellist(1,
-                 lambda a, d: on_defence_succeded('Б', a, d),
-                 lambda s: on_defence_failed('Б', s),
-                 lambda s: on_rule_of_3_failed('Б', s))
+                 lambda a, d: send(1, 'defence_succeded', [a, d]),
+                 lambda s: send(1, 'defence_failed', s),
+                 lambda s: send(1, 'rule_of_3_failed', s),
+                 lambda s: send(1, 'death', s))
 
     a.set_adversary(b)
     b.set_adversary(a)
@@ -85,16 +80,6 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
                 pipe_out.send(message_to_send)
                 messages[raw_data['device_id']] = message_to_send
 
-        # if state['done'] or state['sequence'] != prev_sequence:
-        #     del state['delta']
-        #     state['spell_time'] = '%2.1f' % state['spell_time']
-        #     pipe_out.send({
-        #         'device_id': raw_data['device_id'],
-        #         'sequence': state['sequence']
-        #     })
-        #     print(state)
-        # prev_sequence = state['sequence']
-
 
 if __name__ == '__main__':
     from_gui_parent, from_gui_child = Pipe(duplex=False)
@@ -102,7 +87,9 @@ if __name__ == '__main__':
 
     keyboard_input = len(sys.argv) > 1 and sys.argv[1] == '-k'
 
-    duellists = [Mage.MOLLY, Mage.BELLATRIX]
+    mages = list(Mage)
+    shuffle(mages)
+    duellists = mages[:2]
 
     p = Process(target=start_main_thread,
                 args=(keyboard_input, from_gui_parent, to_gui_child))

@@ -67,13 +67,13 @@ class Duellist(object):
         if self.catched_spells:
             self.timeout -= delta
             expexted_prefixes = self.catched_spells[0].shields_prefixes
-            is_defending = self.sequence in expexted_prefixes
-            if not is_defending and self.timeout < 0:
+            self.is_defending = self.sequence in expexted_prefixes
+            if not self.is_defending and self.timeout < 0:
                 self.on_defence_failed(self.catched_spells[0])
                 self.remove_top_spell()
 
     def for_gui(self):
-        if self.catched_spells:
+        if self.catched_spells and not self.is_defending:
             timeout = int((float(max(self.timeout, 0)) * 20 / SHIELD_TIMEOUT))
         else:
             timeout = int((float(max(self.action_timeout, 0)) * 20 / ACTION_TIMEOUT))

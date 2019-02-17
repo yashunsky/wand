@@ -16,13 +16,15 @@ class Spell(object):
     def __init__(self, sequence, name,
                  shields=None, is_attack=True,
                  ignore_rule_of_3=False,
-                 breaks_rull_of_3=None):
+                 breaks_rull_of_3=None,
+                 accusative=None):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
             shields = [shields]
 
         self.name = name
+        self.accusative = name if accusative is None else accusative
         self.key = sequence
         self.sequence = decode_sequence(sequence)
         self.shields = [] if shields is None else shields
@@ -66,7 +68,8 @@ def get_all_spells():
             enerveit,
             Spell('AuDuDs', 'Ступефай', [enerveit, tabula_rasa]),
             Spell('AuNHu', 'Конфундус', [enerveit, tabula_rasa]),
-            Spell('NAuDuHuZ', 'Отложенная смерть', [enerveit, tabula_rasa]),
+            Spell('NAuDuHuZ', 'Отложенная смерть', [enerveit, tabula_rasa],
+                  accusative='Отложенную смерть'),
 
             insendio,
             deluvium,

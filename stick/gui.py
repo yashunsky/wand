@@ -167,13 +167,15 @@ class DuellistFrame(tk.Frame):
     def set_popup(self, data):
         popup = None
         if data['popup_type'] == 'defence_succeded':
-            args = (self.get_ending(), data['spells'][0], data['spells'][1])
+            args = (self.get_ending(),
+                    data['spells'][0].accusative,
+                    data['spells'][1].accusative)
             popup = 'Отбил%s %s,\nскастовав %s' % args
         elif data['popup_type'] == 'defence_failed':
-            args = (self.get_ending(), data['spells'])
+            args = (self.get_ending(), data['spells'].accusative)
             popup = 'Не отбил%s %s' % args
         elif data['popup_type'] == 'rule_of_3_failed':
-            args = (self.get_ending(), data['spells'])
+            args = (self.get_ending(), data['spells'].accusative)
             popup = 'Нарушил%s правило 3х\nскастовав %s' % args
         elif data['popup_type'] == 'death':
             popup = 'Умерла' if self.get_ending() else 'Умер'

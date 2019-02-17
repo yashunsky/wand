@@ -30,11 +30,16 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
     raw_processors = {device_id: RawToSequence(offsets['A'], offsets['G'])
                       for device_id, offsets in OFFSETS.items()}
 
+    duellists = {}
+
     def send(device_id, popup_type, spells):
         message_to_send = {'device_id': device_id,
                            'popup_type': popup_type,
                            'spells': spells}
         pipe_out.send(message_to_send)
+
+        duellist = duellists[device_id]
+        pipe_out.send(duellist.for_gui())
 
     a = Duellist(0,
                  lambda a, d: send(0, 'defence_succeded', [a, d]),
@@ -51,7 +56,8 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
     a.set_adversary(b)
     b.set_adversary(a)
 
-    duellists = {d.stick_id: d for d in (a, b)}
+    for d in (a, b):
+        duellists[d.stick_id] = d
 
     messages = {}
 

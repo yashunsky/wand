@@ -98,10 +98,10 @@ class ProgressBar(tk.Text):
 
 
 class DuellistFrame(tk.Frame):
-    def __init__(self, parent, config, side):
+    def __init__(self, parent, config, side, speach_queue):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
         self.side = side
-        self.play_audio = config['play_audio']
+        self.speach_queue = speach_queue
         self.sex = config['sex']
 
         self.sequence = tk.StringVar()
@@ -186,14 +186,7 @@ class DuellistFrame(tk.Frame):
 
         if popup is not None:
             self.set_popup_text(popup)
-            self.speach_thread = Thread(target=self.say_popup)
-            self.speach_thread.start()
-
-    def say_popup(self):
-        if self.play_audio:
-            subprocess.run(['say', '-v',
-                            'Yuri' if self.side else 'Milena',
-                            self.popup.get()])
+            self.speach_queue.append((self.side, popup))
 
     def set_popup_text(self, popup):
         if popup != self.prev_popup:
@@ -216,6 +209,9 @@ class Ring(object):
 
         self.window = tk.Tk()
 
+        self.play_audio = play_audio
+        self.speach_queue = []
+
         if family in font.families():
             fonts = {
                 'name': font.Font(family=family, size=100),
@@ -233,8 +229,7 @@ class Ring(object):
             'bg': '#ebcd89',
             'fg': '#64330c',
             'fonts': fonts,
-            'max_timeout': 20,
-            'play_audio': play_audio
+            'max_timeout': 20
         }
 
         configs = {device_id: self.make_config(basic_config, duellist)
@@ -244,7 +239,8 @@ class Ring(object):
         configs[1]['adversery_color'] = configs[0]['self_color']
 
         self.duellists = {device_id: DuellistFrame(self.window, config,
-                                                   device_id)
+                                                   device_id,
+                                                   self.speach_queue)
                           for device_id, config in configs.items()}
 
         self.duellists[0].pack(side='left', fill='y', expand=True)
@@ -259,6 +255,9 @@ class Ring(object):
         self.in_loop = True
         self.refresh = Thread(target=self.refresh_thread)
         self.refresh.start()
+
+        self.speach = Thread(target=self.speach_thread)
+        self.speach.start()
 
     def make_config(self, basic_config, duellist):
         result = copy(basic_config)
@@ -288,6 +287,16 @@ class Ring(object):
             self.duellists[0].check_popup()
             self.duellists[1].check_popup()
             sleep(0.05)
+
+    def speach_thread(self):
+        if self.play_audio:
+            while self.in_loop:
+                if self.speach_queue:
+                    side, message = self.speach_queue.pop(0)
+                    subprocess.run(['say', '-v',
+                                    'Yuri' if side else 'Milena',
+                                    message])
+                sleep(0.05)
 
     def on_key(self, event):
         position = KEYS.get(event.char)

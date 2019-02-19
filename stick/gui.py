@@ -66,7 +66,7 @@ class CapitalText(tk.Text):
     def set_text(self, text):
         lines = text.split('\n')
         self.configure(state=tk.NORMAL,
-                       width=max(map(lambda x: len(x), lines)),
+                       width=max(map(lambda x: len(x), lines)) + 1,
                        height=len(lines))
         self.delete('1.0', tk.END)
         self.insert(tk.END, text)

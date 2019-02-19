@@ -63,7 +63,8 @@ def get_all_spells():
 
             diffendo,
             Spell('HuDuAu', 'Инкарцеро', [diffendo, tabula_rasa]),
-            Spell('HuAuDu', 'Риктусемпра', [diffendo, tabula_rasa]),
+            Spell('HuAuDu', 'Риктусемпра', [diffendo, tabula_rasa],
+                  accusative='Риктусемпру'),
 
             enerveit,
             Spell('AuDuDs', 'Ступефай', [enerveit, tabula_rasa]),

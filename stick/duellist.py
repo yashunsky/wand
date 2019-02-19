@@ -7,7 +7,7 @@ from spells import AVADA
 
 class Duellist(object):
     def __init__(self, stick_id,
-                 on_catch_spell=lambda s: None,
+                 on_parry_needed=lambda s: None,
                  on_defence_succeded=lambda a, d: None,
                  on_defence_failed=lambda s: None,
                  on_rule_of_3_failed=lambda s: None,
@@ -19,7 +19,7 @@ class Duellist(object):
         self.timeout = SHIELD_TIMEOUT
         self.catched_spells = []
         self.adversary = None
-        self.on_catch_spell = on_catch_spell
+        self.on_parry_needed = on_parry_needed
         self.on_defence_succeded = on_defence_succeded
         self.on_defence_failed = on_defence_failed
         self.on_rule_of_3_failed = on_rule_of_3_failed
@@ -37,11 +37,14 @@ class Duellist(object):
         if spell == AVADA:
             self.on_death(spell)
         else:
+            if not self.catched_spells:
+                self.on_parry_needed(spell)
             self.catched_spells.append(spell)
-            self.on_catch_spell(spell)
 
     def remove_top_spell(self):
         self.catched_spells = self.catched_spells[1:]
+        if self.catched_spells:
+            self.on_parry_needed(self.catched_spells[0])
         self.timeout = SHIELD_TIMEOUT
 
     def cast_spell(self, spell):

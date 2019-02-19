@@ -42,14 +42,14 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
         pipe_out.send(duellist.for_gui())
 
     a = Duellist(0,
-                 lambda s: send(0, 'spell_catched', s),
+                 lambda s: send(0, 'parry_needed', s),
                  lambda a, d: send(0, 'defence_succeded', [a, d]),
                  lambda s: send(0, 'defence_failed', s),
                  lambda s: send(0, 'rule_of_3_failed', s),
                  lambda s: send(0, 'death', s))
 
     b = Duellist(1,
-                 lambda s: send(1, 'spell_catched', s),
+                 lambda s: send(1, 'parry_needed', s),
                  lambda a, d: send(1, 'defence_succeded', [a, d]),
                  lambda s: send(1, 'defence_failed', s),
                  lambda s: send(1, 'rule_of_3_failed', s),

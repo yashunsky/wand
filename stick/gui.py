@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+import subprocess
 from time import time, sleep
 import tkinter as tk
 import tkinter.font as font
@@ -97,9 +98,10 @@ class ProgressBar(tk.Text):
 
 
 class DuellistFrame(tk.Frame):
-    def __init__(self, parent, config):
+    def __init__(self, parent, config, side):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
-
+        self.side = side
+        self.play_audio = config['play_audio']
         self.sex = config['sex']
 
         self.sequence = tk.StringVar()
@@ -184,6 +186,14 @@ class DuellistFrame(tk.Frame):
 
         if popup is not None:
             self.set_popup_text(popup)
+            self.speach_thread = Thread(target=self.say_popup)
+            self.speach_thread.start()
+
+    def say_popup(self):
+        if self.play_audio:
+            subprocess.run(['say', '-v',
+                            'Yuri' if self.side else 'Milena',
+                            self.popup.get()])
 
     def set_popup_text(self, popup):
         if popup != self.prev_popup:
@@ -197,7 +207,8 @@ class DuellistFrame(tk.Frame):
 
 
 class Ring(object):
-    def __init__(self, duellists, pipe_in, pipe_out, family=None):
+    def __init__(self, duellists, pipe_in, pipe_out,
+                 family=None, play_audio=False):
         super(Ring, self).__init__()
 
         self.pipe_in = pipe_in
@@ -222,7 +233,8 @@ class Ring(object):
             'bg': '#ebcd89',
             'fg': '#64330c',
             'fonts': fonts,
-            'max_timeout': 20
+            'max_timeout': 20,
+            'play_audio': play_audio
         }
 
         configs = {device_id: self.make_config(basic_config, duellist)
@@ -231,7 +243,8 @@ class Ring(object):
         configs[0]['adversery_color'] = configs[1]['self_color']
         configs[1]['adversery_color'] = configs[0]['self_color']
 
-        self.duellists = {device_id: DuellistFrame(self.window, config)
+        self.duellists = {device_id: DuellistFrame(self.window, config,
+                                                   device_id)
                           for device_id, config in configs.items()}
 
         self.duellists[0].pack(side='left', fill='y', expand=True)

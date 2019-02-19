@@ -15,8 +15,8 @@ from raw_processor import RawToSequence
 from duellist import Duellist
 
 
-def start_gui(duellists, pipe_in, pipe_out):
-    Ring(duellists, pipe_in, pipe_out, 'Agatha-Modern')
+def start_gui(duellists, pipe_in, pipe_out, play_audio):
+    Ring(duellists, pipe_in, pipe_out, 'Agatha-Modern', play_audio)
     tk.mainloop()
 
 
@@ -92,10 +92,15 @@ if __name__ == '__main__':
     from_gui_parent, from_gui_child = Pipe(duplex=False)
     to_gui_parent, to_gui_child = Pipe(duplex=False)
 
-    keyboard_input = len(sys.argv) == 1 or sys.argv[1] != '-u'
+    keys = sys.argv[1:]
 
-    if not keyboard_input:
+    use_uart = '-u' in keys
+    play_audio = '-a' in keys
+
+    if use_uart:
         from uart_reader import UartReader
+
+    keyboard_input = not use_uart
 
     mages = list(Mage)
     shuffle(mages)
@@ -104,5 +109,5 @@ if __name__ == '__main__':
     p = Process(target=start_main_thread,
                 args=(keyboard_input, from_gui_parent, to_gui_child))
     p.start()
-    start_gui(duellists, to_gui_parent, from_gui_child)
+    start_gui(duellists, to_gui_parent, from_gui_child, play_audio)
     p.join()

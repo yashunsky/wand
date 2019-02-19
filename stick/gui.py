@@ -179,6 +179,8 @@ class DuellistFrame(tk.Frame):
             popup = 'Нарушил%s правило 3х\nскастовав %s' % args
         elif data['popup_type'] == 'death':
             popup = 'Убит%s' % self.get_ending()
+        elif data['popup_type'] == 'spell_catched':
+            popup = 'Надо отбить %s' % data['spells'].accusative
 
         if popup is not None:
             self.set_popup_text(popup)

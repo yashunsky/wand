@@ -85,7 +85,7 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
             message_to_send = duellist.for_gui()
             if message_to_send not in messages.values():
                 pipe_out.send(message_to_send)
-                messages[raw_data['device_id']] = message_to_send
+                messages[message_to_send['device_id']] = message_to_send
 
 
 if __name__ == '__main__':

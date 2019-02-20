@@ -97,12 +97,11 @@ class UartReader(object):
 
         self.is_running = False
 
-    def stop(self):
-        self.in_loop = False
-
     def set_feedback(self, device_id, r, g, b, blink_on, blink_off, vibro):
         self.serial.write('set %d %d,%d,%d,%d,%d,%d\r' %
                           (device_id, r, g, b, blink_on, blink_off, vibro))
 
-    def process_action(self, action):
-        pass
+    def process_action(self, message):
+        action = message['action']
+        if action == 'exit':
+            self.in_loop = False

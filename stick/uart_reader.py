@@ -7,6 +7,8 @@ from time import sleep
 
 from setup import PORT
 
+from data_injector import DataInjector
+
 BAUDE_RATE = 115200
 BUFFER_DELIMITER = '\r'
 
@@ -16,7 +18,7 @@ TIME_STAMP_RANGE = 2 ** 32
 
 
 class UartReader(object):
-    def __init__(self, serial_port=PORT, dual=False):
+    def __init__(self, serial_port=PORT, dual=False, injected_ids=[]):
         super(UartReader, self).__init__()
         self.serial_port = serial_port
         self.dual = dual
@@ -27,6 +29,8 @@ class UartReader(object):
         self.prev_timestamp = [None, None]
 
         self.first_line = True
+
+        self.injector = DataInjector(injected_ids)
 
     def get_data(self):
         self.data_buffer += self.serial.read(self.serial.inWaiting()).decode()
@@ -91,6 +95,11 @@ class UartReader(object):
             while self.in_loop:
                 for data in self.get_data():
                     yield data
+
+                    for snapshot in self.injector.snapshots.values():
+                        injected_data = snapshot.get_sensor_data()
+                        injected_data['delta'] = data['delta']
+                        yield injected_data
                 sleep(0.05)
         finally:
             self.serial.close()
@@ -105,3 +114,7 @@ class UartReader(object):
         action = message['action']
         if action == 'exit':
             self.in_loop = False
+        self.injector.process_action(message)
+
+    def set_inner_feedback(self, device_id, state):
+        self.injector.set_inner_feedback(device_id, state)

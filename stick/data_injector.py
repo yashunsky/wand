@@ -58,9 +58,12 @@ class Snapshot(object):
 
 
 class DataInjector(object):
-    def __init__(self):
+    def __init__(self, ids=[]):
         super(DataInjector, self).__init__()
         self.snapshots = {}
+        self.ids = ids
+        for id in ids:
+            self.init_device(id)
         self.in_loop = False
 
     def init_device(self, device_id):
@@ -72,9 +75,10 @@ class DataInjector(object):
         return self.snapshots[device_id]
 
     def set_position(self, device_id, position):
-        self.get_snapshot(device_id).set_expected_position(position)
+        if device_id in self.ids:
+            self.get_snapshot(device_id).set_expected_position(position)
 
-    def set_feedback(self, device_id, state):
+    def set_inner_feedback(self, device_id, state):
         self.get_snapshot(device_id).set_feedback(state)
 
     def __call__(self):

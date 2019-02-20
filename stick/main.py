@@ -21,7 +21,10 @@ def start_gui(duellists, pipe_in, pipe_out, play_audio):
 
 
 def start_main_thread(keyboard_input, pipe_in, pipe_out):
-    raw_stream = DataInjector() if keyboard_input else UartReader()
+    injected_ids = [0, 1] if keyboard_input else [1]
+
+    raw_stream = (DataInjector(ids=injected_ids) if keyboard_input
+                  else UartReader(injected_ids=injected_ids))
 
     if isinstance(raw_stream, DataInjector):
         raw_stream.init_device(0)
@@ -74,8 +77,8 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
 
         state = raw_to_sequence(raw_data)
 
-        if keyboard_input:
-            raw_stream.set_feedback(raw_data['device_id'], state)
+        if raw_data['device_id'] in injected_ids:
+            raw_stream.set_inner_feedback(raw_data['device_id'], state)
 
         duellist.set_state(state['delta'], state['sequence'], state['vibro'],
                            state['spell'] if state['done'] else None,

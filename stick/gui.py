@@ -178,7 +178,7 @@ class DuellistFrame(tk.Frame):
             popup = 'Не отбил%s %s' % args
         elif data['popup_type'] == 'rule_of_3_failed':
             args = (self.get_ending(), data['spells'].accusative)
-            popup = 'Нарушил%s правило 3х\nскастовав %s' % args
+            popup = 'Нарушил%s правило трёх\nскастовав %s' % args
         elif data['popup_type'] == 'death':
             popup = 'Убит%s' % self.get_ending()
         elif data['popup_type'] == 'parry_needed':

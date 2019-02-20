@@ -57,7 +57,8 @@ def get_all_spells():
     insendio.shields = [deluvium, tabula_rasa]
 
     return [protego,
-            Spell('DuAuDu', 'Импедимента', [protego, tabula_rasa]),
+            Spell('DuAuDu', 'Импедимента', [protego, tabula_rasa],
+                  accusative='Импедименту'),
             Spell('DuHuHs', 'Силенцио', [protego, tabula_rasa]),
             Spell('DuHuZ', 'Режущее заклятие', [protego, tabula_rasa]),
 

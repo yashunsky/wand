@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from multiprocessing import Process, Pipe
-from random import shuffle
+from random import choice, shuffle
 import sys
 import tkinter as tk
 
@@ -105,9 +105,10 @@ if __name__ == '__main__':
 
     keyboard_input = not use_uart
 
-    mages = list(Mage)
-    shuffle(mages)
-    duellists = mages[:2]
+    duellists = [choice([Mage.ROWENA, Mage.HELGA]),
+                 choice([Mage.GODRIC, Mage.SALAZAR])]
+
+    shuffle(duellists)
 
     p = Process(target=start_main_thread,
                 args=(keyboard_input, from_gui_parent, to_gui_child))

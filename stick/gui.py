@@ -186,7 +186,7 @@ class DuellistFrame(tk.Frame):
 
         if popup is not None:
             self.set_popup_text(popup)
-            self.speach_queue.append((self.side, popup))
+            self.speach_queue.append((self.sex, popup))
 
     def set_popup_text(self, popup):
         if popup != self.prev_popup:
@@ -292,9 +292,9 @@ class Ring(object):
         if self.play_audio:
             while self.in_loop:
                 if self.speach_queue:
-                    side, message = self.speach_queue.pop(0)
+                    sex, message = self.speach_queue.pop(0)
                     subprocess.run(['say', '-v',
-                                    'Yuri' if side else 'Milena',
+                                    'Yuri' if sex == 'M' else 'Milena',
                                     message])
                 sleep(0.05)
 

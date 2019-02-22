@@ -16,7 +16,7 @@ class Duellist(object):
         self.stick_id = stick_id
         self.sequence = ''
         self.vibro = 0
-        self.timeout = SHIELD_TIMEOUT
+        self.timeout = 0
         self.catched_spells = []
         self.adversary = None
         self.on_parry_needed = on_parry_needed
@@ -38,14 +38,19 @@ class Duellist(object):
             self.on_death(spell)
         else:
             if not self.catched_spells:
+                self.set_timeout_on_spell(spell)
                 self.on_parry_needed(spell)
             self.catched_spells.append(spell)
+
+    def set_timeout_on_spell(self, spell):
+        self.timeout = SHIELD_TIMEOUT if spell.shields else 0
 
     def remove_top_spell(self):
         self.catched_spells = self.catched_spells[1:]
         if self.catched_spells:
-            self.on_parry_needed(self.catched_spells[0])
-        self.timeout = SHIELD_TIMEOUT
+            next_spell = self.catched_spells[0]
+            self.set_timeout_on_spell(next_spell)
+            self.on_parry_needed(next_spell)
 
     def cast_spell(self, spell):
         if self.catched_spells:

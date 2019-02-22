@@ -47,7 +47,7 @@ def get_all_spells():
     # shields
     protego = Spell('DuZDu', 'Протего', is_attack=False)
     diffendo = Spell('HuZHu', 'Диффендо', is_attack=False)
-    enerveit = Spell('AuZAu', 'Щит Энервейт', is_attack=False)
+    enerveit = Spell('AuZAu', 'Энервейт', is_attack=False)
     tabula_rasa = Spell('DsAuDuAsHu', 'Табула Раса',
                         is_attack=False, breaks_rull_of_3=True)
 

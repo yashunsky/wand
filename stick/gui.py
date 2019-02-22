@@ -199,8 +199,8 @@ class DuellistFrame(tk.Frame):
                                  'ой, %s' % spell.name,
                                  'кастуй %s' % spell.shields[0]])
             else:
-                to_say = choice(['безнадёжно',
-                                 'ничто не поможет',
+                to_say = choice(['безнадёжно, это %s' % spell.name,
+                                 'ничто не поможет, это %s' % spell.name,
                                  'непростиловка'])
 
             self.speach_queue.append((self.sex, to_say))

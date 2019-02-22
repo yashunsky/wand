@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+from random import choice
 import subprocess
 from time import time, sleep
 import tkinter as tk
@@ -175,19 +176,34 @@ class DuellistFrame(tk.Frame):
                     data['spells'][1].accusative)
             popup = 'Отбил%s %s,\nскастовав %s' % args
         elif data['popup_type'] == 'defence_failed':
-            args = (self.get_ending(), data['spells'].accusative)
-            popup = 'Не отбил%s %s' % args
+            prefix = 'Не отбил' if data['spells'].shields else 'Словил'
+            args = (prefix, self.get_ending(), data['spells'].accusative)
+            popup = '%s%s %s' % args
         elif data['popup_type'] == 'rule_of_3_failed':
             args = (self.get_ending(), data['spells'].accusative)
             popup = 'Нарушил%s правило трёх\nскастовав %s' % args
         elif data['popup_type'] == 'death':
             popup = 'Убит%s' % self.get_ending()
         elif data['popup_type'] == 'parry_needed':
-            popup = 'Надо отбить %s' % data['spells'].accusative
+            if data['spells'].shields:
+                popup = 'Надо отбить %s' % data['spells'].accusative
+            self.say_something_on_attack(data['spells'])
 
         if popup is not None:
             self.set_popup_text(popup)
-            self.speach_queue.append((self.sex, popup))
+            # self.speach_queue.append((self.sex, popup))
+
+    def say_something_on_attack(self, spell):
+            if spell.shields:
+                to_say = choice(['отбей %s' % spell.accusative,
+                                 'ой, %s' % spell.name,
+                                 'кастуй %s' % spell.shields[0]])
+            else:
+                to_say = choice(['безнадёжно',
+                                 'ничто не поможет',
+                                 'непростиловка'])
+
+            self.speach_queue.append((self.sex, to_say))
 
     def set_popup_text(self, popup):
         if popup != self.prev_popup:

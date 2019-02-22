@@ -13,6 +13,7 @@ from data_injector import DataInjector
 from setup import OFFSETS
 from raw_processor import RawToSequence
 from duellist import Duellist
+from spells import ALL_SPELLS
 
 
 def start_gui(duellists, pipe_in, pipe_out, play_audio):
@@ -68,7 +69,16 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
 
     for raw_data in raw_stream():
         if pipe_in.poll():
-            raw_stream.process_action(pipe_in.recv())
+            message = pipe_in.recv()
+            if 'device_id' in message and message['device_id'] is None:
+                if message['position'] == 'random':
+                    duellist = choice(duellists)
+                    last_catched = duellist.catched_spells[-3:]
+                    spells = [spell for spell in ALL_SPELLS.values()
+                              if spell.shields and (spell not in last_catched)]
+                    duellist.catch_spell(choice(spells))
+            else:
+                raw_stream.process_action(message)
         if raw_data is None:
             continue
 

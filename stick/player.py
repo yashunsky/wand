@@ -4,10 +4,12 @@
 import pyaudio
 import wave
 from time import sleep
-
+import os
 
 CHUNK = 1024
-FILE_TEMPLATE = 'sounds/%s.wav'
+FILE_TEMPLATE = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'sounds/%s.wav')
 
 
 class Player(object):

@@ -17,7 +17,8 @@ class Spell(object):
                  shields=None, is_attack=True,
                  ignore_rule_of_3=False,
                  breaks_rull_of_3=None,
-                 accusative=None):
+                 accusative=None,
+                 audio_key=None):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
@@ -36,6 +37,8 @@ class Spell(object):
         self.breaks_rull_of_3 = (is_attack if breaks_rull_of_3 is None
                                  else breaks_rull_of_3)
 
+        self.audio_key = audio_key
+
     def __str__(self):
         return self.name
 
@@ -48,43 +51,34 @@ def get_all_spells():
     protego = Spell('DuZDu', 'Протего', is_attack=False)
     diffendo = Spell('HuZHu', 'Диффендо', is_attack=False)
     enerveit = Spell('AuZAu', 'Энервейт', is_attack=False)
-    tabula_rasa = Spell('DsAuDuAsHu', 'Табула Раса',
-                        is_attack=False, breaks_rull_of_3=True)
-
-    # cyclic linked spells
-    insendio = Spell('HsNZ', 'Инсендио')
-    deluvium = Spell('HsZN', 'Делювиум', [insendio, tabula_rasa])
-    insendio.shields = [deluvium, tabula_rasa]
 
     return [protego,
-            Spell('DuAuDu', 'Импедимента', [protego, tabula_rasa],
+            Spell('DuAuDu', 'Импедимента', [protego], audio_key='impedimenta',
                   accusative='Импедименту'),
-            Spell('DuHuHs', 'Силенцио', [protego, tabula_rasa]),
-            Spell('DuHuZ', 'Режущее заклятие', [protego, tabula_rasa]),
+            Spell('DuHuHs', 'Силенцио', [protego], audio_key='silencio'),
+            Spell('DuHuZ', 'Флагелум', [protego], audio_key='flaguelum'),
+            Spell('HsNZ', 'Инсендио', [protego], audio_key='incendio'),
+            Spell('HsZN', 'Делювиум', [protego], audio_key='deluvium'),
 
             diffendo,
-            Spell('HuDuAu', 'Инкарцеро', [diffendo, tabula_rasa]),
-            Spell('HuAuDu', 'Риктусемпра', [diffendo, tabula_rasa],
+            Spell('HuDuAu', 'Инкарцеро', [diffendo], audio_key='incarcero'),
+            Spell('HuAuDu', 'Риктусемпра', [diffendo], audio_key='rictusempra',
                   accusative='Риктусемпру'),
 
             enerveit,
-            Spell('AuDuDs', 'Ступефай', [enerveit, tabula_rasa]),
-            Spell('AuNHu', 'Конфундус', [enerveit, tabula_rasa]),
-            Spell('NAuDuHuZ', 'Отложенная смерть', [enerveit, tabula_rasa],
-                  accusative='Отложенную смерть'),
+            Spell('AuDuDs', 'Ступефай', [enerveit], audio_key='stupefy'),
+            Spell('AuNHu', 'Конфундус', [enerveit], audio_key='confundus'),
+            Spell('NAuDuHuZ', 'Фуроре', [enerveit], audio_key='furore'),
 
-            insendio,
-            deluvium,
+            Spell('HsAsZAuDs', 'Экспеллиармус', audio_key='expelliarmus'),
 
-            Spell('HsAsZAuDs', 'Экспеллиармус', tabula_rasa),
-            tabula_rasa,
-            Spell('NZ', 'Авада Кедавра', ignore_rule_of_3=True),
-            Spell('NHuHs', 'Круцио', ignore_rule_of_3=True),
-            Spell('NAuAs', 'Империо', ignore_rule_of_3=True),
-            Spell('ZAuAsAuZ', 'Экзорцио', tabula_rasa,
-                  ignore_rule_of_3=True, breaks_rull_of_3=False),
-            Spell('DdDsDdDuDs', 'Чара, завершающая зельеварение',
-                  is_attack=False)]
+            Spell('NZ', 'Авада Кедавра', ignore_rule_of_3=True,
+                  audio_key='avada_kedavra'),
+            Spell('NHuHs', 'Круцио', ignore_rule_of_3=True,
+                  audio_key='crucio'),
+            Spell('NAuAs', 'Империо', ignore_rule_of_3=True,
+                  audio_key='imperio'),
+            ]
 
 ALL_SPELLS = {spell.key: spell for spell in get_all_spells()}
 ALL_PREFIXES = set(chain(*[spell.prefixes for spell in ALL_SPELLS.values()]))

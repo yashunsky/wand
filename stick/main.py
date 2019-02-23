@@ -36,10 +36,10 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
 
     duellists = {}
 
-    def send(device_id, popup_type, spells):
+    def send(device_id, popup_type, spell):
         message_to_send = {'device_id': device_id,
                            'popup_type': popup_type,
-                           'spells': spells}
+                           'spell': spell}
         pipe_out.send(message_to_send)
 
         duellist = duellists[device_id]
@@ -47,17 +47,15 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
 
     a = Duellist(0,
                  lambda s: send(0, 'parry_needed', s),
-                 lambda a, d: send(0, 'defence_succeded', [a, d]),
+                 lambda s: send(0, 'defence_succeded', s),
                  lambda s: send(0, 'defence_failed', s),
-                 lambda s: send(0, 'rule_of_3_failed', s),
-                 lambda s: send(0, 'death', s))
+                 lambda s: send(0, 'rule_of_3_failed', s))
 
     b = Duellist(1,
                  lambda s: send(1, 'parry_needed', s),
-                 lambda a, d: send(1, 'defence_succeded', [a, d]),
+                 lambda s: send(1, 'defence_succeded', s),
                  lambda s: send(1, 'defence_failed', s),
-                 lambda s: send(1, 'rule_of_3_failed', s),
-                 lambda s: send(1, 'death', s))
+                 lambda s: send(1, 'rule_of_3_failed', s))
 
     a.set_adversary(b)
     b.set_adversary(a)

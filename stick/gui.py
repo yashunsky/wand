@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
-from random import choice
 from time import time, sleep
 import tkinter as tk
 import tkinter.font as font
@@ -158,24 +157,20 @@ class DuellistFrame(tk.Frame):
     def set_popup(self, data):
         popup = None
         if data['popup_type'] == 'defence_succeded':
-            args = (self.get_ending(),
-                    data['spells'][0].accusative,
-                    data['spells'][1].accusative)
-            popup = 'Отбил%s %s,\nскастовав %s' % args
+            args = (self.get_ending(), data['spell'].accusative)
+            popup = 'Отбил%s %s' % args
         elif data['popup_type'] == 'defence_failed':
-            prefix = 'Не отбил' if data['spells'].shields else 'Словил'
-            args = (prefix, self.get_ending(), data['spells'].accusative)
+            prefix = 'Не отбил' if data['spell'].shields else 'Словил'
+            args = (prefix, self.get_ending(), data['spell'].accusative)
             popup = '%s%s %s' % args
-            self.enqueue_effect(data['spells'])
+            self.enqueue_effect(data['spell'])
         elif data['popup_type'] == 'rule_of_3_failed':
-            args = (self.get_ending(), data['spells'].accusative)
+            args = (self.get_ending(), data['spell'].accusative)
             popup = 'Нарушил%s правило трёх\nскастовав %s' % args
-        elif data['popup_type'] == 'death':
-            popup = 'Убит%s' % self.get_ending()
         elif data['popup_type'] == 'parry_needed':
-            if data['spells'].shields:
-                popup = 'Надо отбить %s' % data['spells'].accusative
-            self.enqueue_attack(data['spells'])
+            if data['spell'].shields:
+                popup = 'Надо отбить %s' % data['spell'].accusative
+            self.enqueue_attack(data['spell'])
 
         if popup is not None:
             self.set_popup_text(popup)

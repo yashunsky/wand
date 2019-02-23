@@ -9,7 +9,7 @@ class Sequence(tk.Frame):
     def __init__(self, parent, sprites, side, bg):
         super(Sequence, self).__init__(parent)
 
-        self.configure()
+        self.configure(bg=bg)
 
         self.sprites = sprites
         self.side = side

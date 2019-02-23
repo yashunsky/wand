@@ -10,6 +10,7 @@ import tkinter.font as font
 from threading import Thread
 
 from mages import Mage
+from dump_pipe import DumpPipe
 
 POPUP_TIMEOUT = 4
 
@@ -42,20 +43,6 @@ KEYS = {
 
     ' ': [None, 'random'],
 }
-
-
-class DumpPipe(object):
-    def __init__(self):
-        super(DumpPipe, self).__init__()
-
-    def send(self, value):
-        pass
-
-    def poll(self):
-        return True
-
-    def recv(self):
-        return None
 
 
 class CapitalText(tk.Text):
@@ -326,7 +313,6 @@ class Ring(object):
 
 
 if __name__ == '__main__':
-    Ring([Mage.GODRIC, Mage.SALAZAR], DumpPipe(), DumpPipe())
-    import tkinter.font as f
-    print(f.families())
+    Ring([Mage.GODRIC, Mage.SALAZAR], DumpPipe(), DumpPipe(),
+         family='Agatha-Modern')
     tk.mainloop()

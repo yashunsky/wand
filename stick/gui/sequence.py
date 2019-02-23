@@ -30,6 +30,7 @@ class Sequence(tk.Frame):
         self.hint_ids = []
 
     def set_hint(self, hint):
+        self.remove_hint()
         images = [self.sprites[(self.side + '_shaded', position)]
                   for position in hint]
         width = sum(image['width'] for image in images)

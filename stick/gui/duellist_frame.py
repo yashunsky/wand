@@ -1,9 +1,11 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
+from random import choice
 from time import time
 import tkinter as tk
 
+from knowledge.spells import ALL_SPELLS
 from stick_control.position import decode_sequence
 
 from .capital_text import CapitalText
@@ -65,6 +67,7 @@ class DuellistFrame(tk.Frame):
         if value != self.prev_sequence:
             self.sequence.set(decode_sequence(value))
             self.prev_sequence = value
+            self.set_attack_hint_if_needed()
 
     def set_timeout(self, value):
         if value != self.prev_timeout:
@@ -75,6 +78,7 @@ class DuellistFrame(tk.Frame):
         if spells != self.prev_spells:
             self.spells.set_text('\n'.join(spells))
             self.prev_spells = spells
+            self.set_attack_hint_if_needed()
 
     def get_ending(self):
         return '' if self.sex == 'M' else 'а'
@@ -102,6 +106,14 @@ class DuellistFrame(tk.Frame):
 
         if popup is not None:
             self.set_popup_text(popup)
+
+    def set_attack_hint_if_needed(self):
+        if self.prev_sequence != '' or self.prev_spells:
+            return
+        spell = choice([spell for spell in ALL_SPELLS.values()
+                        if spell.shields])
+        shield_sequence = decode_sequence(spell.key)
+        self.sequence.set_hint(shield_sequence)
 
     def enqueue_attack(self, spell):
         self.enqueue_audio(spell.audio_key)

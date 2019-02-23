@@ -9,7 +9,8 @@ import wave
 CHUNK = 1024
 FILE_TEMPLATE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
-    'sounds/%s.wav')
+    'sounds',
+    '%s.wav')
 
 
 class Player(object):

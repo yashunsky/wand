@@ -57,7 +57,7 @@ def get_all_spells():
             Spell('DuAuDu', 'Импедимента', [protego], audio_key='impedimenta',
                   accusative='Импедименту'),
             Spell('DuHuHs', 'Силенцио', [protego], audio_key='silencio'),
-            Spell('DuHuZ', 'Флагелум', [protego], audio_key='flaguelum'),
+            Spell('DuHuZ', 'Флагелум', [protego], audio_key='flaguellum'),
             Spell('HsNZ', 'Инсендио', [protego], audio_key='incendio'),
             Spell('HsZN', 'Делювиум', [protego], audio_key='deluvium'),
 

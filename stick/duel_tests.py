@@ -65,14 +65,11 @@ class DuelTest(unittest.TestCase):
         assert self.b.catched_spells == [SILENCIO]
 
         # b starts quickly a very long defence...
-        self.b.set_state(0.1, sequence='Ds')
+        self.b.set_state(0.1, sequence='Du')
         assert passed_to_b == []
-        self.b.set_state(5.0, sequence='DsAu')
-        assert passed_to_b == []
-        self.b.set_state(5.0, sequence='DsAuDu')
-        assert passed_to_b == []
+        self.b.set_state(5.0, sequence='DuZ')
         # ...but fails it
-        self.b.set_state(5.0, sequence='DsAuDuAu')
+        self.b.set_state(5.0, sequence='DuZDs')
         assert passed_to_b == [SILENCIO]
 
     def test_rule_3_basic_failure(self):
@@ -99,23 +96,6 @@ class DuelTest(unittest.TestCase):
         # but forgets what he just did
         self.a.set_state(0.1, spell=RICTUSEMPRA)
         assert rule_of_3_failure == [RICTUSEMPRA]
-
-    def test_water_and_fire(self):
-        rule_of_3_failure = []
-        self.b.on_rule_of_3_failed = lambda s: rule_of_3_failure.append(s)
-
-        # a attacks with water
-        self.a.set_state(0.1, spell=DELUVIUM)
-        assert self.b.catched_spells == [DELUVIUM]
-        # b parries with fire...
-        self.b.set_state(0.1, spell=INSENDIO)
-        assert self.a.catched_spells == []
-        assert self.b.catched_spells == []
-
-        # ...and strikes back. the rull of three does'nt count for defences
-        self.b.set_state(0.1, spell=INSENDIO)
-        assert self.a.catched_spells == [INSENDIO]
-        assert rule_of_3_failure == []
 
 
 if __name__ == '__main__':

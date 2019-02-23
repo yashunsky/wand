@@ -8,7 +8,7 @@ import tkinter as tk
 
 
 from duellist import Duellist
-from gui.gui import Ring
+from gui.ring import Ring
 from knowledge.mages import Mage
 from knowledge.setup import OFFSETS
 from knowledge.spells import ALL_SPELLS

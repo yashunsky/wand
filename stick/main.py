@@ -113,10 +113,9 @@ if __name__ == '__main__':
 
     keyboard_input = not use_uart
 
-    duellists = [choice([Mage.ROWENA, Mage.HELGA]),
-                 choice([Mage.GODRIC, Mage.SALAZAR])]
-
-    shuffle(duellists)
+    mages = list(Mage)
+    shuffle(mages)
+    duellists = mages[:2]
 
     p = Process(target=start_main_thread,
                 args=(keyboard_input, from_gui_parent, to_gui_child))

@@ -8,6 +8,7 @@ import tkinter as tk
 import tkinter.font as font
 
 from .duellist_frame import DuellistFrame
+from .sprites_loader import get_sprites
 
 KEYS = {
     'a': [0, 'Z'],
@@ -17,9 +18,9 @@ KEYS = {
     's': [0, 'As'],
     'd': [0, 'Hs'],
     'f': [0, 'Ds'],
-    'x': [0, 'Au'],
-    'c': [0, 'Hu'],
-    'v': [0, 'Du'],
+    'x': [0, 'Ad'],
+    'c': [0, 'Hd'],
+    'v': [0, 'Dd'],
     'g': [0, 'N'],
     'q': [0, 'release'],
 
@@ -30,9 +31,9 @@ KEYS = {
     'j': [1, 'As'],
     'k': [1, 'Hs'],
     'l': [1, 'Ds'],
-    'n': [1, 'Au'],
-    'm': [1, 'Hu'],
-    ',': [1, 'Du'],
+    'n': [1, 'Ad'],
+    'm': [1, 'Hd'],
+    ',': [1, 'Dd'],
     ';': [1, 'N'],
     'y': [1, 'release'],
 

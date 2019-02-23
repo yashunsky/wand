@@ -3,7 +3,6 @@
 
 from copy import copy
 from random import choice
-import subprocess
 from time import time, sleep
 import tkinter as tk
 import tkinter.font as font
@@ -88,10 +87,10 @@ class ProgressBar(tk.Text):
 
 
 class DuellistFrame(tk.Frame):
-    def __init__(self, parent, config, side, speach_queue):
+    def __init__(self, parent, config, side, player):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
         self.side = side
-        self.speach_queue = speach_queue
+        self.player = player
         self.sex = config['sex']
 
         self.sequence = tk.StringVar()
@@ -167,6 +166,7 @@ class DuellistFrame(tk.Frame):
             prefix = 'Не отбил' if data['spells'].shields else 'Словил'
             args = (prefix, self.get_ending(), data['spells'].accusative)
             popup = '%s%s %s' % args
+            self.enqueue_effect(data['spells'])
         elif data['popup_type'] == 'rule_of_3_failed':
             args = (self.get_ending(), data['spells'].accusative)
             popup = 'Нарушил%s правило трёх\nскастовав %s' % args
@@ -175,23 +175,20 @@ class DuellistFrame(tk.Frame):
         elif data['popup_type'] == 'parry_needed':
             if data['spells'].shields:
                 popup = 'Надо отбить %s' % data['spells'].accusative
-            self.say_something_on_attack(data['spells'])
+            self.enqueue_attack(data['spells'])
 
         if popup is not None:
             self.set_popup_text(popup)
-            # self.speach_queue.append((self.sex, popup))
 
-    def say_something_on_attack(self, spell):
-            if spell.shields:
-                to_say = choice(['отбей %s' % spell.accusative,
-                                 'ой, %s' % spell.name,
-                                 'кастуй %s' % spell.shields[0]])
-            else:
-                to_say = choice(['безнадёжно, это %s' % spell.name,
-                                 'ничто не поможет, это %s' % spell.name,
-                                 'непростиловка'])
+    def enqueue_attack(self, spell):
+        self.enqueue_audio(spell.audio_key)
 
-            self.speach_queue.append((self.sex, to_say))
+    def enqueue_effect(self, spell):
+        self.enqueue_audio('%s_effect' % spell.audio_key)
+
+    def enqueue_audio(self, audio_key):
+        if None not in (self.player, audio_key):
+            self.player.enqueue((self.side, audio_key))
 
     def set_popup_text(self, popup):
         if popup != self.prev_popup:
@@ -215,7 +212,6 @@ class Ring(object):
         self.window = tk.Tk()
 
         self.play_audio = play_audio
-        self.speach_queue = []
 
         if family in font.families():
             fonts = {
@@ -243,9 +239,17 @@ class Ring(object):
         configs[0]['adversery_color'] = configs[1]['self_color']
         configs[1]['adversery_color'] = configs[0]['self_color']
 
+        if play_audio:
+            from player import Player
+            self.player = Player()
+            self.speach = Thread(target=self.speach_thread)
+            self.speach.start()
+        else:
+            self.player = None
+
         self.duellists = {device_id: DuellistFrame(self.window, config,
                                                    device_id,
-                                                   self.speach_queue)
+                                                   self.player)
                           for device_id, config in configs.items()}
 
         self.duellists[0].pack(side='left', fill='y', expand=True)
@@ -261,9 +265,6 @@ class Ring(object):
         self.refresh = Thread(target=self.refresh_thread)
         self.refresh.start()
 
-        self.speach = Thread(target=self.speach_thread)
-        self.speach.start()
-
     def make_config(self, basic_config, duellist):
         result = copy(basic_config)
         result['name'] = duellist.value.name
@@ -274,6 +275,8 @@ class Ring(object):
     def on_closing(self):
         self.in_loop = False
         self.pipe_out.send({'action': 'exit'})
+        if self.play_audio:
+            self.player.stop()
         sleep(0.1)
         self.window.destroy()
 
@@ -294,14 +297,7 @@ class Ring(object):
             sleep(0.05)
 
     def speach_thread(self):
-        if self.play_audio:
-            while self.in_loop:
-                if self.speach_queue:
-                    sex, message = self.speach_queue.pop(0)
-                    subprocess.run(['say', '-v',
-                                    'Yuri' if sex == 'M' else 'Milena',
-                                    message])
-                sleep(0.05)
+        self.player.play()
 
     def on_key(self, event):
         position = KEYS.get(event.char)

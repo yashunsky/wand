@@ -89,6 +89,9 @@ class RawToSequence(object):
         if not data['button']:
             self.failed = False
 
+        if spell_done and spell is not None:
+            print('%s %2.1f' % (spell, self.spell_time))
+
         result = {'delta': data['delta'],
                   'spell_time': self.spell_time,
                   'sequence': self.sequence,

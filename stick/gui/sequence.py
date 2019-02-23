@@ -48,11 +48,11 @@ class Sequence(tk.Frame):
         current_str = ''.join(self.current_sequence)
         new_str = ''.join(sequence)
 
-        if current_str not in new_str:
+        if not new_str.startswith(current_str):
             self.canvas.delete('all')
             self.reset_hint()
 
-        if new_str not in self.hint_str:
+        if not self.hint_str.startswith(new_str):
             self.remove_hint()
 
         images = [self.sprites[(self.side, position)] for position in sequence]

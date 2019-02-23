@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import serial
-
 from time import sleep
 
-from setup import PORT
+from knowledge.setup import PORT
 
-from data_injector import DataInjector
+from .data_injector import DataInjector
 
 BAUDE_RATE = 115200
 BUFFER_DELIMITER = '\r'

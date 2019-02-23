@@ -4,7 +4,7 @@
 import unittest
 
 from duellist import Duellist
-from spells import ALL_SPELLS
+from knowledge.spells import ALL_SPELLS
 
 SILENCIO = ALL_SPELLS['DuHuHs']
 IMPEDIMENTA = ALL_SPELLS['DuAuDu']

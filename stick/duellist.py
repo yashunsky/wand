@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-from setup import SHIELD_TIMEOUT, ACTION_TIMEOUT
+from knowledge.setup import SHIELD_TIMEOUT, ACTION_TIMEOUT
 
 
 class Duellist(object):

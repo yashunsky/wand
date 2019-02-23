@@ -3,7 +3,7 @@
 
 from itertools import chain
 
-import tiny_numpy as np
+import utils.tiny_numpy as np
 
 
 def angle_between(v1, v2):

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from itertools import chain
-from position import decode_sequence
+
+from stick_control.position import decode_sequence
 
 
 def prefixes(sequence):

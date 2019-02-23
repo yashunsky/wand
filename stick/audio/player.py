@@ -1,10 +1,10 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-import pyaudio
-import wave
 from time import sleep
 import os
+import pyaudio
+import wave
 
 CHUNK = 1024
 FILE_TEMPLATE = os.path.join(

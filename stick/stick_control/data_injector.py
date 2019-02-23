@@ -3,9 +3,8 @@
 
 from time import sleep
 
-import tiny_numpy as np
-
-from setup import OFFSETS, ACC_SCALE, G_CONST
+from knowledge.setup import OFFSETS, ACC_SCALE, G_CONST
+import utils.tiny_numpy as np
 
 INJECTION_INTERVAL = 0.05
 

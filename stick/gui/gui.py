@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+from threading import Thread
 from time import time, sleep
 import tkinter as tk
 import tkinter.font as font
-from threading import Thread
 
-from mages import Mage
-from dump_pipe import DumpPipe
+from knowledge.mages import Mage
+from utils.dump_pipe import DumpPipe
 
 POPUP_TIMEOUT = 4
 
@@ -235,7 +235,7 @@ class Ring(object):
         configs[1]['adversery_color'] = configs[0]['self_color']
 
         if play_audio:
-            from player import Player
+            from audio.player import Player
             self.player = Player()
             self.speach = Thread(target=self.speach_thread)
             self.speach.start()

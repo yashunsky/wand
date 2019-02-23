@@ -1,21 +1,21 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-from setup import (G_CONST,
-                   ACC_SCALE,
-                   GYRO_SCALE,
-                   PRECISION,
-                   GYRO_EDGE,
-                   ACC_EDGE,
-                   DELTA_ACC_EDGE,
-                   STABLE_TIMEOUT,
-                   PITCH_AXIS,
-                   ROLL_AXIS,
-                   ACTION_TIMEOUT)
+from knowledge.setup import (G_CONST,
+                             ACC_SCALE,
+                             GYRO_SCALE,
+                             PRECISION,
+                             GYRO_EDGE,
+                             ACC_EDGE,
+                             DELTA_ACC_EDGE,
+                             STABLE_TIMEOUT,
+                             PITCH_AXIS,
+                             ROLL_AXIS,
+                             ACTION_TIMEOUT)
+from knowledge.spells import ALL_SPELLS, ALL_PREFIXES
+import utils.tiny_numpy as np
 
-import tiny_numpy as np
-from position import decode_acc
-from spells import ALL_SPELLS, ALL_PREFIXES
+from .position import decode_acc
 
 
 def is_instable(gyro, acc_instab, delta_acc):

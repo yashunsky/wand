@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-import tiny_numpy as np
+import utils.tiny_numpy as np
 
 PORT = '/dev/tty.usbmodem1411'
 

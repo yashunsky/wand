@@ -3,8 +3,8 @@
 
 import unittest
 
-import tiny_numpy as np
-from position import decode_acc, decode_sequence
+import utils.tiny_numpy as np
+from stick_control.position import decode_acc, decode_sequence
 
 
 class DecodeTest(unittest.TestCase):

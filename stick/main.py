@@ -7,13 +7,13 @@ import sys
 import tkinter as tk
 
 
-from gui import Ring
-from mages import Mage
-from data_injector import DataInjector
-from setup import OFFSETS
-from raw_processor import RawToSequence
 from duellist import Duellist
-from spells import ALL_SPELLS
+from gui.gui import Ring
+from knowledge.mages import Mage
+from knowledge.setup import OFFSETS
+from knowledge.spells import ALL_SPELLS
+from stick_control.data_injector import DataInjector
+from stick_control.raw_processor import RawToSequence
 
 
 def start_gui(duellists, pipe_in, pipe_out, play_audio):
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     play_audio = '-a' in keys
 
     if use_uart:
-        from uart_reader import UartReader
+        from stick_control.uart_reader import UartReader
 
     keyboard_input = not use_uart
 

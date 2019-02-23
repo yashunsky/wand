@@ -15,11 +15,13 @@ SIDES = ['left', 'right']
 def get_sprites():
     sprites = {}
     for side in SIDES:
-        for name in NAMES:
-            key = (side, name)
-            filepath = os.path.join(ROOT, side, '%s.gif' % name)
-            image = tk.PhotoImage(file=filepath)
-            sprites[key] = {'data': image,
-                            'width': image.width(),
-                            'height': image.height()}
+        for suffix in ('', '_shaded'):
+            for name in NAMES:
+                folder = side + suffix
+                key = (folder, name)
+                filepath = os.path.join(ROOT, folder, '%s.gif' % name)
+                image = tk.PhotoImage(file=filepath)
+                sprites[key] = {'data': image,
+                                'width': image.width(),
+                                'height': image.height()}
     return sprites

@@ -73,7 +73,7 @@ def get_all_spells():
             Spell('HsAsZAuDs', 'Экспеллиармус', audio_key='expelliarmus'),
 
             Spell('NZ', 'Авада Кедавра', ignore_rule_of_3=True,
-                  audio_key='avada_kedavra'),
+                  accusative='Аваду Кедавру', audio_key='avada_kedavra'),
             Spell('NHuHs', 'Круцио', ignore_rule_of_3=True,
                   audio_key='crucio'),
             Spell('NAuAs', 'Империо', ignore_rule_of_3=True,

@@ -36,6 +36,8 @@ class Duellist(object):
     def catch_spell(self, spell):
         if spell == AVADA:
             self.on_death(spell)
+        elif not spell.shields:
+            self.on_defence_failed(spell)
         else:
             if not self.catched_spells:
                 self.set_timeout_on_spell(spell)

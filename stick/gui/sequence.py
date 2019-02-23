@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
     sprites = get_sprites()
 
-    sequence = Sequence(window, sprites, 'left')
-    sequence.set(['Ad', 'Hu', 'N'])
+    sequence = Sequence(window, sprites, 'left', '#ebcd89')
+    sequence.set(['Ad', 'As', 'Au'])
     sequence.pack()
 
     tk.mainloop()

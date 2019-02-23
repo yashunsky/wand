@@ -4,22 +4,24 @@
 from time import time
 import tkinter as tk
 
+from stick_control.position import decode_sequence
+
 from .capital_text import CapitalText
 from .progress_bar import ProgressBar
+from .sequence import Sequence
 
 
 POPUP_TIMEOUT = 4
 
 
 class DuellistFrame(tk.Frame):
-    def __init__(self, parent, config, side, player):
+    def __init__(self, parent, config, sprites, device_id, player):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
-        self.side = side
+        self.side = 'right' if device_id else 'left'
         self.player = player
         self.sex = config['sex']
 
-        self.sequence = tk.StringVar()
-        self.sequence.set('')
+        self.sequence = []
 
         self.popup = tk.StringVar()
         self.popup.set('')
@@ -31,11 +33,8 @@ class DuellistFrame(tk.Frame):
         name.set_text(config['name'])
         name.pack(side='top', expand=False)
 
-        tk.Label(self, textvariable=self.sequence,
-                 bg=config['bg'],
-                 fg=config['fg'],
-                 font=config['fonts']['sequence']).pack(side='top', fill='x',
-                                                        expand=False)
+        self.sequence = Sequence(self, sprites, self.side, config['bg'])
+        self.sequence.pack(side='top', expand=False)
 
         self.timeout = ProgressBar(self, config['bg'], config['fg'],
                                    config['fonts']['sequence'],
@@ -64,7 +63,7 @@ class DuellistFrame(tk.Frame):
 
     def set_sequence(self, value):
         if value != self.prev_sequence:
-            self.sequence.set(value)
+            self.sequence.set(decode_sequence(value))
             self.prev_sequence = value
 
     def set_timeout(self, value):

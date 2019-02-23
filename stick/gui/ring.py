@@ -50,6 +50,8 @@ class Ring(object):
 
         self.window = tk.Tk()
 
+        sprites = get_sprites()
+
         self.play_audio = play_audio
 
         if family in font.families():
@@ -87,6 +89,7 @@ class Ring(object):
             self.player = None
 
         self.duellists = {device_id: DuellistFrame(self.window, config,
+                                                   sprites,
                                                    device_id,
                                                    self.player)
                           for device_id, config in configs.items()}

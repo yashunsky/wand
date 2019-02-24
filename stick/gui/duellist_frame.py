@@ -95,7 +95,7 @@ class DuellistFrame(tk.Frame):
             self.enqueue_effect(data['spell'])
         elif data['popup_type'] == 'rule_of_3_failed':
             args = (self.get_ending(), data['spell'].accusative)
-            popup = 'Нарушил%s правило трёх\nскастовав %s' % args
+            popup = 'Нарушил%s правило трёх,\nскастовав %s' % args
         elif data['popup_type'] == 'parry_needed':
             if data['spell'].shields:
                 popup = 'Надо отбить %s' % data['spell'].accusative

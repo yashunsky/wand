@@ -107,8 +107,8 @@ class Ring(object):
         self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.in_loop = True
-        self.refresh = Thread(target=self.refresh_thread)
-        self.refresh.start()
+
+        self.refresh()
 
     def make_config(self, basic_config, duellist):
         result = copy(basic_config)
@@ -125,8 +125,8 @@ class Ring(object):
         sleep(0.1)
         self.window.destroy()
 
-    def refresh_thread(self):
-        while self.in_loop:
+    def refresh(self):
+        if self.in_loop:
             if self.pipe_in.poll():
                 message = self.pipe_in.recv()
                 duellist = self.duellists[message['device_id']]
@@ -139,7 +139,8 @@ class Ring(object):
 
             self.duellists[0].check_popup()
             self.duellists[1].check_popup()
-            sleep(0.05)
+
+            self.window.after(50, self.refresh)
 
     def speach_thread(self):
         self.player.play()

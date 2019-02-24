@@ -70,7 +70,6 @@ class Player(object):
 
 
 if __name__ == '__main__':
-    # play(DumpPipe(), [('left', 'incendio'), ('right', 'deluvium_effect')])
     player = Player(stop_when_done=True)
     player.enqueue(('left', 'incendio'))
     player.enqueue(('right', 'deluvium_effect'))

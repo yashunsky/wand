@@ -53,8 +53,8 @@ class Duellist(object):
         if self.catched_spells:
             top_spell = self.catched_spells[0]
             if spell in top_spell.shields:
-                self.on_defence_succeded(top_spell)
                 self.remove_top_spell()
+                self.on_defence_succeded(top_spell)
                 return
 
         if spell.is_attack and self.adversary is not None:
@@ -78,8 +78,9 @@ class Duellist(object):
             expexted_prefixes = self.catched_spells[0].shields_prefixes
             self.is_defending = self.sequence in expexted_prefixes
             if not self.is_defending and self.timeout < 0:
-                self.on_defence_failed(self.catched_spells[0])
+                top_spell = self.catched_spells[0]
                 self.remove_top_spell()
+                self.on_defence_failed(top_spell)
 
     def for_gui(self):
         if self.catched_spells and not self.is_defending:

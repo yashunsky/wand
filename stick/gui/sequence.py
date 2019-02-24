@@ -44,6 +44,9 @@ class Sequence(tk.Frame):
             self.canvas.delete(id)
         self.reset_hint()
 
+    def is_hint_set(self):
+        return self.hint_str != ''
+
     def set(self, sequence):
         current_str = ''.join(self.current_sequence)
         new_str = ''.join(sequence)

@@ -67,6 +67,8 @@ class DuellistFrame(tk.Frame):
 
         self.popup_time = 0
 
+        self.sheild_hint = None
+
     def set_sequence(self, value):
         if value != self.prev_sequence:
             self.sequence.set(decode_sequence(value))
@@ -110,11 +112,20 @@ class DuellistFrame(tk.Frame):
             if data['spell'].shields:
                 popup = 'Надо отбить %s' % data['spell']
                 shield_sequence = decode_sequence(data['spell'].shields[0].key)
-                self.sequence.set_hint(shield_sequence)
+                self.sheild_hint = shield_sequence
+                if self.prev_sequence == '':
+                    self.sequence.set_hint(shield_sequence)
             self.enqueue_attack(data['spell'])
 
         if popup is not None:
             self.set_popup_text(popup)
+
+    def set_suatble_hint(self):
+        if not self.sequence.is_hint_set() and self.prev_sequence == '':
+            if self.prev_spells:
+                self.sequence.set_hint(self.sheild_hint)
+            else:
+                self.set_attack_hint_if_needed()
 
     def set_attack_hint_if_needed(self):
         if self.prev_sequence != '' or self.prev_spells:
@@ -140,6 +151,7 @@ class DuellistFrame(tk.Frame):
             self.popup_time = time()
             self.prev_popup = popup
 
-    def check_popup(self):
+    def refresh(self):
         if time() > self.popup_time + POPUP_TIMEOUT:
             self.set_popup_text('')
+        self.set_suatble_hint()

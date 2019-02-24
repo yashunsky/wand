@@ -138,8 +138,8 @@ class Ring(object):
                     duellist.set_spells(message['spells'])
                     duellist.set_attacks_buffer(message['attacks_buffer'])
 
-            self.duellists[0].check_popup()
-            self.duellists[1].check_popup()
+            self.duellists[0].refresh()
+            self.duellists[1].refresh()
 
             self.window.after(50, self.refresh)
 

@@ -96,19 +96,19 @@ class DuellistFrame(tk.Frame):
     def set_popup(self, data):
         popup = None
         if data['popup_type'] == 'defence_succeded':
-            args = (self.get_ending(), data['spell'].accusative)
+            args = (self.get_ending(), data['spell'])
             popup = 'Отбил%s %s' % args
         elif data['popup_type'] == 'defence_failed':
             prefix = 'Не отбил' if data['spell'].shields else 'Словил'
-            args = (prefix, self.get_ending(), data['spell'].accusative)
+            args = (prefix, self.get_ending(), data['spell'])
             popup = '%s%s %s' % args
             self.enqueue_effect(data['spell'])
         elif data['popup_type'] == 'rule_of_3_failed':
-            args = (self.get_ending(), data['spell'].accusative)
+            args = (self.get_ending(), data['spell'])
             popup = 'Нарушил%s правило трёх,\nскастовав %s' % args
         elif data['popup_type'] == 'parry_needed':
             if data['spell'].shields:
-                popup = 'Надо отбить %s' % data['spell'].accusative
+                popup = 'Надо отбить %s' % data['spell']
                 shield_sequence = decode_sequence(data['spell'].shields[0].key)
                 self.sequence.set_hint(shield_sequence)
             self.enqueue_attack(data['spell'])

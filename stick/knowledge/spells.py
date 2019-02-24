@@ -18,7 +18,6 @@ class Spell(object):
                  shields=None, is_attack=True,
                  ignore_rule_of_3=False,
                  breaks_rull_of_3=None,
-                 accusative=None,
                  audio_key=None):
         super(Spell, self).__init__()
 
@@ -26,7 +25,6 @@ class Spell(object):
             shields = [shields]
 
         self.name = name
-        self.accusative = name if accusative is None else accusative
         self.key = sequence
         self.sequence = decode_sequence(sequence)
         self.shields = [] if shields is None else shields
@@ -38,7 +36,7 @@ class Spell(object):
         self.breaks_rull_of_3 = (is_attack if breaks_rull_of_3 is None
                                  else breaks_rull_of_3)
 
-        self.audio_key = audio_key
+        self.audio_key = name.lower().replace(' ', '_')
 
     def __str__(self):
         return self.name
@@ -49,36 +47,31 @@ class Spell(object):
 
 def get_all_spells():
     # shields
-    protego = Spell('DuZDu', 'Протего', is_attack=False)
-    diffendo = Spell('HuZHu', 'Диффендо', is_attack=False)
-    enerveit = Spell('AuZAu', 'Энервейт', is_attack=False)
+    protego = Spell('DuZDu', 'Protego', is_attack=False)
+    diffendo = Spell('HuZHu', 'Diffendo', is_attack=False)
+    enerveit = Spell('AuZAu', 'Enerveit', is_attack=False)
 
     return [protego,
-            Spell('DuAuDu', 'Импедимента', [protego], audio_key='impedimenta',
-                  accusative='Импедименту'),
-            Spell('DuHuHs', 'Силенцио', [protego], audio_key='silencio'),
-            Spell('DuHuZ', 'Флагелум', [protego], audio_key='flaguellum'),
-            Spell('HsNZ', 'Инсендио', [protego], audio_key='incendio'),
-            Spell('HsZN', 'Делювиум', [protego], audio_key='deluvium'),
+            Spell('DuAuDu', 'Impedimenta', [protego]),
+            Spell('DuHuHs', 'Silencio', [protego]),
+            Spell('DuHuZ', 'Flaguellum', [protego]),
+            Spell('HsNZ', 'Incendio', [protego]),
+            Spell('HsZN', 'Deluvium', [protego]),
 
             diffendo,
-            Spell('HuDuAu', 'Инкарцеро', [diffendo], audio_key='incarcero'),
-            Spell('HuAuDu', 'Риктусемпра', [diffendo], audio_key='rictusempra',
-                  accusative='Риктусемпру'),
+            Spell('HuDuAu', 'Incarcero', [diffendo]),
+            Spell('HuAuDu', 'Rictusempra', [diffendo]),
 
             enerveit,
-            Spell('AuDuDs', 'Ступефай', [enerveit], audio_key='stupefy'),
-            Spell('AuNHu', 'Конфундус', [enerveit], audio_key='confundus'),
-            Spell('NAuDuHuZ', 'Фуроре', [enerveit], audio_key='furore'),
+            Spell('AuDuDs', 'Stupefy', [enerveit]),
+            Spell('AuNHu', 'Confundus', [enerveit]),
+            Spell('NAuDuHuZ', 'Furore', [enerveit]),
 
-            Spell('HsAsZAuDs', 'Экспеллиармус', audio_key='expelliarmus'),
+            Spell('HsAsZAuDs', 'Expelliarmus'),
 
-            Spell('NZ', 'Авада Кедавра', ignore_rule_of_3=True,
-                  accusative='Аваду Кедавру', audio_key='avada_kedavra'),
-            Spell('NHuHs', 'Круцио', ignore_rule_of_3=True,
-                  audio_key='crucio'),
-            Spell('NAuAs', 'Империо', ignore_rule_of_3=True,
-                  audio_key='imperio'),
+            Spell('NZ', 'Avada Kedavra', ignore_rule_of_3=True),
+            Spell('NHuHs', 'Crucio', ignore_rule_of_3=True),
+            Spell('NAuAs', 'Imperio', ignore_rule_of_3=True),
             ]
 
 ALL_SPELLS = {spell.key: spell for spell in get_all_spells()}

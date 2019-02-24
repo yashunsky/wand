@@ -47,8 +47,8 @@ def get_key_by_char(char):
 
     if position is None:
         url = ''
-    elif position == 'random':
-        return '<div class="key" style="width: 400px; text-align: center; vertical-align: middle">Мне повезёт</div>'
+    elif char == ' ' and position == 'random':
+        return '<div class="key" style="width: 440px; text-align: center; vertical-align: middle">Мне повезёт</div>'
     else:
         url = 'gui/sprites/%s/%s.gif' % (side, position)
 

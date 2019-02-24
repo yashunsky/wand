@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+from itertools import chain
 from time import sleep
 import os
 import pyaudio
@@ -62,9 +63,14 @@ class Player(object):
 
     def mix(self, left, right):
         if left is None:
-            left = [0] * len(right)
+            left = []
         if right is None:
-            right = [0] * len(left)
+            right = []
+
+        max_length = max(len(left), len(right))
+
+        left = chain(left, [0] * (max_length - len(left)))
+        right = chain(right, [0] * (max_length - len(right)))
 
         audio_bytes = self.format * 2 // 8
 

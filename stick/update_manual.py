@@ -25,6 +25,12 @@ TEMPLATE = '''<html>
      vertical-align: top;
      width: 70px;
     }}
+    .left {{
+     border-color: blue; 
+    }}
+    .right {{
+     border-color: red; 
+    }}
   </style>
  </head>
  <body style="font-family: sans-serif;">
@@ -33,17 +39,18 @@ TEMPLATE = '''<html>
 </html>
 '''
 
-KEY_TEMPLATE = '    <div class="key" style="background-image: url({url}); border-color:{border_color}">{char}</div>'
+KEY_TEMPLATE = '    <div class="{classes}" style="background-image: url({url});">{char}</div>'
 ROW_TEMPLATE = '   <div style="display: table; border-spacing: 5px"><div style="display: table-cell; width: {offset}px">&nbsp;</div>\n{cells}\n   </div>'
 
 
 def get_key_by_char(char):
     side, position = KEYS.get(char, (None, None))
+    classes = 'key'
     if side is None:
         border_color = '#64330c'
     else:
-        border_color = 'red' if side else 'blue'
         side = 'right' if side else 'left'
+        classes += ' ' + side
 
     if position is None:
         url = ''
@@ -52,7 +59,7 @@ def get_key_by_char(char):
     else:
         url = 'gui/sprites/%s/%s.gif' % (side, position)
 
-    return KEY_TEMPLATE.format(url=url, border_color=border_color, char=char)
+    return KEY_TEMPLATE.format(classes=classes, url=url, char=char)
 
 
 def make_html_row(offset, chars):

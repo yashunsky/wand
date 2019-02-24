@@ -14,6 +14,7 @@ from .sequence import Sequence
 
 
 POPUP_TIMEOUT = 4
+POPUP_WIDTH = 20
 
 
 class DuellistFrame(tk.Frame):
@@ -52,6 +53,7 @@ class DuellistFrame(tk.Frame):
         tk.Label(self, textvariable=self.popup,
                  bg=config['bg'],
                  fg=config['fg'],
+                 width=POPUP_WIDTH,
                  font=config['fonts']['sequence']).pack(side='bottom',
                                                         fill='x',
                                                         expand=False)

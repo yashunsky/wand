@@ -28,13 +28,13 @@ TEMPLATE = '''<html>
   </style>
  </head>
  <body style="font-family: sans-serif;">
-  {rows}
+{rows}
  </body>
 </html>
 '''
 
-KEY_TEMPLATE = '<div class="key" style="background-image: url({url}); border-color:{border_color}">{char}</div>'
-ROW_TEMPLATE = '<div style="display: table; border-spacing: 5px"><div style="display: table-cell; width: {offset}px">&nbsp;</div>{cells}</div>'
+KEY_TEMPLATE = '    <div class="key" style="background-image: url({url}); border-color:{border_color}">{char}</div>'
+ROW_TEMPLATE = '   <div style="display: table; border-spacing: 5px"><div style="display: table-cell; width: {offset}px">&nbsp;</div>\n{cells}\n   </div>'
 
 
 def get_key_by_char(char):
@@ -48,7 +48,7 @@ def get_key_by_char(char):
     if position is None:
         url = ''
     elif char == ' ' and position == 'random':
-        return '<div class="key" style="width: 440px; text-align: center; vertical-align: middle">Мне повезёт</div>'
+        return '    <div class="key" style="width: 440px; text-align: center; vertical-align: middle">Мне повезёт</div>'
     else:
         url = 'gui/sprites/%s/%s.gif' % (side, position)
 
@@ -56,7 +56,7 @@ def get_key_by_char(char):
 
 
 def make_html_row(offset, chars):
-    html_cells = ''.join([get_key_by_char(char) for char in chars])
+    html_cells = '\n'.join([get_key_by_char(char) for char in chars])
     return ROW_TEMPLATE.format(offset=offset, cells=html_cells)
 
 

@@ -63,6 +63,8 @@ class DuellistFrame(tk.Frame):
         self.prev_spells = None
         self.prev_popup = None
 
+        self.attacks_buffer = []
+
         self.popup_time = 0
 
     def set_sequence(self, value):
@@ -81,6 +83,12 @@ class DuellistFrame(tk.Frame):
             self.spells.set_text('\n'.join(spells))
             self.prev_spells = spells
             self.set_attack_hint_if_needed()
+
+    def set_attacks_buffer(self, value):
+        self.attacks_buffer = value
+
+    def done_recently(self, spell):
+        return spell.key in self.attacks_buffer
 
     def get_ending(self):
         return '' if self.sex == 'M' else 'а'
@@ -112,7 +120,7 @@ class DuellistFrame(tk.Frame):
         if self.prev_sequence != '' or self.prev_spells:
             return
         spell = choice([spell for spell in ALL_SPELLS.values()
-                        if spell.shields])
+                        if spell.shields and not self.done_recently(spell)])
         shield_sequence = decode_sequence(spell.key)
         self.sequence.set_hint(shield_sequence)
 

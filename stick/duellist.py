@@ -96,5 +96,6 @@ class Duellist(object):
             'device_id': self.stick_id,
             'sequence': self.sequence,
             'spells': [spell.name for spell in self.catched_spells],
-            'timeout': timeout
+            'timeout': timeout,
+            'attacks_buffer': [spell.key for spell in self.attacks_buffer]
         }

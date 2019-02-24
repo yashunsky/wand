@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from knowledge.setup import SHIELD_TIMEOUT, ACTION_TIMEOUT, GUI_MAX_TIMEOUT

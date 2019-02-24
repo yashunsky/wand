@@ -7,6 +7,8 @@ from time import sleep
 import tkinter as tk
 import tkinter.font as font
 
+from knowledge.setup import GUI_MAX_TIMEOUT
+
 from .duellist_frame import DuellistFrame
 from .sprites_loader import get_sprites
 
@@ -72,7 +74,7 @@ class Ring(object):
             'bg': '#ebcd89',
             'fg': '#64330c',
             'fonts': fonts,
-            'max_timeout': 20
+            'max_timeout': GUI_MAX_TIMEOUT
         }
 
         configs = {device_id: self.make_config(basic_config, duellist)

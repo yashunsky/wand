@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-from knowledge.setup import SHIELD_TIMEOUT, ACTION_TIMEOUT
+from knowledge.setup import SHIELD_TIMEOUT, ACTION_TIMEOUT, GUI_MAX_TIMEOUT
 
 
 class Duellist(object):
@@ -84,9 +84,11 @@ class Duellist(object):
 
     def for_gui(self):
         if self.catched_spells and not self.is_defending:
-            timeout = int((float(max(self.timeout, 0)) * 20 / SHIELD_TIMEOUT))
+            timeout = int((float(max(self.timeout, 0)) *
+                          GUI_MAX_TIMEOUT / SHIELD_TIMEOUT))
         elif self.vibro > 0:
-            timeout = int((float(max(self.action_timeout, 0)) * 20 / ACTION_TIMEOUT))
+            timeout = int((float(max(self.action_timeout, 0)) *
+                          GUI_MAX_TIMEOUT / ACTION_TIMEOUT))
         else:
             timeout = 0
 

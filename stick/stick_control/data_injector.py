@@ -99,3 +99,6 @@ class DataInjector(object):
         elif action == 'position':
             self.set_position(message['device_id'],
                               message['position'])
+
+    def set_feedback(self, device_id, vibro, r, g, b, w):
+        pass

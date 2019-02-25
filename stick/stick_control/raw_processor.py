@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from copy import copy
+
 from knowledge.setup import (G_CONST,
                              ACC_SCALE,
                              GYRO_SCALE,
@@ -11,11 +13,42 @@ from knowledge.setup import (G_CONST,
                              STABLE_TIMEOUT,
                              PITCH_AXIS,
                              ROLL_AXIS,
-                             ACTION_TIMEOUT)
+                             ACTION_TIMEOUT,
+                             VIBRO_ON_POSITION_DONE,
+                             VIBRO_ON_FAILURE,
+                             VIBRO_ON_SPELL_DONE)
 from knowledge.spells import ALL_SPELLS, ALL_PREFIXES
 import utils.tiny_numpy as np
 
 from .position import decode_acc
+
+
+class EffectsBuffer(object):
+    def __init__(self, default=0):
+        super(EffectsBuffer, self).__init__()
+        self.effects = []
+        self.default = default
+
+    def set(self, values):
+        self.effects = copy(values)
+
+    def reset(self):
+        self.effects = []
+
+    def get_state(self, delta):
+        if self.effects:
+            timeout, value = self.effects[0]
+            if timeout is None:
+                return value
+            time_left = timeout - delta
+            if time_left > 0:
+                self.effects[0] = (time_left, value)
+                return value
+            else:
+                self.effects.pop(0)
+                return self.get_state(-time_left)
+        else:
+            return self.default
 
 
 def is_instable(gyro, acc_instab, delta_acc):
@@ -37,6 +70,9 @@ class RawToSequence(object):
         self.button_pressed = False
         self.action_timeout = ACTION_TIMEOUT
         self.failed = False
+
+        self.vibro = EffectsBuffer()
+        self.color = EffectsBuffer((0, 0, 0, 0))
 
     def __call__(self, data):
         acc = (np.array(data['acc']) - self.a_offet) * ACC_SCALE
@@ -66,6 +102,8 @@ class RawToSequence(object):
             self.action_timeout -= data['delta']
             if self.action_timeout < 0.0:
                 self.reset()
+                if not self.failed:
+                    self.vibro.set(VIBRO_ON_FAILURE)
                 self.failed = True
 
             self.button_pressed = True
@@ -76,6 +114,7 @@ class RawToSequence(object):
                 if decoded is not None:
                     position = decoded[0]
                     if not self.sequence.endswith(position):
+                        self.vibro.set(VIBRO_ON_POSITION_DONE)
                         self.action_timeout = ACTION_TIMEOUT
                         self.length += 1
                         self.sequence += position
@@ -92,14 +131,25 @@ class RawToSequence(object):
         if spell_done and spell is not None:
             print('%s %2.1f' % (spell, self.spell_time))
 
+        if spell is not None:
+            if self.button_pressed:
+                self.vibro.set(VIBRO_ON_SPELL_DONE)
+            else:
+                self.vibro.reset()
+
+        feedback = dict(zip(['r', 'g', 'b', 'w'],
+                        self.color.get_state(data['delta'])))
+        feedback['vibro'] = self.vibro.get_state(data['delta'])
+
         result = {'delta': data['delta'],
                   'spell_time': self.spell_time,
                   'sequence': self.sequence,
-                  'vibro': self.length if self.sequence in ALL_PREFIXES else 0,
+                  'doing_well': self.sequence in ALL_PREFIXES,
                   'spell': spell,
                   'done': spell_done,
                   'failed': self.failed,
-                  'action_timeout': self.action_timeout}
+                  'action_timeout': self.action_timeout,
+                  'feedback': feedback}
 
         if spell_done:
             self.reset()

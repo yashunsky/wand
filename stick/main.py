@@ -85,10 +85,13 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
 
         state = raw_to_sequence(raw_data)
 
+        raw_stream.set_feedback(raw_data['device_id'], **state['feedback'])
+
         if raw_data['device_id'] in injected_ids:
             raw_stream.set_inner_feedback(raw_data['device_id'], state)
 
-        duellist.set_state(state['delta'], state['sequence'], state['vibro'],
+        duellist.set_state(state['delta'], state['sequence'],
+                           state['doing_well'],
                            state['spell'] if state['done'] else None,
                            state['action_timeout'])
 

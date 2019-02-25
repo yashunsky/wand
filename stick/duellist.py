@@ -13,7 +13,7 @@ class Duellist(object):
         super(Duellist, self).__init__()
         self.stick_id = stick_id
         self.sequence = ''
-        self.vibro = 0
+        self.doing_well = False
         self.timeout = 0
         self.catched_spells = []
         self.adversary = None
@@ -65,10 +65,10 @@ class Duellist(object):
                     self.on_rule_of_3_failed(spell)
                 self.attacks_buffer = (self.attacks_buffer + [spell])[-3:]
 
-    def set_state(self, delta, sequence='', vibro=0,
+    def set_state(self, delta, sequence='', doing_well=False,
                   spell=None, action_timeout=0):
         self.sequence = sequence
-        self.vibro = vibro
+        self.doing_well = doing_well
         self.action_timeout = action_timeout
         if spell is not None:
             self.cast_spell(spell)
@@ -86,7 +86,7 @@ class Duellist(object):
         if self.catched_spells and not self.is_defending:
             timeout = int((float(max(self.timeout, 0)) *
                           GUI_MAX_TIMEOUT / SHIELD_TIMEOUT))
-        elif self.vibro > 0:
+        elif self.doing_well:
             timeout = int((float(max(self.action_timeout, 0)) *
                           GUI_MAX_TIMEOUT / ACTION_TIMEOUT))
         else:

@@ -22,7 +22,7 @@ def start_gui(duellists, pipe_in, pipe_out, play_audio):
 
 
 def start_main_thread(keyboard_input, pipe_in, pipe_out):
-    injected_ids = [0, 1] if keyboard_input else [1]
+    injected_ids = [0, 1] if keyboard_input else []
 
     raw_stream = (DataInjector(ids=injected_ids) if keyboard_input
                   else UartReader(injected_ids=injected_ids))

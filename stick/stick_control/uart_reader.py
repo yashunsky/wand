@@ -11,7 +11,7 @@ from .data_injector import DataInjector
 BAUDE_RATE = 115200
 BUFFER_DELIMITER = '\r'
 
-TIME_SCALE = 0.0001  # s/digit
+TIME_SCALE = 0.001  # s/digit
 MAX_DELTA = 10
 TIME_STAMP_RANGE = 2 ** 32
 
@@ -55,13 +55,13 @@ class UartReader(object):
 
     def parse_line(self, line):
         try:
-            data = [float(value) for value in line.split(';')]
+            data = [int(value) for value in line.split(';')]
         except ValueError:
             return None
 
-        device_id = 0
-        time_stamp = data[0]
-        button = data[1] > 0
+        device_id = data[0]
+        time_stamp = data[1]
+        button = data[2] > 0
 
         delta = (0 if self.prev_timestamp[device_id] is None
                  else time_stamp - self.prev_timestamp[device_id])
@@ -78,8 +78,8 @@ class UartReader(object):
         return {'device_id': device_id,
                 'button': button,
                 'delta': delta,
-                'gyro': data[2:5],
-                'acc': data[5:8]}
+                'gyro': data[3:6],
+                'acc': data[6:9]}
 
     def __call__(self):
         self.in_loop = True
@@ -105,9 +105,9 @@ class UartReader(object):
 
         self.is_running = False
 
-    def set_feedback(self, device_id, r, g, b, blink_on, blink_off, vibro):
-        self.serial.write('set %d %d,%d,%d,%d,%d,%d\r' %
-                          (device_id, r, g, b, blink_on, blink_off, vibro))
+    def set_feedback(self, device_id, vibro, r, g, b, w):
+        data = 'set %d,%d,%d,%d,%d,%d\r' % (device_id, vibro, r, g, b, w)
+        self.serial.write(data.encode())
 
     def process_action(self, message):
         action = message['action']

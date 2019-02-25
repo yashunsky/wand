@@ -6,8 +6,8 @@ import utils.tiny_numpy as np
 PORT = '/dev/tty.usbmodem1411'
 
 OFFSETS = {
-    0: {'A': np.array([255, -7, 0]), 'G': np.array([0, -67, -6])},
-    1: {'A': np.array([255, -7, 0]), 'G': np.array([0, -67, -6])}
+    0: {'A': np.array([-70, -254, 101]), 'G': np.array([26, -226, 17])},
+    1: {'A': np.array([85, -85, 47]), 'G': np.array([15, -123, 15])}
 }
 
 GYRO_SCALE = 2000.0 / 32768 / 180 * np.pi

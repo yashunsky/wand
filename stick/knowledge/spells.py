@@ -18,7 +18,7 @@ class Spell(object):
                  shields=None, is_attack=True,
                  ignore_rule_of_3=False,
                  breaks_rull_of_3=None,
-                 r=0, g=0, b=0, w=0):
+                 r=None, g=None, b=None, w=None):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
@@ -38,7 +38,13 @@ class Spell(object):
 
         self.audio_key = name.lower().replace(' ', '_')
 
-        self.color = (r, g, b, w)
+        color_override_set = any(map(lambda c: c is not None, (r, g, b, w)))
+        color = tuple(c or 0 for c in (r, g, b, w))
+
+        if color_override_set or not self.shields:
+            self.color = color
+        else:
+            self.color = self.shields[0].color
 
     def __str__(self):
         return self.name
@@ -49,30 +55,30 @@ class Spell(object):
 
 def get_all_spells():
     # shields
-    protego = Spell('DuZDu', 'Protego', is_attack=False)
-    diffendo = Spell('HuZHu', 'Diffendo', is_attack=False)
-    enerveit = Spell('AuZAu', 'Enerveit', is_attack=False)
+    protego = Spell('DuZDu', 'Protego', is_attack=False, r=255, g=200)
+    diffendo = Spell('HuZHu', 'Diffendo', is_attack=False, w=255)
+    enerveit = Spell('AuZAu', 'Enerveit', is_attack=False, r=255)
 
     return [protego,
-            Spell('DuAuDu', 'Impedimenta', [protego], r=100, g=50),
-            Spell('DuHuHs', 'Silencio', [protego], r=50, g=50),
-            Spell('DuHuZ', 'Flaguellum', [protego], r=50),
-            Spell('HsNZ', 'Incendio', [protego], r=120),
-            Spell('HsZN', 'Deluvium', [protego], b=120),
+            Spell('DuAuDu', 'Impedimenta', [protego]),
+            Spell('DuHuHs', 'Silencio', [protego]),
+            Spell('DuHuZ', 'Flaguellum', [protego]),
+            Spell('HsNZ', 'Incendio', [protego]),
+            Spell('HsZN', 'Deluvium', [protego]),
 
             diffendo,
-            Spell('HuDuAu', 'Incarcero', [diffendo], r=50, g=50),
-            Spell('HuAuDu', 'Rictusempra', [diffendo], w=255),
+            Spell('HuDuAu', 'Incarcero', [diffendo]),
+            Spell('HuAuDu', 'Rictusempra', [diffendo]),
 
             enerveit,
-            Spell('AuDuDs', 'Stupefy', [enerveit], r=120),
-            Spell('AuNHu', 'Confundus', [enerveit], r=100, g=100),
-            Spell('NAuDuHuZ', 'Furore', [enerveit], r=120),
+            Spell('AuDuDs', 'Stupefy', [enerveit]),
+            Spell('AuNHu', 'Confundus', [enerveit]),
+            Spell('NAuDuHuZ', 'Furore', [enerveit]),
 
-            Spell('HsAsZAuDs', 'Expelliarmus', w=255),
+            Spell('HsAsZAuDs', 'Expelliarmus'),
 
             Spell('NZ', 'Avada Kedavra', ignore_rule_of_3=True, g=255),
-            Spell('NHuHs', 'Crucio', ignore_rule_of_3=True, r=255),
+            Spell('NHuHs', 'Crucio', ignore_rule_of_3=True, r=255, g=255),
             Spell('NAuAs', 'Imperio', ignore_rule_of_3=True, r=255, g=255),
             ]
 

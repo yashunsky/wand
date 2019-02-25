@@ -17,8 +17,7 @@ class Spell(object):
     def __init__(self, sequence, name,
                  shields=None, is_attack=True,
                  ignore_rule_of_3=False,
-                 breaks_rull_of_3=None,
-                 audio_key=None):
+                 breaks_rull_of_3=None):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):

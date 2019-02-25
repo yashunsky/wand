@@ -16,7 +16,8 @@ from knowledge.setup import (G_CONST,
                              ACTION_TIMEOUT,
                              VIBRO_ON_POSITION_DONE,
                              VIBRO_ON_FAILURE,
-                             VIBRO_ON_SPELL_DONE)
+                             VIBRO_ON_SPELL_DONE,
+                             BLINK_TIMEOUT)
 from knowledge.spells import ALL_SPELLS, ALL_PREFIXES
 import utils.tiny_numpy as np
 
@@ -123,6 +124,8 @@ class RawToSequence(object):
 
         elif self.button_pressed:
             self.button_pressed = False
+            if not spell_done and spell is not None:
+                self.color.set([(BLINK_TIMEOUT, spell.color)])
             spell_done = True
 
         if not data['button']:

@@ -17,7 +17,8 @@ class Spell(object):
     def __init__(self, sequence, name,
                  shields=None, is_attack=True,
                  ignore_rule_of_3=False,
-                 breaks_rull_of_3=None):
+                 breaks_rull_of_3=None,
+                 r=0, g=0, b=0, w=0):
         super(Spell, self).__init__()
 
         if isinstance(shields, Spell):
@@ -37,6 +38,8 @@ class Spell(object):
 
         self.audio_key = name.lower().replace(' ', '_')
 
+        self.color = (r, g, b, w)
+
     def __str__(self):
         return self.name
 
@@ -51,26 +54,26 @@ def get_all_spells():
     enerveit = Spell('AuZAu', 'Enerveit', is_attack=False)
 
     return [protego,
-            Spell('DuAuDu', 'Impedimenta', [protego]),
-            Spell('DuHuHs', 'Silencio', [protego]),
-            Spell('DuHuZ', 'Flaguellum', [protego]),
-            Spell('HsNZ', 'Incendio', [protego]),
-            Spell('HsZN', 'Deluvium', [protego]),
+            Spell('DuAuDu', 'Impedimenta', [protego], r=100, g=50),
+            Spell('DuHuHs', 'Silencio', [protego], r=50, g=50),
+            Spell('DuHuZ', 'Flaguellum', [protego], r=50),
+            Spell('HsNZ', 'Incendio', [protego], r=120),
+            Spell('HsZN', 'Deluvium', [protego], b=120),
 
             diffendo,
-            Spell('HuDuAu', 'Incarcero', [diffendo]),
-            Spell('HuAuDu', 'Rictusempra', [diffendo]),
+            Spell('HuDuAu', 'Incarcero', [diffendo], r=50, g=50),
+            Spell('HuAuDu', 'Rictusempra', [diffendo], w=255),
 
             enerveit,
-            Spell('AuDuDs', 'Stupefy', [enerveit]),
-            Spell('AuNHu', 'Confundus', [enerveit]),
-            Spell('NAuDuHuZ', 'Furore', [enerveit]),
+            Spell('AuDuDs', 'Stupefy', [enerveit], r=120),
+            Spell('AuNHu', 'Confundus', [enerveit], r=100, g=100),
+            Spell('NAuDuHuZ', 'Furore', [enerveit], r=120),
 
-            Spell('HsAsZAuDs', 'Expelliarmus'),
+            Spell('HsAsZAuDs', 'Expelliarmus', w=255),
 
-            Spell('NZ', 'Avada Kedavra', ignore_rule_of_3=True),
-            Spell('NHuHs', 'Crucio', ignore_rule_of_3=True),
-            Spell('NAuAs', 'Imperio', ignore_rule_of_3=True),
+            Spell('NZ', 'Avada Kedavra', ignore_rule_of_3=True, g=255),
+            Spell('NHuHs', 'Crucio', ignore_rule_of_3=True, r=255),
+            Spell('NAuAs', 'Imperio', ignore_rule_of_3=True, r=255, g=255),
             ]
 
 ALL_SPELLS = {spell.key: spell for spell in get_all_spells()}

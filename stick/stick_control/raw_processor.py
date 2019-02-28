@@ -77,10 +77,11 @@ class RawToAction(object):
         self.action_timeout = ACTION_TIMEOUT
         self.failed = False
         self.prev_position = None
-        self.action_to_inject = None
+        self.action_to_inject = []
+        self.with_injection = False
 
     def inject(self, action):
-        self.action_to_inject = action
+        self.action_to_inject.append(action)
 
     def __call__(self, data):
         result = {'delta': data['delta'], 'value': None}
@@ -130,17 +131,19 @@ class RawToAction(object):
 
         do_reset = False
 
-        if result['value'] is None and self.action_to_inject is not None:
-            action = self.action_to_inject
+        if result['value'] is None and self.action_to_inject:
+            action = self.action_to_inject.pop(0)
             if action == 'release':
                 result['value'] = action
-                self.do_reset = True
+                do_reset = True
             elif action != self.prev_position:
                 self.action_timeout = ACTION_TIMEOUT
                 self.prev_position = action
-                self.spell_time += data['delta']
                 result['value'] = action
-            self.action_to_inject = None
+            self.with_injection = True
+
+        if self.with_injection:
+            self.spell_time += data['delta']
 
         result['spell_time'] = self.spell_time
         result['action_timeout'] = self.action_timeout
@@ -155,6 +158,7 @@ class RawToAction(object):
         self.failed = False
         self.prev_position = None
         self.spell_time = 0.0
+        self.with_injection = False
 
 
 class RawToSequence(object):

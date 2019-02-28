@@ -12,7 +12,7 @@ from gui.ring import Ring
 from knowledge.mages import Mage
 from knowledge.setup import OFFSETS
 from knowledge.spells import ALL_SPELLS
-from stick_control.data_injector import DataInjector
+from stick_control.pulse_generator import PulseGenerator
 from stick_control.raw_processor import RawToSequence
 
 
@@ -24,12 +24,8 @@ def start_gui(duellists, pipe_in, pipe_out, play_audio):
 def start_main_thread(keyboard_input, pipe_in, pipe_out):
     injected_ids = [0, 1] if keyboard_input else []
 
-    raw_stream = (DataInjector(ids=injected_ids) if keyboard_input
+    raw_stream = (PulseGenerator(ids=injected_ids) if keyboard_input
                   else UartReader(injected_ids=injected_ids))
-
-    if isinstance(raw_stream, DataInjector):
-        raw_stream.init_device(0)
-        raw_stream.init_device(1)
 
     raw_processors = {device_id: RawToSequence(offsets['A'], offsets['G'])
                       for device_id, offsets in OFFSETS.items()}
@@ -75,10 +71,10 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
                     spells = [spell for spell in ALL_SPELLS.values()
                               if spell.shields and (spell not in last_catched)]
                     duellist.catch_spell(choice(spells))
-            else:
-                raw_stream.process_action(message)
-        if raw_data is None:
-            continue
+            elif message['action'] == 'position':
+                raw_processors[message['device_id']].inject(message['position'])
+            elif message['action'] == 'exit':
+                raw_stream.stop()
 
         raw_to_sequence = raw_processors[raw_data['device_id']]
         duellist = duellists[raw_data['device_id']]
@@ -87,12 +83,9 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
 
         raw_stream.set_feedback(raw_data['device_id'], **state['feedback'])
 
-        if raw_data['device_id'] in injected_ids:
-            raw_stream.set_inner_feedback(raw_data['device_id'], state)
-
         duellist.set_state(state['delta'], state['sequence'],
                            state['doing_well'],
-                           state['spell'] if state['done'] else None,
+                           state['spell'],
                            state['action_timeout'])
 
         for duellist in duellists.values():

@@ -6,7 +6,7 @@ from time import sleep
 
 from knowledge.setup import PORT
 
-from .data_injector import DataInjector
+from .pulse_generator import PulseGenerator
 
 BAUDE_RATE = 115200
 BUFFER_DELIMITER = '\r'
@@ -29,7 +29,7 @@ class UartReader(object):
 
         self.first_line = True
 
-        self.injector = DataInjector(injected_ids or [])
+        self.pulse_generator = PulseGenerator(injected_ids)
 
     def get_data(self):
         self.data_buffer += self.serial.read(self.serial.inWaiting()).decode()
@@ -95,10 +95,10 @@ class UartReader(object):
                 for data in self.get_data():
                     yield data
 
-                    for snapshot in self.injector.snapshots.values():
-                        injected_data = snapshot.get_sensor_data()
-                        injected_data['delta'] = data['delta']
-                        yield injected_data
+                    for snapshot in self.pulse_generator.snapshots:
+                        pulse_data = snapshot.get_sensor_data()
+                        pulse_data['delta'] = data['delta']
+                        yield pulse_data
                 sleep(0.05)
         finally:
             self.serial.close()
@@ -109,11 +109,6 @@ class UartReader(object):
         data = 'set %d,%d,%d,%d,%d,%d\r' % (device_id, vibro, r, g, b, w)
         self.serial.write(data.encode())
 
-    def process_action(self, message):
-        action = message['action']
-        if action == 'exit':
-            self.in_loop = False
-        self.injector.process_action(message)
-
-    def set_inner_feedback(self, device_id, state):
-        self.injector.set_inner_feedback(device_id, state)
+    def stop(self):
+        self.in_loop = False
+        self.pulse_generator.stop()

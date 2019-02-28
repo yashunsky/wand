@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
-from random import choice
+from random import choice, random
 
 from knowledge.setup import SHIELD_TIMEOUT, ACTION_TIMEOUT, GUI_MAX_TIMEOUT
 from knowledge.setup import AUTO_REACTION, AUTO_PAUSE
@@ -41,6 +41,8 @@ class Duellist(object):
 
         self.update_plan()
 
+        self.just_parried = False
+
     def set_auto(self, value):
         self.auto_base_timeout = AUTO_PAUSE if value else None
         self.set_auto_timeout()
@@ -49,7 +51,8 @@ class Duellist(object):
         if self.auto_base_timeout is None:
             self.auto_timeout = None
         else:
-            self.auto_timeout = self.auto_base_timeout
+            coeff = 1 + (random() * 0.5)
+            self.auto_timeout = self.auto_base_timeout * coeff
 
     def set_adversary(self, adversary):
         self.adversary = adversary
@@ -80,11 +83,13 @@ class Duellist(object):
             top_spell = self.catched_spells[0]
             if spell in top_spell.shields:
                 self.on_defence_succeded(top_spell)
+                self.just_parried = True
                 self.remove_top_spell()
                 return
 
         if spell.is_attack and self.adversary is not None:
             self.adversary.catch_spell(spell)
+            self.just_parried = False
             if spell.breaks_rull_of_3:
                 if (spell in self.attacks_buffer[-2:] and
                    not spell.ignore_rule_of_3):
@@ -118,20 +123,25 @@ class Duellist(object):
                 self.auto_action()
 
     def update_plan(self, to_parry=None):
+        if self.auto_base_timeout is None:
+            return
+
         if to_parry is not None:
             if to_parry.shields:
-                self.release()
+                self.release(AUTO_REACTION)
                 self.auto_plan = copy(to_parry.shields[0].sequence)
         elif not self.auto_plan:
             spell = choice([spell for spell in ALL_SPELLS.values()
                             if spell.shields and
                             spell not in self.attacks_buffer])
-            self.release()
+            timeout = (AUTO_REACTION if self.just_parried else
+                       AUTO_PAUSE * random() * 4)
+            self.release(timeout)
             self.auto_plan = copy(spell.sequence)
 
-    def release(self):
+    def release(self, timeout):
         self.on_auto('release')
-        self.auto_timeout = AUTO_REACTION
+        self.auto_timeout = timeout
 
     def auto_action(self):
         if self.auto_base_timeout is not None:

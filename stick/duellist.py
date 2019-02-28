@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from copy import copy
+from random import choice
+
 from knowledge.setup import SHIELD_TIMEOUT, ACTION_TIMEOUT, GUI_MAX_TIMEOUT
+from knowledge.setup import AUTO_REACTION, AUTO_PAUSE
+from knowledge.spells import ALL_SPELLS
 
 
 class Duellist(object):
@@ -9,7 +14,9 @@ class Duellist(object):
                  on_parry_needed=lambda s: None,
                  on_defence_succeded=lambda s: None,
                  on_defence_failed=lambda s: None,
-                 on_rule_of_3_failed=lambda s: None):
+                 on_rule_of_3_failed=lambda s: None,
+                 on_auto=lambda p: None,
+                 auto_base_timeout=None):
         super(Duellist, self).__init__()
         self.stick_id = stick_id
         self.sequence = ''
@@ -27,6 +34,23 @@ class Duellist(object):
 
         self.is_defending = False
 
+        self.auto_base_timeout = auto_base_timeout
+        self.on_auto = on_auto
+        self.set_auto_timeout()
+        self.auto_plan = []
+
+        self.update_plan()
+
+    def set_auto(self, value):
+        self.auto_base_timeout = AUTO_PAUSE if value else None
+        self.set_auto_timeout()
+
+    def set_auto_timeout(self):
+        if self.auto_base_timeout is None:
+            self.auto_timeout = None
+        else:
+            self.auto_timeout = self.auto_base_timeout
+
     def set_adversary(self, adversary):
         self.adversary = adversary
 
@@ -37,6 +61,7 @@ class Duellist(object):
             if not self.catched_spells:
                 self.set_timeout_on_spell(spell)
                 self.on_parry_needed(spell)
+                self.update_plan(spell)
             self.catched_spells.append(spell)
 
     def set_timeout_on_spell(self, spell):
@@ -48,6 +73,7 @@ class Duellist(object):
             next_spell = self.catched_spells[0]
             self.set_timeout_on_spell(next_spell)
             self.on_parry_needed(next_spell)
+            self.update_plan(next_spell)
 
     def cast_spell(self, spell):
         if self.catched_spells:
@@ -81,6 +107,37 @@ class Duellist(object):
                 top_spell = self.catched_spells[0]
                 self.on_defence_failed(top_spell)
                 self.remove_top_spell()
+
+        if not doing_well:
+            self.update_plan()
+
+        if self.auto_timeout is not None:
+            self.auto_timeout -= delta
+            if self.auto_timeout < 0:
+                self.auto_timeout = -1
+                self.auto_action()
+
+    def update_plan(self, to_parry=None):
+        if to_parry is not None:
+            if to_parry.shields:
+                self.release()
+                self.auto_plan = copy(to_parry.shields[0].sequence)
+        elif not self.auto_plan:
+            spell = choice([spell for spell in ALL_SPELLS.values()
+                            if spell.shields and
+                            spell not in self.attacks_buffer])
+            self.release()
+            self.auto_plan = copy(spell.sequence)
+
+    def release(self):
+        self.on_auto('release')
+        self.auto_timeout = AUTO_REACTION
+
+    def auto_action(self):
+        if self.auto_base_timeout is not None:
+            if self.auto_plan:
+                self.on_auto(self.auto_plan.pop(0))
+            self.set_auto_timeout()
 
     def for_gui(self):
         if self.catched_spells and not self.is_defending:

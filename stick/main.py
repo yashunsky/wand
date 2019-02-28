@@ -45,13 +45,15 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
                  lambda s: send(0, 'parry_needed', s),
                  lambda s: send(0, 'defence_succeded', s),
                  lambda s: send(0, 'defence_failed', s),
-                 lambda s: send(0, 'rule_of_3_failed', s))
+                 lambda s: send(0, 'rule_of_3_failed', s),
+                 lambda p: raw_processors[0].inject(p))
 
     b = Duellist(1,
                  lambda s: send(1, 'parry_needed', s),
                  lambda s: send(1, 'defence_succeded', s),
                  lambda s: send(1, 'defence_failed', s),
-                 lambda s: send(1, 'rule_of_3_failed', s))
+                 lambda s: send(1, 'rule_of_3_failed', s),
+                 lambda p: raw_processors[1].inject(p))
 
     a.set_adversary(b)
     b.set_adversary(a)

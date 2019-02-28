@@ -15,7 +15,7 @@ TIME_STAMP_RANGE = 2 ** 32
 
 
 class UartReader(object):
-    def __init__(self, serial_port=PORT, dual=False, injected_ids=None):
+    def __init__(self, serial_port=PORT, dual=False):
         super(UartReader, self).__init__()
         self.serial_port = serial_port
         self.dual = dual
@@ -27,7 +27,7 @@ class UartReader(object):
 
         self.first_line = True
 
-        self.injected_ids = injected_ids or []
+        self.injected_ids = [0, 1]
 
     def get_data(self):
         self.data_buffer += self.serial.read(self.serial.inWaiting()).decode()
@@ -91,6 +91,8 @@ class UartReader(object):
             self.serial = serial.Serial(self.serial_port, timeout=0)
             while self.in_loop:
                 for data in self.get_data():
+                    if data['device_id'] in self.injected_ids:
+                        self.injected_ids.remove(data['device_id'])
                     yield data
 
                     for device_id in self.injected_ids:

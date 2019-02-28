@@ -10,7 +10,7 @@ class PulseGenerator(object):
     def __init__(self, ids=None):
         super(PulseGenerator, self).__init__()
         self.snapshots = [{'device_id': id, 'delta': INJECTION_INTERVAL}
-                          for id in ids or []]
+                          for id in ids or [0, 1]]
 
     def __call__(self):
         self.in_loop = True

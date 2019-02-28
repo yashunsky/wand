@@ -94,7 +94,8 @@ class Ring(object):
         self.duellists = {device_id: DuellistFrame(self.window, config,
                                                    sprites,
                                                    device_id,
-                                                   self.player)
+                                                   self.player,
+                                                   self.pipe_out)
                           for device_id, config in configs.items()}
 
         self.duellists[0].pack(side='left', fill='y', expand=True)

@@ -73,6 +73,8 @@ def start_main_thread(keyboard_input, pipe_in, pipe_out):
                     spells = [spell for spell in ALL_SPELLS.values()
                               if spell.shields and (spell not in last_catched)]
                     duellist.catch_spell(choice(spells))
+            elif message['action'] == 'auto':
+                duellists[message['device_id']].set_auto(message['value'])
             elif message['action'] == 'position':
                 raw_processors[message['device_id']].inject(message['position'])
             elif message['action'] == 'exit':

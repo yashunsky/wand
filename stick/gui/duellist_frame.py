@@ -18,8 +18,9 @@ POPUP_WIDTH = 20
 
 
 class DuellistFrame(tk.Frame):
-    def __init__(self, parent, config, sprites, device_id, player):
+    def __init__(self, parent, config, sprites, device_id, player, pipe):
         super(DuellistFrame, self).__init__(parent, bg=config['bg'])
+        self.device_id = device_id
         self.side = 'right' if device_id else 'left'
         self.player = player
         self.sex = config['sex']
@@ -35,6 +36,7 @@ class DuellistFrame(tk.Frame):
 
         name.set_text(config['name'])
         name.pack(side='top', expand=False)
+        name.bind("<Button-1>", self.switch_auto)
 
         self.sequence = Sequence(self, sprites, self.side, config['bg'])
         self.sequence.pack(side='top', expand=False)
@@ -68,6 +70,16 @@ class DuellistFrame(tk.Frame):
         self.popup_time = 0
 
         self.sheild_hint = None
+
+        self.auto = False
+
+        self.pipe = pipe
+
+    def switch_auto(self, *args):
+        self.auto = not self.auto
+        self.pipe.send({'device_id': self.device_id,
+                        'action': 'auto',
+                        'value': self.auto})
 
     def set_sequence(self, value):
         if value != self.prev_sequence:
@@ -121,7 +133,10 @@ class DuellistFrame(tk.Frame):
             self.set_popup_text(popup)
 
     def set_suatble_hint(self):
-        if not self.sequence.is_hint_set() and self.prev_sequence == '':
+        if self.auto:
+            if self.sequence.is_hint_set():
+                self.sequence.remove_hint()
+        elif not self.sequence.is_hint_set() and self.prev_sequence == '':
             if self.prev_spells:
                 self.sequence.set_hint(self.sheild_hint)
             else:

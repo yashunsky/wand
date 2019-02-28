@@ -6,8 +6,6 @@ from time import sleep
 
 from knowledge.setup import PORT
 
-from .pulse_generator import PulseGenerator
-
 BAUDE_RATE = 115200
 BUFFER_DELIMITER = '\r'
 
@@ -29,7 +27,7 @@ class UartReader(object):
 
         self.first_line = True
 
-        self.pulse_generator = PulseGenerator(injected_ids)
+        self.injected_ids = injected_ids or []
 
     def get_data(self):
         self.data_buffer += self.serial.read(self.serial.inWaiting()).decode()
@@ -95,9 +93,9 @@ class UartReader(object):
                 for data in self.get_data():
                     yield data
 
-                    for snapshot in self.pulse_generator.snapshots:
-                        pulse_data = snapshot.get_sensor_data()
-                        pulse_data['delta'] = data['delta']
+                    for device_id in self.injected_ids:
+                        pulse_data = {'device_id': device_id,
+                                      'delta': data['delta']}
                         yield pulse_data
                 sleep(0.05)
         finally:
@@ -111,4 +109,3 @@ class UartReader(object):
 
     def stop(self):
         self.in_loop = False
-        self.pulse_generator.stop()

@@ -75,11 +75,14 @@ class DuellistFrame(tk.Frame):
 
         self.pipe = pipe
 
-    def switch_auto(self, *args):
-        self.auto = not self.auto
+    def set_auto(self, value):
+        self.auto = value
         self.pipe.send({'device_id': self.device_id,
                         'action': 'auto',
                         'value': self.auto})
+
+    def switch_auto(self, *args):
+        self.set_auto(not self.auto)
 
     def set_sequence(self, value):
         if value != self.prev_sequence:
@@ -117,6 +120,7 @@ class DuellistFrame(tk.Frame):
             args = (prefix, self.get_ending(), data['spell'])
             popup = '%s%s %s' % args
             self.enqueue_effect(data['spell'])
+            self.set_auto(False)
         elif data['popup_type'] == 'rule_of_3_failed':
             args = (self.get_ending(), data['spell'])
             popup = 'Нарушил%s правило трёх,\nскастовав %s' % args

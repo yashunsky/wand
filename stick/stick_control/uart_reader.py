@@ -29,6 +29,8 @@ class UartReader(object):
 
         self.injected_ids = [0, 1]
 
+        self.feedbacks = {}
+
     def get_data(self):
         self.data_buffer += self.serial.read(self.serial.inWaiting()).decode()
 
@@ -106,8 +108,11 @@ class UartReader(object):
         self.is_running = False
 
     def set_feedback(self, device_id, vibro, r, g, b, w):
-        data = 'set %d,%d,%d,%d,%d,%d\r' % (device_id, vibro, r, g, b, w)
-        self.serial.write(data.encode())
+        args = (device_id, vibro, r, g, b, w)
+        if self.feedbacks.get(device_id) != args:
+            self.feedbacks[device_id] = args
+            data = 'set %d,%d,%d,%d,%d,%d\r' % args
+            self.serial.write(data.encode())
 
     def stop(self):
         self.in_loop = False

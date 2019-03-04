@@ -11,7 +11,7 @@ BUFFER_DELIMITER = '\r'
 
 TIME_SCALE = 0.001  # s/digit
 MAX_DELTA = 10
-TIME_STAMP_RANGE = 2 ** 32
+TIME_STAMP_RANGE = 65536
 
 
 class UartReader(object):

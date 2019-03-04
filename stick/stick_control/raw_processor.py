@@ -125,7 +125,7 @@ class RawToAction(object):
 
         self.action_timeout -= data['delta']
 
-        if self.action_timeout < 0 and not self.failed:
+        if self.action_timeout < 0 and not self.failed and self.button_pressed:
             self.failed = True
             result['value'] = 'failed'
 

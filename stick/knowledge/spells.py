@@ -55,8 +55,8 @@ class Spell(object):
 
 def get_all_spells():
     # shields
-    protego = Spell('DuZDu', 'Protego', is_attack=False, r=255, g=200)
-    diffendo = Spell('HuZHu', 'Diffendo', is_attack=False, w=255)
+    protego = Spell('DuZDu', 'Protego', is_attack=False, r=255, b=255)
+    diffendo = Spell('HuZHu', 'Diffendo', is_attack=False, b=255)
     enerveit = Spell('AuZAu', 'Enerveit', is_attack=False, r=255)
 
     return [protego,
@@ -75,7 +75,7 @@ def get_all_spells():
             Spell('AuNHu', 'Confundus', [enerveit]),
             Spell('NAuDuHuZ', 'Furore', [enerveit]),
 
-            Spell('HsAsZAuDs', 'Expelliarmus'),
+            Spell('HsAsZAuDs', 'Expelliarmus', g=255, b=255),
 
             Spell('NZ', 'Avada Kedavra', ignore_rule_of_3=True, g=255),
             Spell('NHuHs', 'Crucio', ignore_rule_of_3=True, r=255, g=255),

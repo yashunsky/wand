@@ -205,7 +205,7 @@ class RawToSequence(object):
             self.vibro.set(VIBRO_ON_POSITION_DONE)
             spell = ALL_SPELLS.get(self.sequence)
 
-        if spell is not None:
+        if spell is not None and action['value'] != 'release':
             self.vibro.set(VIBRO_ON_SPELL_DONE)
 
         if spell is not None or action['action_timeout'] < 0:

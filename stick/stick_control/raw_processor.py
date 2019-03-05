@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import copy
+from time import time
 
 from knowledge.setup import (G_CONST,
                              ACC_SCALE,
@@ -167,6 +168,8 @@ class RawToSequence(object):
 
         self.raw_to_action = RawToAction(a_offet, g_offset)
 
+        self.prev_ts = None
+
         self.vibro = EffectsBuffer()
         self.color = EffectsBuffer(OFF)
 
@@ -178,6 +181,10 @@ class RawToSequence(object):
 
     def __call__(self, data):
         action = self.raw_to_action(data)
+
+        now = time()
+        real_delta = 0 if self.prev_ts is None else now - self.prev_ts
+        self.prev_ts = now
 
         spell_done = False
 
@@ -213,8 +220,8 @@ class RawToSequence(object):
                 self.inject('release')
 
         feedback = dict(zip(['r', 'g', 'b', 'w'],
-                        self.color.get_state(data['delta'])))
-        feedback['vibro'] = self.vibro.get_state(data['delta'])
+                        self.color.get_state(real_delta)))
+        feedback['vibro'] = self.vibro.get_state(real_delta)
 
         result = {'delta': data['delta'],
                   'spell_time': action['spell_time'],

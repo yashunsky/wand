@@ -77,6 +77,7 @@ class UartReader(object):
         return {'device_id': device_id,
                 'button': button,
                 'delta': delta,
+                'timestamp': data[1],
                 'gyro': data[3:6],
                 'acc': data[6:9]}
 

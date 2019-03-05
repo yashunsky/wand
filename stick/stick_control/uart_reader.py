@@ -15,10 +15,9 @@ TIME_STAMP_RANGE = 65536
 
 
 class UartReader(object):
-    def __init__(self, serial_port=PORT, dual=False):
+    def __init__(self, serial_port=PORT, injected_ids=None):
         super(UartReader, self).__init__()
         self.serial_port = serial_port
-        self.dual = dual
 
         self.in_loop = False
         self.is_running = False
@@ -27,7 +26,7 @@ class UartReader(object):
 
         self.first_line = True
 
-        self.injected_ids = [0, 1]
+        self.injected_ids = injected_ids or []
 
         self.feedbacks = {}
 

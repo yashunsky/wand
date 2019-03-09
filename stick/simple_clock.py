@@ -15,7 +15,7 @@ if __name__ == '__main__':
         delta = raw_data['delta']
         timers[device_id] = timers.get(device_id, 0) + delta
 
-        old_tss = tss[device_id]
+        old_tss = tss.get(device_id, 0)
         if old_tss > raw_data['timestamp']:
             print('New timer value %d is lower then previous %d on device %d' %
                   (raw_data['timestamp'], old_tss, device_id))
